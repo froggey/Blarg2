@@ -1,3 +1,5 @@
+// You are standing at the gate to Gehennom.  Unspeakable cruelty and harm lurk down there.
+
 using UnityEngine;
 
 // Fixed point numbers.

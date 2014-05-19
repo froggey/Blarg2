@@ -30,7 +30,7 @@ public class PlayerInterface : MonoBehaviour {
                                 ComSat.IssueAttack(selectedUnit.GetComponent<Entity>(), target);
                         // Otherwise, do a move.
                         } else if(Physics.Raycast(ray, out hit, Mathf.Infinity, 1<<9)) {
-                                DVector2 point = new DVector2((DReal)hit.point.x, (DReal)hit.point.z);
+                                DVector2 point = new DVector2((DReal)hit.point.z, (DReal)hit.point.x);
                                 ComSat.IssueMove(selectedUnit.GetComponent<Entity>(), point);
                         }
                 }

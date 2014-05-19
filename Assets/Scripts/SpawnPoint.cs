@@ -15,7 +15,7 @@ public class SpawnPoint : MonoBehaviour {
         }
 
         void Start() {
-                DVector2 vec = new DVector2((DReal)transform.position.x, (DReal)transform.position.z);
+                DVector2 vec = new DVector2((DReal)transform.position.z, (DReal)transform.position.x);
                 DReal rotation = DReal.Radians((DReal)transform.rotation.eulerAngles.y);
                 Entity ent = ComSat.Spawn(entityName, team, vec, rotation);
                 if(ent == null) return;

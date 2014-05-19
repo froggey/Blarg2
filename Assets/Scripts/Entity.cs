@@ -13,9 +13,9 @@ public class Entity : MonoBehaviour {
         }
 
         void Update() {
-                transform.localPosition = new Vector3((float)position.x,
+                transform.localPosition = new Vector3((float)position.y,
                                                       transform.localPosition.y,
-                                                      (float)position.y);
+                                                      (float)position.x);
                 transform.localRotation = Quaternion.AngleAxis((float)DReal.Degrees(rotation), Vector3.up);
         }
 }
