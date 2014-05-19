@@ -21,14 +21,12 @@ public class TwinTank : MonoBehaviour {
                 IDLE, MOVE, ATTACK
         }
 
-        static DReal minimumRange = 0; // Can't be closer than this.
-        static DReal attackRange = 400; // Max range for attacking.
         static DReal attackDistance = 300; // Try to stay this close.
-        static DReal speed = 20;
-        static DReal turnSpeed = 45; // degress per second
-        static DReal turretTurnSpeed = 30; // degrees per second
-        static DReal sqrPositioningAccuracy = (DReal)1 / 10;
-        static DReal maxMoveAngle = 100;
+        static DReal speed = 93; // m/s
+        static DReal turnSpeed = DReal.Radians(687); // radians per second
+        static DReal turretTurnSpeed = DReal.Radians(727); // radians per second
+        static DReal sqrPositioningAccuracy = (DReal)1 / 100;
+        static DReal maxMoveAngle = DReal.Radians(100);
 
         Mode mode;
         DVector2 destination;
@@ -42,14 +40,14 @@ public class TwinTank : MonoBehaviour {
 
         // current = current angle, radians.
         // target = target angle, radians.
-        // speed = max degrees turned per second.
-        // Returns the new angle in radians.
+        // speed = max radians turned per second.
+        // Returns the new angle in radians, range [0,2pi].
         DReal CalculateNewAngle(DReal currentAngle, DReal targetAngle, DReal speed) {
-                DReal turnSpeedTicks = DReal.Radians(speed) * ComSat.tickRate;
+                var turnSpeedTicks = speed * ComSat.tickRate;
                 targetAngle = DReal.Mod(targetAngle, DReal.TwoPI);
 
 		// Turn towards heading.
-		DReal angleDiff = DReal.Mod(currentAngle - targetAngle, DReal.TwoPI);
+		var angleDiff = DReal.Mod(currentAngle - targetAngle, DReal.TwoPI);
                 int sign;
                 DReal distance;
                 if(angleDiff > DReal.PI) {
@@ -69,78 +67,38 @@ public class TwinTank : MonoBehaviour {
         }
 
         void MoveTowards(DVector2 dest) {
-                DVector2 dir = dest - entity.position;
-                DReal targetAngle = DReal.Atan2(dir.x, dir.y);
-                DReal baseAngle = CalculateNewAngle(entity.rotation, targetAngle, turnSpeed);
-                entity.rotation = baseAngle;
-/*
-                DReal baseAngle = entity.rotation;
-
-                DReal turnSpeedTicks = DReal.Radians(turnSpeed) * ComSat.tickRate;
-
-                print("Target angle " + targetAngle);
-
-		// Turn towards heading.
-		DReal angleDiff = targetAngle - baseAngle;
-		if(DReal.Abs(angleDiff) > DReal.PI) {
-			if(angleDiff > 0) {
-				baseAngle -= turnSpeedTicks;
-                        } else {
-				baseAngle += turnSpeedTicks;
-                        }
-		} else if(DReal.Abs(angleDiff) > turnSpeedTicks) {
-			if(angleDiff > 0) {
-				baseAngle += turnSpeedTicks;
-                        } else {
-				baseAngle -= turnSpeedTicks;
-                        }
-                } else {
-                        baseAngle = targetAngle;
-		}
-		if(baseAngle > DReal.PI) {
-			baseAngle -= DReal.TwoPI;
-                }
-		if(baseAngle < -DReal.PI) {
-			baseAngle += DReal.TwoPI;
-                }
+                var dir = dest - entity.position; // also vector to dest.
+                var targetAngle = DReal.Atan2(dir.y, dir.x);
+                var baseAngle = CalculateNewAngle(entity.rotation, targetAngle, turnSpeed);
                 entity.rotation = baseAngle;
 
-                */
-
-		// Move along current heading. Ramp speed up as the angle gets closer. (todo)
-                var diff = DReal.Abs(targetAngle - baseAngle);
-                print("Diff: " + diff + "  " + (1 - (diff / DReal.TwoPI)));
-		if(diff < DReal.Radians(maxMoveAngle)) {
-                        entity.position += new DVector2(DReal.Sin(baseAngle), DReal.Cos(baseAngle)) * speed /* * (1 - (diff / DReal.TwoPI)) */ * ComSat.tickRate;
-                        //entity.position += new DVector2(DReal.Sin(targetAngle), DReal.Cos(targetAngle)) * speed * ComSat.tickRate;
+		// Move along current heading. Ramp speed up as the angle gets closer.
+                // Augh.
+                // [-pi,pi] => [0,2pi]
+                if(targetAngle < 0) {
+                        targetAngle += DReal.TwoPI;
+                }
+                // Get targetAngle within +/- pi of baseAngle.
+                if(targetAngle < baseAngle - DReal.PI) {
+                        targetAngle += DReal.TwoPI;
+                } else if(targetAngle > baseAngle + DReal.PI) {
+                        targetAngle -= DReal.TwoPI;
+                }
+                var diff = DReal.Abs(baseAngle - targetAngle);
+		if(diff < maxMoveAngle) {
+                        var tickSpeed = speed * ComSat.tickRate;
+                        var distance = dir.magnitude;
+                        print("Distance: " + distance + "  speed is: " + tickSpeed);
+                        if(distance < tickSpeed) {
+                                tickSpeed = distance;
+                        }
+                        var travel = new DVector2(DReal.Cos(baseAngle), DReal.Sin(baseAngle)) * (1 - (diff / DReal.PI)) * tickSpeed;
+                        entity.position += travel;
 		}
 	}
 
         void TurnTurret(DReal targetAngle) {
                 turretAngle = CalculateNewAngle(turretAngle, targetAngle, turretTurnSpeed);
-/*
-                DReal currentAngle = turretAngle;
-                DReal turnSpeedTicks = DReal.Radians(turretTurnSpeed) * ComSat.tickRate;
-                targetAngle = DReal.Mod(targetAngle, DReal.TwoPI);
-
-		// Turn towards heading.
-		DReal angleDiff = DReal.Mod(currentAngle - targetAngle, DReal.TwoPI);
-                int sign;
-                DReal distance;
-                if(angleDiff > DReal.PI) {
-                        sign = 1;
-                        distance = DReal.TwoPI - angleDiff;
-                } else {
-                        sign = -1;
-                        distance = angleDiff;
-                }
-                if(distance > turnSpeedTicks) {
-                        currentAngle += turnSpeedTicks * sign;
-                } else {
-                        currentAngle = targetAngle;
-                }
-                turretAngle = DReal.Mod(currentAngle, DReal.TwoPI);
-                */
         }
 
         void TickUpdate() {
@@ -151,7 +109,7 @@ public class TwinTank : MonoBehaviour {
 
                 if(mode == Mode.ATTACK) {
                         DVector2 dir = target.position - entity.position;
-                        DReal turretAngle = DReal.Atan2(dir.x, dir.y);
+                        DReal turretAngle = DReal.Atan2(dir.y, dir.x);
                         print("attack angle is " + turretAngle + "[" + (turretAngle - entity.rotation) + "][" + DReal.Mod(turretAngle - entity.rotation, DReal.TwoPI) + "] for dir " + dir);
                         TurnTurret(turretAngle - entity.rotation);
                         print("New angle is " + this.turretAngle);
