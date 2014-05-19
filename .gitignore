@@ -1,0 +1,7 @@
+/Temp
+/obj
+/Library
+/.DS_Store
+*.csproj
+*.unityproj
+*.sln
