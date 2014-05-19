@@ -36,6 +36,7 @@ public class TwinTank : MonoBehaviour {
 
         void Start() {
                 mode = Mode.IDLE;
+                turretAngle = 0;
         }
 
         // current = current angle, radians.

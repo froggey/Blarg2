@@ -20,7 +20,7 @@ public struct DReal {
         //}
 
         private static DReal Create(long value) {
-                DReal result;
+                DReal result = new DReal();
                 result.value = value;
                 return result;
         }
