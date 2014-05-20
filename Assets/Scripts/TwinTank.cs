@@ -29,14 +29,15 @@ public class TwinTank : MonoBehaviour {
         static DReal maxMoveAngle = DReal.Radians(100);
 
         Mode mode;
-        DVector2 destination;
-        Entity target;
+        DVector2 destination; // Current movement target.
+        Entity target; // Current attack target.
+        bool movingToTarget; // Cleared when attackDistance is reached.
 
-        DReal turretAngle;
+        DReal turretRotation;
 
         void Start() {
                 mode = Mode.IDLE;
-                turretAngle = 0;
+                turretRotation = 0;
         }
 
         // current = current angle, radians.
@@ -67,9 +68,11 @@ public class TwinTank : MonoBehaviour {
                 return DReal.Mod(currentAngle, DReal.TwoPI);
         }
 
+        // This could be smarter. If dest is too close & perpendicular, then the tank
+        // can end up circling around.
         void MoveTowards(DVector2 dest) {
                 var dir = dest - entity.position; // also vector to dest.
-                var targetAngle = DReal.Atan2(dir.y, dir.x);
+                var targetAngle = DVector2.ToAngle(dir);
                 var baseAngle = CalculateNewAngle(entity.rotation, targetAngle, turnSpeed);
                 entity.rotation = baseAngle;
 
@@ -93,13 +96,13 @@ public class TwinTank : MonoBehaviour {
                         if(distance < tickSpeed) {
                                 tickSpeed = distance;
                         }
-                        var travel = new DVector2(DReal.Cos(baseAngle), DReal.Sin(baseAngle)) * (1 - (diff / DReal.PI)) * tickSpeed;
+                        var travel = DVector2.FromAngle(baseAngle) * (1 - (diff / DReal.PI)) * tickSpeed;
                         entity.position += travel;
 		}
 	}
 
         void TurnTurret(DReal targetAngle) {
-                turretAngle = CalculateNewAngle(turretAngle, targetAngle, turretTurnSpeed);
+                turretRotation = CalculateNewAngle(turretRotation, targetAngle, turretTurnSpeed);
         }
 
         void TickUpdate() {
@@ -109,17 +112,28 @@ public class TwinTank : MonoBehaviour {
                 }
 
                 if(mode == Mode.ATTACK) {
-                        DVector2 dir = target.position - entity.position;
-                        DReal turretAngle = DReal.Atan2(dir.y, dir.x);
-                        print("attack angle is " + turretAngle + "[" + (turretAngle - entity.rotation) + "][" + DReal.Mod(turretAngle - entity.rotation, DReal.TwoPI) + "] for dir " + dir);
-                        TurnTurret(turretAngle - entity.rotation);
-                        print("New angle is " + this.turretAngle);
+                        var distVec = target.position - entity.position;
+                        var dist = distVec.magnitude;
+                        var targetTurretAngle = DReal.Mod(DVector2.ToAngle(distVec) - entity.rotation, DReal.TwoPI);
 
-                        if((target.position - entity.position).sqrMagnitude < attackDistance * attackDistance) {
-                                // FIRE! (maybe)
+                        // Turn turret to point at target when close.
+                        if(dist < attackRange * 2) {
+                                TurnTurret(targetTurretAngle);
                         } else {
-                                // Move towards.
+                                TurnTurret(0);
+                        }
+
+                        if(dist < attackDistance) {
+                                // Close enough.
+                                movingToTarget = false;
+                        } else if(movingToTarget || (dist >= attackRange)) {
+                                movingToTarget = true;
+                                // Approach target.
                                 MoveTowards(target.position);
+                        }
+
+                        // Fire when in range and pointing the gun at the target.
+                        if(dist < attackRange && targetTurretAngle == turretRotation) {
                         }
                 } else if(mode == Mode.MOVE) {
                         // Move towards.
@@ -142,6 +156,7 @@ public class TwinTank : MonoBehaviour {
                 Debug.Log(this + " attacking " + target);
                 mode = Mode.ATTACK;
                 this.target = target;
+                this.movingToTarget = false;
         }
 
         void Move(DVector2 location) {
@@ -154,7 +169,7 @@ public class TwinTank : MonoBehaviour {
         void Update() {
                 // Always update local rotation.
                 // Touching the world rotation causes fighting with Entity.
-                turretMesh.transform.localRotation = Quaternion.AngleAxis((float)DReal.Degrees(turretAngle), Vector3.up);
+                turretMesh.transform.localRotation = Quaternion.AngleAxis((float)DReal.Degrees(turretRotation), Vector3.up);
         }
 
         void OnDrawGizmosSelected() {
@@ -164,7 +179,7 @@ public class TwinTank : MonoBehaviour {
                                                      0,
                                                      (float)turretAttachPoint.y);
                 Matrix4x4 rotationMatrix = Matrix4x4.TRS(transform.position, transform.rotation, transform.lossyScale) *
-                        Matrix4x4.TRS(turretPosition, Quaternion.AngleAxis((float)DReal.Degrees(turretAngle), Vector3.up), transform.lossyScale);
+                        Matrix4x4.TRS(turretPosition, Quaternion.AngleAxis((float)DReal.Degrees(turretRotation), Vector3.up), transform.lossyScale);
                 Gizmos.matrix = rotationMatrix;
                 Gizmos.DrawWireSphere(new Vector3(0,0,0), 0.5f);
                 Gizmos.DrawWireCube(new Vector3((float)turretSeperation, 0, (float)projectileSpawnDistance),
