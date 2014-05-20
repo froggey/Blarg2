@@ -13,10 +13,18 @@ public class TwinTank : MonoBehaviour {
         public GameObject projectilePrefab;
         public GameObject leftBarrel, rightBarrel;
 
+        public DReal collisionRadius = (DReal)5 / 2; // 2.5 Ughhh!
+
         private Entity entity;
 
         void Awake() {
                 entity = GetComponent<Entity>();
+                entity.collisionRadius = collisionRadius; // ugghhh.
+
+                mode = Mode.IDLE;
+                turretRotation = 0;
+
+                fireCycle = FireCycle.READY;
         }
 
         enum Mode {
@@ -53,14 +61,7 @@ public class TwinTank : MonoBehaviour {
         DReal fireDelayTime;
 
         DReal barrelDelay = (DReal)1 / 5; // Delay between firing left & right barrels.
-        DReal barrelRecycleTime = 1; // Delay before refiring one barrel.
-
-        void Start() {
-                mode = Mode.IDLE;
-                turretRotation = 0;
-
-                fireCycle = FireCycle.READY;
-        }
+        DReal barrelRecycleTime = 2; // Delay before refiring one barrel.
 
         // current = current angle, radians.
         // target = target angle, radians.
@@ -129,7 +130,7 @@ public class TwinTank : MonoBehaviour {
 
         void FireOneBarrel(int sign, GameObject barrel) {
                 barrel.SendMessage("Fire");
-                ComSat.SpawnProjectile(projectilePrefab, entity.position, entity.rotation + turretRotation);
+                ComSat.SpawnProjectile(entity, projectilePrefab, entity.position, entity.rotation + turretRotation);
         }
 
         void Fire() {
@@ -227,6 +228,10 @@ public class TwinTank : MonoBehaviour {
         }
 
         void OnDrawGizmosSelected() {
+                // Ughhh!!
+                Gizmos.color = Color.green;
+                Gizmos.DrawWireSphere(transform.position, (float)collisionRadius);
+
                 // Projectile spawn location & stuff.
                 Gizmos.color = Color.red;
                 Vector3 turretPosition = new Vector3((float)turretAttachPoint.x,
@@ -240,6 +245,7 @@ public class TwinTank : MonoBehaviour {
                                     new Vector3(0.5f, 0.5f, 0.5f));
                 Gizmos.DrawWireCube(new Vector3(-(float)turretSeperation, 0, (float)projectileSpawnDistance),
                                     new Vector3(0.5f, 0.5f, 0.5f));
+
         }
 
 }

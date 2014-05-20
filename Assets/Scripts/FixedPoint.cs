@@ -260,4 +260,16 @@ public struct DVector2 {
         public static DVector2 operator *(DVector2 lhs, DReal rhs) {
                 return new DVector2(lhs.x * rhs, lhs.y * rhs);
         }
+
+        public static DVector2 FromAngle(DReal radians) {
+                return new DVector2(DReal.Cos(radians), DReal.Sin(radians));
+        }
+
+        public static DReal ToAngle(DVector2 vector) {
+                return DReal.Atan2(vector.y, vector.x);
+        }
+
+        public static DReal Dot(DVector2 a, DVector2 b) {
+                return a.x * b.x + a.y * b.y;
+        }
 }
