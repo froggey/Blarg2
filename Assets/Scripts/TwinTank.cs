@@ -10,6 +10,8 @@ public class TwinTank : MonoBehaviour {
         public DVector2 turretAttachPoint = new DVector2(0, -(DReal)597 / 2048);
         public DReal turretSeperation = (DReal)1 / 3;
         public GameObject turretMesh;
+        public GameObject projectilePrefab;
+        public GameObject leftBarrel, rightBarrel;
 
         private Entity entity;
 
@@ -21,7 +23,8 @@ public class TwinTank : MonoBehaviour {
                 IDLE, MOVE, ATTACK
         }
 
-        static DReal attackDistance = 300; // Try to stay this close.
+        static DReal attackDistance = 50; // Try to stay this close.
+        static DReal attackRange = 60; // Maximum firing range.
         static DReal speed = 93; // m/s
         static DReal turnSpeed = DReal.Radians(687); // radians per second
         static DReal turretTurnSpeed = DReal.Radians(727); // radians per second
@@ -35,9 +38,28 @@ public class TwinTank : MonoBehaviour {
 
         DReal turretRotation;
 
+        // Firing cycle:
+        //   10 Await trigger
+        //   20 Fire left
+        //   30 delay
+        //   40 Fire right
+        //   50 delay
+        //   60 goto 10
+        enum FireCycle {
+                READY, FIREDLEFT, FIREDRIGHT
+        }
+
+        FireCycle fireCycle;
+        DReal fireDelayTime;
+
+        DReal barrelDelay = (DReal)1 / 5; // Delay between firing left & right barrels.
+        DReal barrelRecycleTime = 1; // Delay before refiring one barrel.
+
         void Start() {
                 mode = Mode.IDLE;
                 turretRotation = 0;
+
+                fireCycle = FireCycle.READY;
         }
 
         // current = current angle, radians.
@@ -105,6 +127,21 @@ public class TwinTank : MonoBehaviour {
                 turretRotation = CalculateNewAngle(turretRotation, targetAngle, turretTurnSpeed);
         }
 
+        void FireOneBarrel(int sign, GameObject barrel) {
+                barrel.SendMessage("Fire");
+                ComSat.SpawnProjectile(projectilePrefab, entity.position, entity.rotation + turretRotation);
+        }
+
+        void Fire() {
+                if(fireCycle != FireCycle.READY) {
+                        return;
+                }
+                // Fire left.
+                fireCycle = FireCycle.FIREDLEFT;
+                fireDelayTime = barrelDelay;
+                FireOneBarrel(+1, leftBarrel);
+        }
+
         void TickUpdate() {
                 if(mode == Mode.ATTACK && target == null) {
                         target = null;
@@ -134,6 +171,7 @@ public class TwinTank : MonoBehaviour {
 
                         // Fire when in range and pointing the gun at the target.
                         if(dist < attackRange && targetTurretAngle == turretRotation) {
+                                Fire();
                         }
                 } else if(mode == Mode.MOVE) {
                         // Move towards.
@@ -146,6 +184,22 @@ public class TwinTank : MonoBehaviour {
                         TurnTurret(0);
                 } else if(mode == Mode.IDLE) {
                         TurnTurret(0);
+                }
+
+                if(fireCycle != FireCycle.READY) {
+                        fireDelayTime -= ComSat.tickRate;
+                        if(fireDelayTime <= 0) {
+                                if(fireCycle == FireCycle.FIREDLEFT) {
+                                        // Fire right.
+                                        fireCycle = FireCycle.FIREDRIGHT;
+                                        FireOneBarrel(-1, rightBarrel);
+                                        // This is enough time for the left barrel to recycle.
+                                        fireDelayTime = barrelRecycleTime - barrelDelay;
+                                } else if(fireCycle == FireCycle.FIREDRIGHT) {
+                                        // cycle complete.
+                                        fireCycle = FireCycle.READY;
+                                }
+                        }
                 }
         }
 
