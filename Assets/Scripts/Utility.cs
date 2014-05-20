@@ -44,7 +44,7 @@ static public class Utility {
                         // t1 is the intersection, and it's closer than t2
                         // (since t1 uses -b - discriminant)
                         // Impale, Poke
-                        outIp = lineStart; // fixme.
+                        outIp = circleOrigin + d.normalized * -radius;
                         return true;
                 }
 
@@ -52,7 +52,7 @@ static public class Utility {
                 // inside the sphere or completely past it
                 if(t2 >= 0 && t2 <= 1) {
                         // ExitWound
-                        outIp = lineEnd; // fixme.
+                        outIp = circleOrigin + d.normalized * radius;
                         return true ;
                 }
 
