@@ -60,18 +60,32 @@ static public class Utility {
                 outIp = new DVector2();
                 return false;
 	}
+
+        // current = current angle, radians.
+        // target = target angle, radians.
+        // speed = max radians turned per second.
+        // Returns the new angle in radians, range [0,2pi].
+        public static DReal CalculateNewAngle(DReal currentAngle, DReal targetAngle, DReal speed) {
+                var turnSpeedTicks = speed * ComSat.tickRate;
+                targetAngle = DReal.Mod(targetAngle, DReal.TwoPI);
+
+		// Turn towards heading.
+		var angleDiff = DReal.Mod(currentAngle - targetAngle, DReal.TwoPI);
+                int sign;
+                DReal distance;
+                if(angleDiff > DReal.PI) {
+                        sign = 1;
+                        distance = DReal.TwoPI - angleDiff;
+                } else {
+                        sign = -1;
+                        distance = angleDiff;
+                }
+                if(distance > turnSpeedTicks) {
+                        currentAngle += turnSpeedTicks * sign;
+                } else {
+                        currentAngle = targetAngle;
+                }
+
+                return DReal.Mod(currentAngle, DReal.TwoPI);
+        }
 }
-/*
-
-
-		float l1 = (b - b4ac) * diva;
-		float l2 = (b + b4ac) * diva;
-
-		// we need the closest intersection point.. so find smaller l.
-		// To get the other end , just change the comparison operator.
-		float l = l2;
-		if (l2 < l1)
-		{
-			l = l1;
-		}
-                */

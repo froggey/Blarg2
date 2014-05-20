@@ -63,40 +63,12 @@ public class TwinTank : MonoBehaviour {
         DReal barrelDelay = (DReal)1 / 5; // Delay between firing left & right barrels.
         DReal barrelRecycleTime = 2; // Delay before refiring one barrel.
 
-        // current = current angle, radians.
-        // target = target angle, radians.
-        // speed = max radians turned per second.
-        // Returns the new angle in radians, range [0,2pi].
-        DReal CalculateNewAngle(DReal currentAngle, DReal targetAngle, DReal speed) {
-                var turnSpeedTicks = speed * ComSat.tickRate;
-                targetAngle = DReal.Mod(targetAngle, DReal.TwoPI);
-
-		// Turn towards heading.
-		var angleDiff = DReal.Mod(currentAngle - targetAngle, DReal.TwoPI);
-                int sign;
-                DReal distance;
-                if(angleDiff > DReal.PI) {
-                        sign = 1;
-                        distance = DReal.TwoPI - angleDiff;
-                } else {
-                        sign = -1;
-                        distance = angleDiff;
-                }
-                if(distance > turnSpeedTicks) {
-                        currentAngle += turnSpeedTicks * sign;
-                } else {
-                        currentAngle = targetAngle;
-                }
-
-                return DReal.Mod(currentAngle, DReal.TwoPI);
-        }
-
         // This could be smarter. If dest is too close & perpendicular, then the tank
         // can end up circling around.
         void MoveTowards(DVector2 dest) {
                 var dir = dest - entity.position; // also vector to dest.
                 var targetAngle = DVector2.ToAngle(dir);
-                var baseAngle = CalculateNewAngle(entity.rotation, targetAngle, turnSpeed);
+                var baseAngle = Utility.CalculateNewAngle(entity.rotation, targetAngle, turnSpeed);
                 entity.rotation = baseAngle;
 
 		// Move along current heading. Ramp speed up as the angle gets closer.
@@ -125,7 +97,7 @@ public class TwinTank : MonoBehaviour {
 	}
 
         void TurnTurret(DReal targetAngle) {
-                turretRotation = CalculateNewAngle(turretRotation, targetAngle, turretTurnSpeed);
+                turretRotation = Utility.CalculateNewAngle(turretRotation, targetAngle, turretTurnSpeed);
         }
 
         void FireOneBarrel(int sign, GameObject barrel) {
@@ -247,5 +219,4 @@ public class TwinTank : MonoBehaviour {
                                     new Vector3(0.5f, 0.5f, 0.5f));
 
         }
-
 }

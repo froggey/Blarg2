@@ -14,9 +14,11 @@ public class BallisticProjectile : Projectile {
         }
 
         void OnDestroy() {
-                trail.transform.parent = null;
-                trail.autodestruct = true;
-                trail = null;
+                if(trail != null) {
+                        trail.transform.parent = null;
+                        trail.autodestruct = true;
+                        trail = null;
+                }
         }
 
         void TickUpdate() {

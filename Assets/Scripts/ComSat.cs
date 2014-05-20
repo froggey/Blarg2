@@ -132,11 +132,25 @@ static class ComSat {
 
                         DVector2 result;
                         if(Utility.IntersectLineCircle(e.position, e.collisionRadius, start, end, out result)) {
+                                Debug.Log("Cast line " + start + "-" + end + " hit " + e + " at " + result);
                                 hitPosition = result;
                                 return e;
                         }
                 }
                 hitPosition = new DVector2();
+
+                return null;
+        }
+
+        // Locate an entity within the given circle, not on the given team.
+        public static Entity FindEntityWithinRadius(DVector2 origin, DReal radius, int ignoreTeam = -1) {
+                foreach(Entity e in worldEntityCache) {
+                        if(e.team == ignoreTeam) continue;
+
+                        if((e.position - origin).sqrMagnitude < radius*radius) {
+                                return e;
+                        }
+                }
 
                 return null;
         }
