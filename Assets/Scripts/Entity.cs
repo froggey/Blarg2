@@ -7,7 +7,7 @@ public class Entity : MonoBehaviour {
         public int team;
 
         public int maxHealth;
-        private int health;
+        public int health;
 
         // This is super dumb.
         // The inspector can't display DReals, so expose the collisionRadius as a fraction.

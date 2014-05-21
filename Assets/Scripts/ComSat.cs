@@ -3,6 +3,20 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
+class DeferredInstantiation {
+        public GameObject prefab;
+        public int team;
+        public DVector2 position;
+        public DReal rotation;
+
+        public DeferredInstantiation(GameObject prefab, int team, DVector2 position, DReal rotation) {
+                this.prefab = prefab;
+                this.team = team;
+                this.position = position;
+                this.rotation = rotation;
+        }
+}
+
 static class ComSat {
         public static DReal tickRate = (DReal)1 / (DReal)25;
         private static float timeSlop;
@@ -11,6 +25,8 @@ static class ComSat {
         private static Dictionary<Entity, int> reverseWorldEntities = new Dictionary<Entity, int>();
         private static List<Projectile> worldProjectiles = new List<Projectile>();
         private static List<Entity> worldEntityCache = new List<Entity>(); // Faster to iterate through.
+
+        private static List<DeferredInstantiation> deferredInstantiations = new List<DeferredInstantiation>();
 
         private static WorldSimulation world_;
         public static WorldSimulation world {
@@ -27,6 +43,12 @@ static class ComSat {
                 thing.rotation = rotation;
                 thing.team = team;
                 return thing;
+        }
+
+        // Instantiate a new prefab, defering to the end of TickUpdate.
+        // Prefab must be an Entity.
+        public static void Instantiate(GameObject prefab, int team, DVector2 position, DReal rotation) {
+                deferredInstantiations.Add(new DeferredInstantiation(prefab, team, position, rotation));
         }
 
         // Called by WorldSimulation when the level is loaded.
@@ -65,6 +87,16 @@ static class ComSat {
                                 e.gameObject.SendMessage("TickUpdate", null, SendMessageOptions.DontRequireReceiver);
                         }
                 }
+
+                foreach(var d in deferredInstantiations) {
+                        Vector3 worldPosition = new Vector3((float)d.position.y, 0, (float)d.position.x);
+                        Quaternion worldRotation = Quaternion.AngleAxis((float)d.rotation, Vector3.up);
+                        Entity thing = (Object.Instantiate(d.prefab, worldPosition, worldRotation) as GameObject).GetComponent<Entity>();
+                        thing.position = d.position;
+                        thing.rotation = d.rotation;
+                        thing.team = d.team;
+                }
+                deferredInstantiations.Clear();
         }
 
         public static void Update() {
@@ -123,6 +155,11 @@ static class ComSat {
         public static void IssueAttack(Entity unit, Entity target) {
                 Debug.Log(unit + "[" + reverseWorldEntities[unit] + "] attack " + target + "[" + reverseWorldEntities[target] + "]");
                 unit.gameObject.SendMessage("Attack", target, SendMessageOptions.DontRequireReceiver);
+        }
+
+        public static void IssueUIAction(Entity unit, int what) {
+                Debug.Log(unit + "[" + reverseWorldEntities[unit] + "] UI action " + what);
+                unit.gameObject.SendMessage("UIAction", what, SendMessageOptions.DontRequireReceiver);
         }
 
         // Cast a line from A to B, checking for collisions with other entities.
