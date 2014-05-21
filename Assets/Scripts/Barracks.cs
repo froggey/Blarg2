@@ -28,7 +28,11 @@ public class Barracks : MonoBehaviour {
                 }
 
                 print("Build new " + prefabs[what]);
-                ComSat.Instantiate(prefabs[what], entity.team, entity.position, entity.rotation);
+
+                var rotation = ComSat.RandomRange(0, DReal.TwoPI);
+                var offset = DVector2.FromAngle(rotation) * ComSat.RandomRange(entity.collisionRadius + 5, entity.collisionRadius + 15);
+
+                ComSat.Instantiate(prefabs[what], entity.team, entity.position + offset, rotation);
                 delay = buildTime;
         }
 

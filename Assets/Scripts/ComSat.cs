@@ -51,6 +51,8 @@ static class ComSat {
                 deferredInstantiations.Add(new DeferredInstantiation(prefab, team, position, rotation));
         }
 
+        private static uint randomValue;
+
         // Called by WorldSimulation when the level is loaded.
         public static void LevelLoad(WorldSimulation world) {
                 if(worldEntities.Count != 0) {
@@ -62,6 +64,7 @@ static class ComSat {
                 }
                 timeSlop = 0.0f;
                 nextEntityId = 0;
+                randomValue = (uint)(Random.value * 0xFFFFFFFF);
                 ComSat.world_ = world;
         }
 
@@ -190,5 +193,16 @@ static class ComSat {
                 }
 
                 return null;
+        }
+
+        public static DReal RandomValue() {
+                randomValue = 22695477 * randomValue + 1;
+                return randomValue;
+        }
+
+        public static DReal RandomRange(DReal min, DReal max) {
+                var range = DReal.max(0, max - min);
+                var n = RandomValue() / (uint)0xFFFFFFFF;
+                return n * range + min;
         }
 }

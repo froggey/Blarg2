@@ -35,6 +35,10 @@ public struct DReal {
                 return Create((long)value << fixedShift);
         }
 
+        public static implicit operator DReal(uint value) {
+                return Create((long)((ulong)value << fixedShift));
+        }
+
         public static explicit operator float(DReal value) {
                 return (float)((double)value.value / (double)(1 << fixedShift));
         }
@@ -220,6 +224,14 @@ public struct DReal {
 
         public static DReal Degrees(DReal radians) {
                 return radians * (180 / PI);
+        }
+
+        public static DReal min(DReal a, DReal b) {
+                return (a < b) ? a : b;
+        }
+
+        public static DReal max(DReal a, DReal b) {
+                return (a > b) ? a : b;
         }
 }
 
