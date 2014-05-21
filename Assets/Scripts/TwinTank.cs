@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 
 [RequireComponent (typeof(Entity))]
+[RequireComponent (typeof(Vehicle))]
 public class TwinTank : MonoBehaviour {
         // Can't use GameObjects to set these up because floats.
         // Unity refuses to edit these because they're structs.
@@ -13,13 +14,12 @@ public class TwinTank : MonoBehaviour {
         public GameObject projectilePrefab;
         public GameObject leftBarrel, rightBarrel;
 
-        public DReal collisionRadius = (DReal)5 / 2; // 2.5 Ughhh!
-
         private Entity entity;
+        private Vehicle vehicle;
 
         void Awake() {
                 entity = GetComponent<Entity>();
-                entity.collisionRadius = collisionRadius; // ugghhh.
+                vehicle = GetComponent<Vehicle>();
 
                 mode = Mode.IDLE;
                 turretRotation = 0;
@@ -33,11 +33,8 @@ public class TwinTank : MonoBehaviour {
 
         static DReal attackDistance = 50; // Try to stay this close.
         static DReal attackRange = 60; // Maximum firing range.
-        static DReal speed = 93; // m/s
-        static DReal turnSpeed = DReal.Radians(687); // radians per second
         static DReal turretTurnSpeed = DReal.Radians(727); // radians per second
         static DReal sqrPositioningAccuracy = (DReal)1 / 100;
-        static DReal maxMoveAngle = DReal.Radians(100);
 
         Mode mode;
         DVector2 destination; // Current movement target.
@@ -62,39 +59,6 @@ public class TwinTank : MonoBehaviour {
 
         DReal barrelDelay = (DReal)1 / 5; // Delay between firing left & right barrels.
         DReal barrelRecycleTime = 2; // Delay before refiring one barrel.
-
-        // This could be smarter. If dest is too close & perpendicular, then the tank
-        // can end up circling around.
-        void MoveTowards(DVector2 dest) {
-                var dir = dest - entity.position; // also vector to dest.
-                var targetAngle = DVector2.ToAngle(dir);
-                var baseAngle = Utility.CalculateNewAngle(entity.rotation, targetAngle, turnSpeed);
-                entity.rotation = baseAngle;
-
-		// Move along current heading. Ramp speed up as the angle gets closer.
-                // Augh.
-                // [-pi,pi] => [0,2pi]
-                if(targetAngle < 0) {
-                        targetAngle += DReal.TwoPI;
-                }
-                // Get targetAngle within +/- pi of baseAngle.
-                if(targetAngle < baseAngle - DReal.PI) {
-                        targetAngle += DReal.TwoPI;
-                } else if(targetAngle > baseAngle + DReal.PI) {
-                        targetAngle -= DReal.TwoPI;
-                }
-                var diff = DReal.Abs(baseAngle - targetAngle);
-		if(diff < maxMoveAngle) {
-                        var tickSpeed = speed * ComSat.tickRate;
-                        var distance = dir.magnitude;
-                        print("Distance: " + distance + "  speed is: " + tickSpeed);
-                        if(distance < tickSpeed) {
-                                tickSpeed = distance;
-                        }
-                        var travel = DVector2.FromAngle(baseAngle) * (1 - (diff / DReal.PI)) * tickSpeed;
-                        entity.position += travel;
-		}
-	}
 
         void TurnTurret(DReal targetAngle) {
                 turretRotation = Utility.CalculateNewAngle(turretRotation, targetAngle, turretTurnSpeed);
@@ -139,7 +103,7 @@ public class TwinTank : MonoBehaviour {
                         } else if(movingToTarget || (dist >= attackRange)) {
                                 movingToTarget = true;
                                 // Approach target.
-                                MoveTowards(target.position);
+                                vehicle.MoveTowards(target.position);
                         }
 
                         // Fire when in range and pointing the gun at the target.
@@ -152,7 +116,7 @@ public class TwinTank : MonoBehaviour {
                                 // Close enough.
                                 mode = Mode.IDLE;
                         } else {
-                                MoveTowards(destination);
+                                vehicle.MoveTowards(destination);
                         }
                         TurnTurret(0);
                 } else if(mode == Mode.IDLE) {
@@ -200,10 +164,6 @@ public class TwinTank : MonoBehaviour {
         }
 
         void OnDrawGizmosSelected() {
-                // Ughhh!!
-                Gizmos.color = Color.green;
-                Gizmos.DrawWireSphere(transform.position, (float)collisionRadius);
-
                 // Projectile spawn location & stuff.
                 Gizmos.color = Color.red;
                 Vector3 turretPosition = new Vector3((float)turretAttachPoint.x,

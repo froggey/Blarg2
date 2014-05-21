@@ -9,9 +9,16 @@ public class Entity : MonoBehaviour {
         public int maxHealth;
         private int health;
 
+        // This is super dumb.
+        // The inspector can't display DReals, so expose the collisionRadius as a fraction.
+        public int collisionRadiusNumerator;
+        public int collisionRadiusDenominator;
+
         public DReal collisionRadius;
 
         void Awake() {
+                collisionRadius = (DReal)collisionRadiusNumerator / collisionRadiusDenominator;
+
                 ComSat.EntityCreated(this);
 
                 health = maxHealth;
@@ -32,5 +39,10 @@ public class Entity : MonoBehaviour {
                 if(health <= 0) {
                         Destroy(gameObject);
                 }
+        }
+
+        void OnDrawGizmosSelected() {
+                Gizmos.color = Color.green;
+                Gizmos.DrawWireSphere(transform.position, (float)collisionRadiusNumerator / collisionRadiusDenominator);
         }
 }

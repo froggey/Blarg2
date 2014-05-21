@@ -1,4 +1,7 @@
 fileFormatVersion: 2
 guid: f84c16673625c4e4abea2824922b9e22
+labels:
+- Vehicle
+- Weapon
 NativeFormatImporter:
   userData: 

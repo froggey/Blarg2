@@ -12,8 +12,6 @@ public class Turret : MonoBehaviour {
         public DReal attackRange = 60; // Maximum firing range.
         static DReal turretTurnSpeed = DReal.Radians(727); // radians per second
 
-        public DReal collisionRadius = (DReal)3 / 2; // 2.5 Ughhh!
-
         public DReal projectileSpawnDistance = 3;
         public DVector2 turretAttachPoint = new DVector2(0, 0);
         public GameObject turretMesh;
@@ -26,7 +24,6 @@ public class Turret : MonoBehaviour {
 
         void Awake() {
                 entity = GetComponent<Entity>();
-                entity.collisionRadius = collisionRadius; // ugghhh.
 
                 target = null;
                 turretRotation = 0;
@@ -93,10 +90,6 @@ public class Turret : MonoBehaviour {
         void OnDrawGizmosSelected() {
                 Gizmos.color = Color.red;
                 Gizmos.DrawWireSphere(transform.position, (float)attackRange);
-
-                // Ughhh!!
-                Gizmos.color = Color.green;
-                Gizmos.DrawWireSphere(transform.position, (float)collisionRadius);
 
                 // Projectile spawn location & stuff.
                 Gizmos.color = Color.red;
