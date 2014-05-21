@@ -45,8 +45,14 @@ public class Barracks : MonoBehaviour {
         private void OnGUI() {
                 if(!isSelected) return;
 
+                if(delay > 0) {
+                        GUI.Box(new Rect(10, 10, 64, 25), ((int)(float)delay).ToString());
+                } else {
+                        GUI.Box(new Rect(10, 10, 64, 25), "Ready");
+                }
+
                 for(int i = 0; i < prefabs.Length; ++i) {
-                        if(GUI.Button(new Rect(10, 10 + i * 74, 64, 64), icons[i])) {
+                        if(GUI.Button(new Rect(10, 45 + i * 74, 64, 64), icons[i])) {
                                 ComSat.IssueUIAction(entity, i);
                         }
                 }
