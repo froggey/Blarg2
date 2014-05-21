@@ -5,7 +5,7 @@ public class PlayerInterface : MonoBehaviour {
         private GameObject selectedUnit;
 
         void Update() {
-                if(Input.GetMouseButtonUp(0)) {
+                if(Input.GetButtonUp("Select")) {
                         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
                         if(selectedUnit) {
@@ -21,7 +21,7 @@ public class PlayerInterface : MonoBehaviour {
                         }
                 }
 
-                if(Input.GetMouseButtonUp(1) && selectedUnit) {
+                if(Input.GetButtonUp("Action") && selectedUnit) {
                         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
                         // Shoot for units first.
                         RaycastHit hit;
