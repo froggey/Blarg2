@@ -44,6 +44,13 @@ public class ComSat : MonoBehaviour {
         private bool worldRunning;
 
         private bool syncCheckRequested;
+        private bool debugVomit;
+
+        void Log(string s) {
+                if(debugVomit) {
+                        Debug.Log(s);
+                }
+        }
 
         void OnGUI() {
                 if(!worldRunning) return;
@@ -56,6 +63,9 @@ public class ComSat : MonoBehaviour {
                 }
                 if(GUILayout.Button("Check Sync")) {
                         syncCheckRequested = true;
+                }
+                if(GUILayout.Button(debugVomit ? "Disable verbose logging" : "Enable verbose logging")) {
+                        debugVomit = !debugVomit;
                 }
                 GUILayout.EndArea();
         }
@@ -119,7 +129,7 @@ public class ComSat : MonoBehaviour {
                 Quaternion worldRotation = Quaternion.AngleAxis((float)rotation, Vector3.up);
 
                 QueueCommand(onTurn, () => {
-                                Debug.Log("{" + tickID + "} Spawn " + entityName + " on team " + team + " at " + position + ":" + rotation);
+                                Log("{" + tickID + "} Spawn " + entityName + " on team " + team + " at " + position + ":" + rotation);
                                 Entity thing = (Object.Instantiate(go, worldPosition, worldRotation) as GameObject).GetComponent<Entity>();
                                 thing.position = position;
                                 thing.rotation = rotation;
@@ -134,7 +144,7 @@ public class ComSat : MonoBehaviour {
                 currentInstance.worldEntities[id] = ent;
                 currentInstance.reverseWorldEntities[ent] = id;
                 currentInstance.worldEntityCache.Add(ent);
-                Debug.Log("{" + tickID + "} Created entity " + ent + "[" + id + "] at " + ent.position + ":" + ent.rotation);
+                Log("{" + tickID + "} Created entity " + ent + "[" + id + "] at " + ent.position + ":" + ent.rotation);
         }
 
         public static void DestroyEntity(Entity e) {
@@ -144,7 +154,7 @@ public class ComSat : MonoBehaviour {
                                         return;
                                 }
                                 int id = currentInstance.reverseWorldEntities[e];
-                                Debug.Log("{" + currentInstance.tickID + "} Destroy entity " + e + "[" + id + "] at " + e.position + ":" + e.rotation);
+                                currentInstance.Log("{" + currentInstance.tickID + "} Destroy entity " + e + "[" + id + "] at " + e.position + ":" + e.rotation);
                                 currentInstance.worldEntities.Remove(id);
                                 currentInstance.reverseWorldEntities.Remove(e);
                                 currentInstance.worldEntityCache.Remove(e);
@@ -157,10 +167,10 @@ public class ComSat : MonoBehaviour {
         void MoveCommand(int onTurn, int entityID, string positionX, string positionY) {
                 var position = new DVector2(DReal.Deserialize(positionX), DReal.Deserialize(positionY));
                 var entity = worldEntities[entityID];
-                Debug.Log("Got move action on " + turnID + "@" + tickID + " for turn " + onTurn);
+                Log("Got move action on " + turnID + "@" + tickID + " for turn " + onTurn);
                 QueueCommand(onTurn, () => {
                                 if(entity != null) {
-                                        Debug.Log("{" + tickID + "} Move " + entity + "[" + entityID + "] to " + position);
+                                        Log("{" + tickID + "} Move " + entity + "[" + entityID + "] to " + position);
                                         entity.gameObject.SendMessage("Move", position, SendMessageOptions.DontRequireReceiver);
                                 }
                         });
@@ -173,7 +183,7 @@ public class ComSat : MonoBehaviour {
                 var target = worldEntities[targetID];
                 QueueCommand(onTurn, () => {
                                 if(entity != null && target != null) {
-                                        Debug.Log("{" + tickID + "} " + entity + "[" + entityID + "] attack " + target + "[" + targetID + "]");
+                                        Log("{" + tickID + "} " + entity + "[" + entityID + "] attack " + target + "[" + targetID + "]");
                                         entity.gameObject.SendMessage("Attack", target, SendMessageOptions.DontRequireReceiver);
                                 }
                         });
@@ -185,7 +195,7 @@ public class ComSat : MonoBehaviour {
                 var entity = worldEntities[entityID];
                 QueueCommand(onTurn, () => {
                                 if(entity != null) {
-                                        Debug.Log("{" + tickID + "} " + entity + "[" + entityID + "] UI action " + what);
+                                        Log("{" + tickID + "} " + entity + "[" + entityID + "] UI action " + what);
                                         entity.gameObject.SendMessage("UIAction", what, SendMessageOptions.DontRequireReceiver);
                                 }
                         });
@@ -329,7 +339,7 @@ public class ComSat : MonoBehaviour {
                 while(timeSlop >= (float)tickRate) {
                         timeSlop -= (float)tickRate;
                         if(ticksRemaining != 0) {
-                                Debug.Log("Tick " + tickID);
+                                Log("Tick " + tickID);
                                 tickID += 1;
                                 TickUpdate();
                                 ticksRemaining -= 1;
@@ -344,7 +354,7 @@ public class ComSat : MonoBehaviour {
                                 if(goForNextTurn) {
                                         if(Network.isServer) {
                                                 currentGameState = DumpGameState();
-                                                Debug.Log(currentGameState);
+                                                Log(currentGameState);
                                         }
                                         if(syncCheckRequested) {
                                                 string state = DumpGameState();
@@ -353,9 +363,9 @@ public class ComSat : MonoBehaviour {
                                                 syncCheckRequested = false;
                                         }
 
-                                        Debug.Log("Advancing turn. " + turnID + " on tick " + tickID);
+                                        Log("Advancing turn. " + turnID + " on tick " + tickID);
                                         foreach(System.Action a in queuedCommands) {
-                                                print("{" + tickID + "} Issue queued command " + a);
+                                                Log("{" + tickID + "} Issue queued command " + a);
                                                 a();
                                         }
                                         queuedCommands.Clear();
@@ -392,7 +402,7 @@ public class ComSat : MonoBehaviour {
         void DoReadyUp(NetworkMessageInfo info) {
                 foreach(var p in players) {
                         if(p.client == info.sender) {
-                                print("Player " + p.id + " readyup  " + turnID + " " + tickID);
+                                Log("Player " + p.id + " readyup  " + turnID + " " + tickID);
                                 p.ready = true;
                                 return;
                         }
@@ -403,7 +413,7 @@ public class ComSat : MonoBehaviour {
         // Advance to the next communication turn. (Client)
         [RPC]
         void NextTurn() {
-                print("Next turn.  " + turnID + " " + tickID);
+                Log("Next turn.  " + turnID + " " + tickID);
                 if(goForNextTurn) {
                         Debug.LogError("Duplicate NextTurn call!");
                 }
@@ -412,7 +422,7 @@ public class ComSat : MonoBehaviour {
 
         public static void SpawnProjectile(Entity origin, GameObject prefab, DVector2 position, DReal rotation/*, DReal height*/) {
                 currentInstance.deferredActions.Add(() => {
-                                Debug.Log("{" + currentInstance.tickID + "} Spawn projectile " + prefab + " at " + position + ":" + rotation);
+                                currentInstance.Log("{" + currentInstance.tickID + "} Spawn projectile " + prefab + " at " + position + ":" + rotation);
                                 Vector3 worldPosition = new Vector3((float)position.y, 0, (float)position.x);
                                 Quaternion worldRotation = Quaternion.AngleAxis((float)rotation, Vector3.up);
                                 var thing = (Object.Instantiate(prefab, worldPosition, worldRotation) as GameObject).GetComponent<Projectile>();
@@ -428,7 +438,7 @@ public class ComSat : MonoBehaviour {
 
         public static void DestroyProjectile(Projectile p) {
                 currentInstance.deferredActions.Add(() => {
-                                Debug.Log("{" + currentInstance.tickID + "} Destroy projectile " + p + " at " + p.position + ":" + p.rotation);
+                                currentInstance.Log("{" + currentInstance.tickID + "} Destroy projectile " + p + " at " + p.position + ":" + p.rotation);
                                 currentInstance.worldProjectiles.Remove(p);
                                 Object.Destroy(p.gameObject);
                         });
