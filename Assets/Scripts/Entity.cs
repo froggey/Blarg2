@@ -16,10 +16,18 @@ public class Entity : MonoBehaviour {
 
         public DReal collisionRadius;
 
+        public GameObject baseMesh;
+
         void Awake() {
                 collisionRadius = (DReal)collisionRadiusNumerator / collisionRadiusDenominator;
 
                 health = maxHealth;
+        }
+
+        void Start() {
+                if(baseMesh && team != 0) {
+                        baseMesh.renderer.material.color = Utility.TeamColour(team);
+                }
         }
 
         void Update() {

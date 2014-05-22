@@ -88,4 +88,16 @@ static public class Utility {
 
                 return DReal.Mod(currentAngle, DReal.TwoPI);
         }
+
+        public static Color TeamColour(int team) {
+                switch(team) {
+                case 1: return Color.blue;
+                case 2: return Color.cyan;
+                case 3: return Color.green;
+                case 4: return Color.magenta;
+                case 5: return Color.red;
+                case 6: return Color.yellow;
+                }
+                return Color.white;
+        }
 }
