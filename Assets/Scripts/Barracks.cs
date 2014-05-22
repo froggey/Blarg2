@@ -50,7 +50,7 @@ public class Barracks : MonoBehaviour {
                 if(!isSelected) return;
 
                 if(delay > 0) {
-                        GUI.Box(new Rect(10, 10, 64, 25), ((int)(float)delay).ToString());
+                        GUI.Box(new Rect(10, 10, 64, 25), ((int)Mathf.Ceil((float)delay)).ToString());
                 } else {
                         GUI.Box(new Rect(10, 10, 64, 25), "Ready");
                 }
