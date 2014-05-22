@@ -40,7 +40,7 @@ public class Truck : MonoBehaviour {
         }
 
         void UIAction(int what) {
-                ComSat.Instantiate(constructionPrefab, entity.team, entity.position, entity.rotation);
+                ComSat.SpawnEntity(constructionPrefab, entity.team, entity.position, entity.rotation);
                 ComSat.DestroyEntity(entity);
         }
 

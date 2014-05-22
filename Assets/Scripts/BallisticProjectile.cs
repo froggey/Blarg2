@@ -24,9 +24,11 @@ public class BallisticProjectile : Projectile {
                         Vector3 position = new Vector3((float)hitPosition.y, 0, (float)hitPosition.x);
                         Object.Instantiate(impactPrefab, position, Quaternion.AngleAxis((float)this.rotation, Vector3.up));
 
-                        trail.transform.parent = null;
-                        trail.autodestruct = true;
-                        trail = null;
+                        if(trail) {
+                                trail.transform.parent = null;
+                                trail.autodestruct = true;
+                                trail = null;
+                        }
 
                         ComSat.DestroyProjectile(this);
                         return;

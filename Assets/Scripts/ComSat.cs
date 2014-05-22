@@ -18,19 +18,20 @@ public class ComSat : MonoBehaviour {
         public static DReal tickRate = (DReal)1 / (DReal)25;
         // This many ticks per communication turn.
         // Max input lag = ticksPerTurn * tickRate.
-        public int ticksPerTurn = 5;
+        public static int ticksPerTurn = 5;
+
         private float timeSlop;
         private int ticksRemaining; // Ticks remaining in this turn.
         private bool goForNextTurn;
 
-        private static int nextEntityId;
-        private static Dictionary<int, Entity> worldEntities = new Dictionary<int, Entity>();
-        private static Dictionary<Entity, int> reverseWorldEntities = new Dictionary<Entity, int>();
-        private static List<Projectile> worldProjectiles = new List<Projectile>();
-        private static List<Entity> worldEntityCache = new List<Entity>(); // Faster to iterate through.
+        private int nextEntityId;
+        private Dictionary<int, Entity> worldEntities;
+        private Dictionary<Entity, int> reverseWorldEntities;
+        private List<Projectile> worldProjectiles;
+        private List<Entity> worldEntityCache;
 
         // Actions to be performed at the end of a tick.
-        private static List<System.Action> deferredActions = new List<System.Action>();
+        private List<System.Action> deferredActions;
         private List<System.Action> queuedCommands;
 
         private static ComSat currentInstance;
@@ -74,6 +75,20 @@ public class ComSat : MonoBehaviour {
                 }
         }
 
+        // Instantiate a new prefab, defering to the end of TickUpdate.
+        // Prefab must be an Entity.
+        public static void SpawnEntity(GameObject prefab, int team, DVector2 position, DReal rotation) {
+                currentInstance.deferredActions.Add(() => {
+                                Vector3 worldPosition = new Vector3((float)position.y, 0, (float)position.x);
+                                Quaternion worldRotation = Quaternion.AngleAxis((float)rotation, Vector3.up);
+                                Entity thing = (Object.Instantiate(prefab, worldPosition, worldRotation) as GameObject).GetComponent<Entity>();
+                                thing.position = position;
+                                thing.rotation = rotation;
+                                thing.team = team;
+                                currentInstance.EntityCreated(thing);
+                        });
+        }
+
         // Create a new entity at whereever.
         // Called by all, but ignored everywhere but the server.
         public static void Spawn(string entityName, int team, DVector2 position, DReal rotation) {
@@ -102,6 +117,28 @@ public class ComSat : MonoBehaviour {
                                 thing.rotation = rotation;
                                 thing.team = team;
                                 EntityCreated(thing);
+                        });
+        }
+
+        void EntityCreated(Entity ent) {
+                int id = currentInstance.nextEntityId;
+                currentInstance.nextEntityId += 1;
+                currentInstance.worldEntities[id] = ent;
+                currentInstance.reverseWorldEntities[ent] = id;
+                currentInstance.worldEntityCache.Add(ent);
+        }
+
+        public static void DestroyEntity(Entity e) {
+                currentInstance.deferredActions.Add(() => {
+                                if(!currentInstance.reverseWorldEntities.ContainsKey(e)) {
+                                        // It's possible for a thing to be destroyed twice in one tick.
+                                        return;
+                                }
+                                int id = currentInstance.reverseWorldEntities[e];
+                                currentInstance.worldEntities.Remove(id);
+                                currentInstance.reverseWorldEntities.Remove(e);
+                                currentInstance.worldEntityCache.Remove(e);
+                                Object.Destroy(e.gameObject);
                         });
         }
 
@@ -145,36 +182,22 @@ public class ComSat : MonoBehaviour {
                 queuedCommands.Add(command);
         }
 
-        // Instantiate a new prefab, defering to the end of TickUpdate.
-        // Prefab must be an Entity.
-        public static void Instantiate(GameObject prefab, int team, DVector2 position, DReal rotation) {
-                deferredActions.Add(() => {
-                                Vector3 worldPosition = new Vector3((float)position.y, 0, (float)position.x);
-                                Quaternion worldRotation = Quaternion.AngleAxis((float)rotation, Vector3.up);
-                                Entity thing = (Object.Instantiate(prefab, worldPosition, worldRotation) as GameObject).GetComponent<Entity>();
-                                thing.position = position;
-                                thing.rotation = rotation;
-                                thing.team = team;
-                                EntityCreated(thing);
-                        });
-        }
-
         private static uint randomValue;
 
         void OnLevelWasLoaded(int level) {
                 worldRunning = true;
-                if(worldEntities.Count != 0) {
-                        // This test is done here, not in LevelUnload to prevent spurious
-                        // invalid entity destroyed warnings.
-                        Debug.LogError("Not all entities destroyed before starting new level!");
-                        worldEntities.Clear();
-                        reverseWorldEntities.Clear();
-                }
+
                 timeSlop = 0.0f;
                 ticksRemaining = 0;
-                nextEntityId = 0;
+                nextEntityId = 1;
                 randomValue = 42;
                 goForNextTurn = false;
+
+                worldEntities = new Dictionary<int, Entity>();
+                reverseWorldEntities = new Dictionary<Entity, int>();
+                worldProjectiles = new List<Projectile>();
+                worldEntityCache = new List<Entity>(); // Faster to iterate through.
+                deferredActions = new List<System.Action>();
                 queuedCommands = new List<System.Action>();
 
                 if(Network.isServer) {
@@ -209,7 +232,7 @@ public class ComSat : MonoBehaviour {
 
         // Called every tickRate seconds when the world is live.
         // (Client)
-        private static void TickUpdate() {
+        void TickUpdate() {
                 // Must tick all objects in a consistent order across machines.
                 foreach(Entity e in worldEntityCache) {
                         if(e != null) {
@@ -295,25 +318,8 @@ public class ComSat : MonoBehaviour {
                 goForNextTurn = true;
         }
 
-        public static void EntityCreated(Entity ent) {
-                int id = ++nextEntityId;
-                worldEntities[id] = ent;
-                reverseWorldEntities[ent] = id;
-                worldEntityCache.Add(ent);
-        }
-
-        public static void EntityDestroyed(Entity ent) {
-                if(!reverseWorldEntities.ContainsKey(ent)) {
-                        throw new System.Exception("Invalid entity " + ent + " being destroyed!");
-                }
-                int id = reverseWorldEntities[ent];
-                worldEntities.Remove(id);
-                reverseWorldEntities.Remove(ent);
-                worldEntityCache.Remove(ent);
-        }
-
         public static void SpawnProjectile(Entity origin, GameObject prefab, DVector2 position, DReal rotation/*, DReal height*/) {
-                deferredActions.Add(() => {
+                currentInstance.deferredActions.Add(() => {
                                 Vector3 worldPosition = new Vector3((float)position.y, 0, (float)position.x);
                                 Quaternion worldRotation = Quaternion.AngleAxis((float)rotation, Vector3.up);
                                 var thing = (Object.Instantiate(prefab, worldPosition, worldRotation) as GameObject).GetComponent<Projectile>();
@@ -323,26 +329,15 @@ public class ComSat : MonoBehaviour {
                                         thing.team = origin.team;
                                         thing.origin = origin;
                                 }
-                                worldProjectiles.Add(thing);
-                        });
-        }
-
-        public static void DestroyEntity(Entity e) {
-                deferredActions.Add(() => {
-                                EntityDestroyed(e);
-                                Object.Destroy(e.gameObject);
+                                currentInstance.worldProjectiles.Add(thing);
                         });
         }
 
         public static void DestroyProjectile(Projectile p) {
-                deferredActions.Add(() => {
-                                ProjectileDestroyed(p);
+                currentInstance.deferredActions.Add(() => {
+                                currentInstance.worldProjectiles.Remove(p);
                                 Object.Destroy(p.gameObject);
                         });
-        }
-
-        public static void ProjectileDestroyed(Projectile projectile) {
-                worldProjectiles.Remove(projectile);
         }
 
         Player SenderToPlayer(NetworkPlayer net) {
@@ -360,7 +355,7 @@ public class ComSat : MonoBehaviour {
                         currentInstance.IssueMoveServer(currentInstance.players[0], unit, position);
                 } else {
                         currentInstance.networkView.RPC("IssueMoveNet", RPCMode.Server,
-                                                        reverseWorldEntities[unit],
+                                                        currentInstance.reverseWorldEntities[unit],
                                                         DReal.Serialize(position.x), DReal.Serialize(position.y));
                 }
         }
@@ -391,8 +386,8 @@ public class ComSat : MonoBehaviour {
                         currentInstance.IssueAttackServer(currentInstance.players[0], unit, target);
                 } else {
                         currentInstance.networkView.RPC("IssueAttackNet", RPCMode.Server,
-                                                        reverseWorldEntities[unit],
-                                                        reverseWorldEntities[target]);
+                                                        currentInstance.reverseWorldEntities[unit],
+                                                        currentInstance.reverseWorldEntities[target]);
                 }
         }
 
@@ -422,7 +417,7 @@ public class ComSat : MonoBehaviour {
                         currentInstance.IssueUIActionServer(currentInstance.players[0], unit, what);
                 } else {
                         currentInstance.networkView.RPC("IssueUIActionNet", RPCMode.Server,
-                                                        reverseWorldEntities[unit],
+                                                        currentInstance.reverseWorldEntities[unit],
                                                         what);
                 }
         }
@@ -448,7 +443,7 @@ public class ComSat : MonoBehaviour {
 
         // Cast a line from A to B, checking for collisions with other entities.
         public static Entity LineCast(DVector2 start, DVector2 end, out DVector2 hitPosition, int ignoreTeam = -1) {
-                foreach(Entity e in worldEntityCache) {
+                foreach(Entity e in currentInstance.worldEntityCache) {
                         if(e.team == ignoreTeam) continue;
 
                         DVector2 result;
@@ -465,7 +460,7 @@ public class ComSat : MonoBehaviour {
 
         // Locate an entity within the given circle, not on the given team.
         public static Entity FindEntityWithinRadius(DVector2 origin, DReal radius, int ignoreTeam = -1) {
-                foreach(Entity e in worldEntityCache) {
+                foreach(Entity e in currentInstance.worldEntityCache) {
                         if(e.team == ignoreTeam) continue;
 
                         if((e.position - origin).sqrMagnitude < radius*radius) {
