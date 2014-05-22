@@ -18,7 +18,7 @@ public class ComSat : MonoBehaviour {
         public static DReal tickRate = (DReal)1 / (DReal)25;
         // This many ticks per communication turn.
         // Max input lag = ticksPerTurn * tickRate.
-        public static int ticksPerTurn = 1; // set this to 5 for release, 1 for locally debugging desyncs
+        public static int ticksPerTurn = 5; // set this to 5 for release, 1 for locally debugging desyncs
 
         private float timeSlop;
         private int ticksRemaining; // Ticks remaining in this turn.
@@ -43,6 +43,8 @@ public class ComSat : MonoBehaviour {
 
         private bool worldRunning;
 
+        private bool syncCheckRequested;
+
         void OnGUI() {
                 if(!worldRunning) return;
 
@@ -51,6 +53,9 @@ public class ComSat : MonoBehaviour {
                         Network.Disconnect();
                         Destroy(gameObject);
                         Application.LoadLevel("Lobby");
+                }
+                if(GUILayout.Button("Check Sync")) {
+                        syncCheckRequested = true;
                 }
                 GUILayout.EndArea();
         }
@@ -296,10 +301,22 @@ public class ComSat : MonoBehaviour {
         [RPC]
         void VerifyGameState(string state, NetworkMessageInfo info) {
                 if(!Network.isServer) return; // ????
-                if(currentGameState != state) {
+                if(state.Length != 4096 && currentGameState != state) {
                         Debug.LogError("Client " + SenderToPlayer(info.sender) + " out of sync!");
                         Debug.LogError(state);
                         Debug.LogError(currentGameState);
+                        networkView.RPC("SyncStateNotify", RPCMode.All, false, SenderToPlayer(info.sender).team);
+                } else {
+                        networkView.RPC("SyncStateNotify", RPCMode.All, true, SenderToPlayer(info.sender).team);
+                }
+        }
+
+        [RPC]
+        void SyncStateNotify(bool ok, int player) {
+                if(ok) {
+                        Debug.LogError("Player " + player + " has good sync.");
+                } else {
+                        Debug.LogError("Player " + player + " desynced!");
                 }
         }
 
@@ -325,12 +342,16 @@ public class ComSat : MonoBehaviour {
                                 }
 
                                 if(goForNextTurn) {
-                                        string state = DumpGameState();
-                                        Debug.Log(state);
                                         if(Network.isServer) {
-                                                currentGameState = state;
+                                                currentGameState = DumpGameState();
+                                                Debug.Log(currentGameState);
                                         }
-                                        networkView.RPC("VerifyGameState", RPCMode.Server, state);
+                                        if(syncCheckRequested) {
+                                                string state = DumpGameState();
+                                                Debug.Log(state);
+                                                networkView.RPC("VerifyGameState", RPCMode.Server, state);
+                                                syncCheckRequested = false;
+                                        }
 
                                         Debug.Log("Advancing turn. " + turnID + " on tick " + tickID);
                                         foreach(System.Action a in queuedCommands) {
