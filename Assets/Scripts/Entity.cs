@@ -19,8 +19,6 @@ public class Entity : MonoBehaviour {
         void Awake() {
                 collisionRadius = (DReal)collisionRadiusNumerator / collisionRadiusDenominator;
 
-                ComSat.EntityCreated(this);
-
                 health = maxHealth;
         }
         void OnDestroy() {

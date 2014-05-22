@@ -226,12 +226,20 @@ public struct DReal {
                 return radians * (180 / PI);
         }
 
-        public static DReal min(DReal a, DReal b) {
+        public static DReal Min(DReal a, DReal b) {
                 return (a < b) ? a : b;
         }
 
-        public static DReal max(DReal a, DReal b) {
+        public static DReal Max(DReal a, DReal b) {
                 return (a > b) ? a : b;
+        }
+
+        public static string Serialize(DReal n) {
+                return n.value.ToString();
+        }
+
+        public static DReal Deserialize(string n) {
+                return Create(System.Convert.ToInt64(n));
         }
 }
 

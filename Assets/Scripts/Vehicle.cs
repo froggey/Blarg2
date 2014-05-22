@@ -38,7 +38,7 @@ public class Vehicle : MonoBehaviour {
 		if(diff < maxMoveAngle) {
                         var tickSpeed = maxSpeed * ComSat.tickRate;
                         var distance = dir.magnitude;
-                        print("Distance: " + distance + "  speed is: " + tickSpeed);
+                        //print("Distance: " + distance + "  speed is: " + tickSpeed);
                         if(distance < tickSpeed) {
                                 tickSpeed = distance;
                         }

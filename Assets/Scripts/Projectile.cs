@@ -9,9 +9,6 @@ public class Projectile : MonoBehaviour {
         public int team = 0;
         public Entity origin; // who spawned this.
 
-        void Awake() {
-                ComSat.ProjectileCreated(this);
-        }
         void OnDestroy() {
                 ComSat.ProjectileDestroyed(this);
         }
