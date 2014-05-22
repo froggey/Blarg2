@@ -144,14 +144,12 @@ public class TwinTank : MonoBehaviour {
                 if(target == entity) {
                         return;
                 }
-                Debug.Log(this + " attacking " + target);
                 mode = Mode.ATTACK;
                 this.target = target;
                 this.movingToTarget = false;
         }
 
         void Move(DVector2 location) {
-                Debug.Log(this + " moving to " + location);
                 mode = Mode.MOVE;
                 target = null;
                 destination = location;

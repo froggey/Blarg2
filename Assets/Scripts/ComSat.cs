@@ -18,11 +18,13 @@ public class ComSat : MonoBehaviour {
         public static DReal tickRate = (DReal)1 / (DReal)25;
         // This many ticks per communication turn.
         // Max input lag = ticksPerTurn * tickRate.
-        public static int ticksPerTurn = 5;
+        public static int ticksPerTurn = 1; // set this to 5 for release, 1 for locally debugging desyncs
 
         private float timeSlop;
         private int ticksRemaining; // Ticks remaining in this turn.
         private bool goForNextTurn;
+        private int tickID;
+        private int turnID;
 
         private int nextEntityId;
         private Dictionary<int, Entity> worldEntities;
@@ -33,6 +35,7 @@ public class ComSat : MonoBehaviour {
         // Actions to be performed at the end of a tick.
         private List<System.Action> deferredActions;
         private List<System.Action> queuedCommands;
+        private List<System.Action> futureQueuedCommands;
 
         private static ComSat currentInstance;
 
@@ -94,8 +97,7 @@ public class ComSat : MonoBehaviour {
         public static void Spawn(string entityName, int team, DVector2 position, DReal rotation) {
                 if(!Network.isServer) return;
 
-                currentInstance.networkView.RPC("SpawnCommand",
-                                                RPCMode.AllBuffered,
+                currentInstance.networkView.RPC("SpawnCommand", RPCMode.All, currentInstance.turnID,
                                                 entityName,
                                                 team,
                                                 DReal.Serialize(position.x), DReal.Serialize(position.y),
@@ -104,14 +106,15 @@ public class ComSat : MonoBehaviour {
 
         // (Client)
         [RPC]
-        void SpawnCommand(string entityName, int team, string positionX, string positionY, string rotation_) {
+        void SpawnCommand(int onTurn, string entityName, int team, string positionX, string positionY, string rotation_) {
                 var position = new DVector2(DReal.Deserialize(positionX), DReal.Deserialize(positionY));
                 var rotation = DReal.Deserialize(rotation_);
                 GameObject go = Resources.Load<GameObject>(entityName);
                 Vector3 worldPosition = new Vector3((float)position.y, 0, (float)position.x);
                 Quaternion worldRotation = Quaternion.AngleAxis((float)rotation, Vector3.up);
 
-                QueueCommand(() => {
+                QueueCommand(onTurn, () => {
+                                Debug.Log("{" + tickID + "} Spawn " + entityName + " on team " + team + " at " + position + ":" + rotation);
                                 Entity thing = (Object.Instantiate(go, worldPosition, worldRotation) as GameObject).GetComponent<Entity>();
                                 thing.position = position;
                                 thing.rotation = rotation;
@@ -126,6 +129,7 @@ public class ComSat : MonoBehaviour {
                 currentInstance.worldEntities[id] = ent;
                 currentInstance.reverseWorldEntities[ent] = id;
                 currentInstance.worldEntityCache.Add(ent);
+                Debug.Log("{" + tickID + "} Created entity " + ent + "[" + id + "] at " + ent.position + ":" + ent.rotation);
         }
 
         public static void DestroyEntity(Entity e) {
@@ -135,6 +139,7 @@ public class ComSat : MonoBehaviour {
                                         return;
                                 }
                                 int id = currentInstance.reverseWorldEntities[e];
+                                Debug.Log("{" + currentInstance.tickID + "} Destroy entity " + e + "[" + id + "] at " + e.position + ":" + e.rotation);
                                 currentInstance.worldEntities.Remove(id);
                                 currentInstance.reverseWorldEntities.Remove(e);
                                 currentInstance.worldEntityCache.Remove(e);
@@ -144,11 +149,13 @@ public class ComSat : MonoBehaviour {
 
         // (Client)
         [RPC]
-        void MoveCommand(int entityID, string positionX, string positionY) {
+        void MoveCommand(int onTurn, int entityID, string positionX, string positionY) {
                 var position = new DVector2(DReal.Deserialize(positionX), DReal.Deserialize(positionY));
                 var entity = worldEntities[entityID];
-                QueueCommand(() => {
+                Debug.Log("Got move action on " + turnID + "@" + tickID + " for turn " + onTurn);
+                QueueCommand(onTurn, () => {
                                 if(entity != null) {
+                                        Debug.Log("{" + tickID + "} Move " + entity + "[" + entityID + "] to " + position);
                                         entity.gameObject.SendMessage("Move", position, SendMessageOptions.DontRequireReceiver);
                                 }
                         });
@@ -156,11 +163,12 @@ public class ComSat : MonoBehaviour {
 
         // (Client)
         [RPC]
-        void AttackCommand(int entityID, int targetID) {
+        void AttackCommand(int onTurn, int entityID, int targetID) {
                 var entity = worldEntities[entityID];
                 var target = worldEntities[targetID];
-                QueueCommand(() => {
+                QueueCommand(onTurn, () => {
                                 if(entity != null && target != null) {
+                                        Debug.Log("{" + tickID + "} " + entity + "[" + entityID + "] attack " + target + "[" + targetID + "]");
                                         entity.gameObject.SendMessage("Attack", target, SendMessageOptions.DontRequireReceiver);
                                 }
                         });
@@ -168,18 +176,29 @@ public class ComSat : MonoBehaviour {
 
         // (Client)
         [RPC]
-        void UIActionCommand(int entityID, int what) {
+        void UIActionCommand(int onTurn, int entityID, int what) {
                 var entity = worldEntities[entityID];
-                QueueCommand(() => {
+                QueueCommand(onTurn, () => {
                                 if(entity != null) {
+                                        Debug.Log("{" + tickID + "} " + entity + "[" + entityID + "] UI action " + what);
                                         entity.gameObject.SendMessage("UIAction", what, SendMessageOptions.DontRequireReceiver);
                                 }
                         });
         }
 
         // (Client)
-        void QueueCommand(System.Action command) {
-                queuedCommands.Add(command);
+        void QueueCommand(int onTurn, System.Action command) {
+                if(goForNextTurn) {
+                        if(onTurn != turnID+1) {
+                                Debug.LogError("Future command on turn " + turnID+1 + " is for turn " + onTurn + "???");
+                        }
+                        futureQueuedCommands.Add(command);
+                } else {
+                        if(onTurn != turnID) {
+                                Debug.LogError("Command on turn " + turnID + " is for turn " + onTurn + "???");
+                        }
+                        queuedCommands.Add(command);
+                }
         }
 
         private static uint randomValue;
@@ -192,6 +211,8 @@ public class ComSat : MonoBehaviour {
                 nextEntityId = 1;
                 randomValue = 42;
                 goForNextTurn = false;
+                tickID = 0;
+                turnID = 0;
 
                 worldEntities = new Dictionary<int, Entity>();
                 reverseWorldEntities = new Dictionary<Entity, int>();
@@ -199,12 +220,29 @@ public class ComSat : MonoBehaviour {
                 worldEntityCache = new List<Entity>(); // Faster to iterate through.
                 deferredActions = new List<System.Action>();
                 queuedCommands = new List<System.Action>();
+                futureQueuedCommands = new List<System.Action>();
 
                 if(Network.isServer) {
                         ClearReady();
                 }
 
                 ReadyUp();
+        }
+
+        string DumpGameState() {
+                string result = "Tick " + tickID + "; Turn " + turnID + "\n";
+                foreach(var e in worldEntityCache) {
+                        if(e != null) {
+                                result += "Ent " + e + "[" + reverseWorldEntities[e] + "] " + e.position + ":" + e.rotation + "\n";
+                        }
+                }
+                foreach(var p in worldProjectiles) {
+                        if(p != null) {
+                                result += "Prj " + p + " " + p.position + ":" + p.rotation + "\n";
+                        }
+                }
+
+                return result;
         }
 
         // (Server)
@@ -253,6 +291,18 @@ public class ComSat : MonoBehaviour {
                 deferredActions.Clear();
         }
 
+        string currentGameState;
+
+        [RPC]
+        void VerifyGameState(string state, NetworkMessageInfo info) {
+                if(!Network.isServer) return; // ????
+                if(currentGameState != state) {
+                        Debug.LogError("Client " + SenderToPlayer(info.sender) + " out of sync!");
+                        Debug.LogError(state);
+                        Debug.LogError(currentGameState);
+                }
+        }
+
         void Update() {
                 if(!worldRunning) return;
 
@@ -262,25 +312,45 @@ public class ComSat : MonoBehaviour {
                 while(timeSlop >= (float)tickRate) {
                         timeSlop -= (float)tickRate;
                         if(ticksRemaining != 0) {
+                                Debug.Log("Tick " + tickID);
+                                tickID += 1;
                                 TickUpdate();
                                 ticksRemaining -= 1;
                         }
-                        if(ticksRemaining == 0 && goForNextTurn) {
-                                foreach(System.Action a in queuedCommands) {
-                                        a();
+                        if(ticksRemaining == 0) {
+                                if(Network.isServer && EveryoneIsReady()) {
+                                        // Advance the game turn.
+                                        networkView.RPC("NextTurn", RPCMode.All);
+                                        ClearReady();
                                 }
-                                queuedCommands.Clear();
-                                goForNextTurn = false;
-                                ReadyUp();
-                                ticksRemaining = ticksPerTurn;
-                        }
 
-                        if(Network.isServer && ticksRemaining == 0 && EveryoneIsReady()) {
-                                // Advance the game turn.
-                                networkView.RPC("NextTurn", RPCMode.AllBuffered);
-                                ClearReady();
+                                if(goForNextTurn) {
+                                        string state = DumpGameState();
+                                        Debug.Log(state);
+                                        if(Network.isServer) {
+                                                currentGameState = state;
+                                        }
+                                        networkView.RPC("VerifyGameState", RPCMode.Server, state);
+
+                                        Debug.Log("Advancing turn. " + turnID + " on tick " + tickID);
+                                        foreach(System.Action a in queuedCommands) {
+                                                print("{" + tickID + "} Issue queued command " + a);
+                                                a();
+                                        }
+                                        queuedCommands.Clear();
+                                        var tmp = queuedCommands;
+                                        queuedCommands = futureQueuedCommands;
+                                        futureQueuedCommands = tmp;
+                                        goForNextTurn = false;
+                                        ReadyUp();
+                                        ticksRemaining = ticksPerTurn;
+                                        turnID += 1;
+                                }
                         }
                 }
+
+                worldEntityCache.RemoveAll((Entity e) => { return e == null; });
+                worldProjectiles.RemoveAll((Projectile p) => { return p == null; });
         }
 
         void ReadyUp() {
@@ -301,7 +371,7 @@ public class ComSat : MonoBehaviour {
         void DoReadyUp(NetworkMessageInfo info) {
                 foreach(var p in players) {
                         if(p.client == info.sender) {
-                                //print("Player " + p.id + " readyup");
+                                print("Player " + p.id + " readyup  " + turnID + " " + tickID);
                                 p.ready = true;
                                 return;
                         }
@@ -312,6 +382,7 @@ public class ComSat : MonoBehaviour {
         // Advance to the next communication turn. (Client)
         [RPC]
         void NextTurn() {
+                print("Next turn.  " + turnID + " " + tickID);
                 if(goForNextTurn) {
                         Debug.LogError("Duplicate NextTurn call!");
                 }
@@ -320,6 +391,7 @@ public class ComSat : MonoBehaviour {
 
         public static void SpawnProjectile(Entity origin, GameObject prefab, DVector2 position, DReal rotation/*, DReal height*/) {
                 currentInstance.deferredActions.Add(() => {
+                                Debug.Log("{" + currentInstance.tickID + "} Spawn projectile " + prefab + " at " + position + ":" + rotation);
                                 Vector3 worldPosition = new Vector3((float)position.y, 0, (float)position.x);
                                 Quaternion worldRotation = Quaternion.AngleAxis((float)rotation, Vector3.up);
                                 var thing = (Object.Instantiate(prefab, worldPosition, worldRotation) as GameObject).GetComponent<Projectile>();
@@ -335,6 +407,7 @@ public class ComSat : MonoBehaviour {
 
         public static void DestroyProjectile(Projectile p) {
                 currentInstance.deferredActions.Add(() => {
+                                Debug.Log("{" + currentInstance.tickID + "} Destroy projectile " + p + " at " + p.position + ":" + p.rotation);
                                 currentInstance.worldProjectiles.Remove(p);
                                 Object.Destroy(p.gameObject);
                         });
@@ -350,7 +423,8 @@ public class ComSat : MonoBehaviour {
         }
 
         public static void IssueMove(Entity unit, DVector2 position) {
-                //Debug.Log("Move " + unit + "[" + reverseWorldEntities[unit] + "] to " + position);
+                if(unit == null) return;
+
                 if(Network.isServer) {
                         currentInstance.IssueMoveServer(currentInstance.players[0], unit, position);
                 } else {
@@ -365,7 +439,7 @@ public class ComSat : MonoBehaviour {
                         return;
                 }
 
-                networkView.RPC("MoveCommand", RPCMode.AllBuffered,
+                networkView.RPC("MoveCommand", RPCMode.All, turnID,
                                 reverseWorldEntities[unit],
                                 DReal.Serialize(position.x), DReal.Serialize(position.y));
         }
@@ -381,7 +455,8 @@ public class ComSat : MonoBehaviour {
         }
 
         public static void IssueAttack(Entity unit, Entity target) {
-                //Debug.Log(unit + "[" + reverseWorldEntities[unit] + "] attack " + target + "[" + reverseWorldEntities[target] + "]");
+                if(unit == null || target == null) return;
+
                 if(Network.isServer) {
                         currentInstance.IssueAttackServer(currentInstance.players[0], unit, target);
                 } else {
@@ -396,7 +471,7 @@ public class ComSat : MonoBehaviour {
                         return;
                 }
 
-                networkView.RPC("AttackCommand", RPCMode.AllBuffered,
+                networkView.RPC("AttackCommand", RPCMode.All, turnID,
                                 reverseWorldEntities[unit],
                                 reverseWorldEntities[target]);
         }
@@ -412,7 +487,8 @@ public class ComSat : MonoBehaviour {
         }
 
         public static void IssueUIAction(Entity unit, int what) {
-                //Debug.Log(unit + "[" + reverseWorldEntities[unit] + "] UI action " + what);
+                if(unit == null) return;
+
                 if(Network.isServer) {
                         currentInstance.IssueUIActionServer(currentInstance.players[0], unit, what);
                 } else {
@@ -427,7 +503,7 @@ public class ComSat : MonoBehaviour {
                         return;
                 }
 
-                networkView.RPC("UIActionCommand", RPCMode.AllBuffered,
+                networkView.RPC("UIActionCommand", RPCMode.All, turnID,
                                 reverseWorldEntities[unit],
                                 what);
         }
@@ -444,6 +520,7 @@ public class ComSat : MonoBehaviour {
         // Cast a line from A to B, checking for collisions with other entities.
         public static Entity LineCast(DVector2 start, DVector2 end, out DVector2 hitPosition, int ignoreTeam = -1) {
                 foreach(Entity e in currentInstance.worldEntityCache) {
+                        if(e == null) continue;
                         if(e.team == ignoreTeam) continue;
 
                         DVector2 result;
@@ -461,6 +538,8 @@ public class ComSat : MonoBehaviour {
         // Locate an entity within the given circle, not on the given team.
         public static Entity FindEntityWithinRadius(DVector2 origin, DReal radius, int ignoreTeam = -1) {
                 foreach(Entity e in currentInstance.worldEntityCache) {
+                        if(e == null) continue;
+
                         if(e.team == ignoreTeam) continue;
 
                         if((e.position - origin).sqrMagnitude < radius*radius) {

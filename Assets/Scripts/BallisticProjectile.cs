@@ -13,12 +13,16 @@ public class BallisticProjectile : Projectile {
                 velocity = DVector2.FromAngle(this.rotation) * initialSpeed;
         }
 
-        void TickUpdate() {
+        public override void TickUpdate() {
+                base.TickUpdate();
+
                 DVector2 newPosition = this.position + velocity * ComSat.tickRate;
 
                 DVector2 hitPosition;
                 Entity hit = ComSat.LineCast(this.position, newPosition, out hitPosition, this.team);
                 if(hit != null) {
+                        print("Projectile at " + this.position + " impacted " + hit + " at " + hitPosition);
+
                         hit.Damage(damage);
 
                         Vector3 position = new Vector3((float)hitPosition.y, 0, (float)hitPosition.x);
