@@ -21,9 +21,6 @@ public class Entity : MonoBehaviour {
 
                 health = maxHealth;
         }
-        void OnDestroy() {
-                ComSat.EntityDestroyed(this);
-        }
 
         void Update() {
                 transform.localPosition = new Vector3((float)position.y,
@@ -35,7 +32,7 @@ public class Entity : MonoBehaviour {
         public void Damage(int damage) {
                 health -= damage;
                 if(health <= 0) {
-                        Destroy(gameObject);
+                        ComSat.DestroyEntity(this);
                 }
         }
 

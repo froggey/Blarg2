@@ -3,36 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-class DeferredInstantiation {
-        public GameObject prefab;
-        public int team;
-        public DVector2 position;
-        public DReal rotation;
-
-        public DeferredInstantiation(GameObject prefab, int team, DVector2 position, DReal rotation) {
-                this.prefab = prefab;
-                this.team = team;
-                this.position = position;
-                this.rotation = rotation;
-        }
-}
-
-class DeferredProjectile {
-        public Entity origin;
-        public GameObject prefab;
-        public int team;
-        public DVector2 position;
-        public DReal rotation;
-
-        public DeferredProjectile(Entity origin, GameObject prefab, int team, DVector2 position, DReal rotation) {
-                this.origin = origin;
-                this.prefab = prefab;
-                this.team = team;
-                this.position = position;
-                this.rotation = rotation;
-        }
-}
-
 public class ComSat : MonoBehaviour {
         private class Player {
                 public int id;
@@ -59,8 +29,8 @@ public class ComSat : MonoBehaviour {
         private static List<Projectile> worldProjectiles = new List<Projectile>();
         private static List<Entity> worldEntityCache = new List<Entity>(); // Faster to iterate through.
 
-        private static List<DeferredInstantiation> deferredInstantiations = new List<DeferredInstantiation>();
-        private static List<DeferredProjectile> deferredProjectiles = new List<DeferredProjectile>();
+        // Actions to be performed at the end of a tick.
+        private static List<System.Action> deferredActions = new List<System.Action>();
         private List<System.Action> queuedCommands;
 
         private static ComSat currentInstance;
@@ -178,7 +148,15 @@ public class ComSat : MonoBehaviour {
         // Instantiate a new prefab, defering to the end of TickUpdate.
         // Prefab must be an Entity.
         public static void Instantiate(GameObject prefab, int team, DVector2 position, DReal rotation) {
-                deferredInstantiations.Add(new DeferredInstantiation(prefab, team, position, rotation));
+                deferredActions.Add(() => {
+                                Vector3 worldPosition = new Vector3((float)position.y, 0, (float)position.x);
+                                Quaternion worldRotation = Quaternion.AngleAxis((float)rotation, Vector3.up);
+                                Entity thing = (Object.Instantiate(prefab, worldPosition, worldRotation) as GameObject).GetComponent<Entity>();
+                                thing.position = position;
+                                thing.rotation = rotation;
+                                thing.team = team;
+                                EntityCreated(thing);
+                        });
         }
 
         private static uint randomValue;
@@ -246,30 +224,10 @@ public class ComSat : MonoBehaviour {
                         }
                 }
 
-                foreach(var d in deferredInstantiations) {
-                        Vector3 worldPosition = new Vector3((float)d.position.y, 0, (float)d.position.x);
-                        Quaternion worldRotation = Quaternion.AngleAxis((float)d.rotation, Vector3.up);
-                        Entity thing = (Object.Instantiate(d.prefab, worldPosition, worldRotation) as GameObject).GetComponent<Entity>();
-                        thing.position = d.position;
-                        thing.rotation = d.rotation;
-                        thing.team = d.team;
-                        EntityCreated(thing);
+                foreach(var a in deferredActions) {
+                        a();
                 }
-                deferredInstantiations.Clear();
-
-                foreach(var d in deferredProjectiles) {
-                        Vector3 worldPosition = new Vector3((float)d.position.y, 0, (float)d.position.x);
-                        Quaternion worldRotation = Quaternion.AngleAxis((float)d.rotation, Vector3.up);
-                        var thing = (Object.Instantiate(d.prefab, worldPosition, worldRotation) as GameObject).GetComponent<Projectile>();
-                        thing.position = d.position;
-                        thing.rotation = d.rotation;
-                        if(d.origin != null) {
-                                thing.team = d.origin.team;
-                                thing.origin = d.origin;
-                        }
-                        worldProjectiles.Add(thing);
-                }
-                deferredProjectiles.Clear();
+                deferredActions.Clear();
         }
 
         void Update() {
@@ -355,12 +313,34 @@ public class ComSat : MonoBehaviour {
         }
 
         public static void SpawnProjectile(Entity origin, GameObject prefab, DVector2 position, DReal rotation/*, DReal height*/) {
-                deferredProjectiles.Add(new DeferredProjectile(origin, prefab, origin == null ? 0 : origin.team, position, rotation));
+                deferredActions.Add(() => {
+                                Vector3 worldPosition = new Vector3((float)position.y, 0, (float)position.x);
+                                Quaternion worldRotation = Quaternion.AngleAxis((float)rotation, Vector3.up);
+                                var thing = (Object.Instantiate(prefab, worldPosition, worldRotation) as GameObject).GetComponent<Projectile>();
+                                thing.position = position;
+                                thing.rotation = rotation;
+                                if(origin != null) {
+                                        thing.team = origin.team;
+                                        thing.origin = origin;
+                                }
+                                worldProjectiles.Add(thing);
+                        });
         }
 
-        public static void ProjectileCreated(Projectile projectile) {
-
+        public static void DestroyEntity(Entity e) {
+                deferredActions.Add(() => {
+                                EntityDestroyed(e);
+                                Object.Destroy(e.gameObject);
+                        });
         }
+
+        public static void DestroyProjectile(Projectile p) {
+                deferredActions.Add(() => {
+                                ProjectileDestroyed(p);
+                                Object.Destroy(p.gameObject);
+                        });
+        }
+
         public static void ProjectileDestroyed(Projectile projectile) {
                 worldProjectiles.Remove(projectile);
         }

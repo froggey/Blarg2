@@ -9,10 +9,6 @@ public class Projectile : MonoBehaviour {
         public int team = 0;
         public Entity origin; // who spawned this.
 
-        void OnDestroy() {
-                ComSat.ProjectileDestroyed(this);
-        }
-
         void Update() {
                 transform.localPosition = new Vector3((float)position.y,
                                                       (float)height,

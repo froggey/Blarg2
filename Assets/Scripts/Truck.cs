@@ -41,7 +41,7 @@ public class Truck : MonoBehaviour {
 
         void UIAction(int what) {
                 ComSat.Instantiate(constructionPrefab, entity.team, entity.position, entity.rotation);
-                Destroy(gameObject);
+                ComSat.DestroyEntity(entity);
         }
 
         private bool isSelected;

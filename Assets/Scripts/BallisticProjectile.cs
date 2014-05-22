@@ -13,14 +13,6 @@ public class BallisticProjectile : Projectile {
                 velocity = DVector2.FromAngle(this.rotation) * initialSpeed;
         }
 
-        void OnDestroy() {
-                if(trail != null) {
-                        trail.transform.parent = null;
-                        trail.autodestruct = true;
-                        trail = null;
-                }
-        }
-
         void TickUpdate() {
                 DVector2 newPosition = this.position + velocity * ComSat.tickRate;
 
@@ -32,7 +24,11 @@ public class BallisticProjectile : Projectile {
                         Vector3 position = new Vector3((float)hitPosition.y, 0, (float)hitPosition.x);
                         Object.Instantiate(impactPrefab, position, Quaternion.AngleAxis((float)this.rotation, Vector3.up));
 
-                        Destroy(gameObject);
+                        trail.transform.parent = null;
+                        trail.autodestruct = true;
+                        trail = null;
+
+                        ComSat.DestroyProjectile(this);
                         return;
                 }
 
