@@ -96,6 +96,7 @@ public class ComSat : MonoBehaviour {
                 DontDestroyOnLoad(gameObject);
 
                 currentInstance = this;
+                gameOver = false;
 
                 if(Network.isServer) {
                         players = new List<Player>();
@@ -412,15 +413,16 @@ public class ComSat : MonoBehaviour {
 
                 worldEntityCache.RemoveAll((Entity e) => { return e == null; });
 
-                if(!gameOver && turnID != 0) {
+                if(!gameOver && turnID > 5) {
                         // Win check.
                         int winningTeam = 0;
                         int teamMask = 0;
                         foreach(var ent in worldEntityCache) {
                                 if(ent.team == 0) continue;
-                                teamMask = 1 << ent.team;
+                                teamMask |= 1 << ent.team;
                                 winningTeam = ent.team;
                         }
+
                         // Magic bit hackery to check if exactly one bit is set (power of two).
                         // No bits is also a possiblilty.
                         if(teamMask == 0 || (teamMask & (teamMask - 1)) == 0) {
