@@ -3,7 +3,7 @@ using System.Collections;
 
 [RequireComponent (typeof(Vehicle))]
 [RequireComponent (typeof(Entity))]
-public class LandRover : MonoBehaviour {
+public class SimpleMovable : MonoBehaviour {
         bool moving;
         DVector2 destination;
 

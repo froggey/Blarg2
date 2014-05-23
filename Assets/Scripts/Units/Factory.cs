@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 [RequireComponent (typeof(Entity))]
-public class Barracks : MonoBehaviour {
+public class Factory : MonoBehaviour {
         public GameObject[] prefabs;
         public Texture2D[] icons;
 
