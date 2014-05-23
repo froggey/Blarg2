@@ -213,7 +213,7 @@ MonoBehaviour:
   prefabs:
   - {fileID: 100000, guid: f84c16673625c4e4abea2824922b9e22, type: 2}
   - {fileID: 100006, guid: ec693c88864ab47a397cd9ecad7497ca, type: 2}
-  - {fileID: 100018, guid: 864856f36d4724abf8aa04d361a7877a, type: 2}
+  - {fileID: 100020, guid: db717139a2f9b4014a84e348e4622957, type: 2}
   - {fileID: 100008, guid: 1deedf8488c5a4c1b9cf8d5e9096c2a2, type: 2}
   icons:
   - {fileID: 2800000, guid: e36a9dd5251d0409bbd1395fbaeda27a, type: 3}
