@@ -45,6 +45,9 @@ public class ComSat : MonoBehaviour {
         private bool syncCheckRequested;
         private bool debugVomit;
 
+        private bool gameOver;
+        private int winningTeam;
+
         void Log(string s) {
                 if(debugVomit) {
                         Debug.Log(s);
@@ -65,6 +68,13 @@ public class ComSat : MonoBehaviour {
                 }
                 if(GUILayout.Button(debugVomit ? "Disable verbose logging" : "Enable verbose logging")) {
                         debugVomit = !debugVomit;
+                }
+                if(gameOver) {
+                        if(winningTeam == 0) {
+                                GUILayout.Label("DRAW!");
+                        } else {
+                                GUILayout.Label("Player " + winningTeam + " wins!");
+                        }
                 }
                 GUILayout.EndArea();
         }
@@ -90,6 +100,12 @@ public class ComSat : MonoBehaviour {
                 if(Network.isServer) {
                         players = new List<Player>();
                 }
+        }
+
+        [RPC]
+        void Victory(int winner) {
+                gameOver = true;
+                winningTeam = winner;
         }
 
         // Instantiate a new prefab, defering to the end of TickUpdate.
@@ -123,6 +139,21 @@ public class ComSat : MonoBehaviour {
         // Called by all, but ignored everywhere but the server.
         public static void Spawn(string entityName, int team, DVector2 position, DReal rotation) {
                 if(!Network.isServer) return;
+
+                if(team != 0) {
+                        // Only spawn if the team exists.
+                        bool ok = false;
+
+                        // Only spa
+                        foreach(var p in currentInstance.players) {
+                                if(p.team == team) {
+                                        ok = true;
+                                        break;
+                                }
+                        }
+
+                        if(!ok) return;
+                }
 
                 currentInstance.networkView.RPC("SpawnCommand", RPCMode.All, currentInstance.turnID,
                                                 entityName,
@@ -380,6 +411,22 @@ public class ComSat : MonoBehaviour {
                 }
 
                 worldEntityCache.RemoveAll((Entity e) => { return e == null; });
+
+                if(!gameOver && turnID != 0) {
+                        // Win check.
+                        int winningTeam = 0;
+                        int teamMask = 0;
+                        foreach(var ent in worldEntityCache) {
+                                if(ent.team == 0) continue;
+                                teamMask = 1 << ent.team;
+                                winningTeam = ent.team;
+                        }
+                        // Magic bit hackery to check if exactly one bit is set (power of two).
+                        // No bits is also a possiblilty.
+                        if(teamMask == 0 || (teamMask & (teamMask - 1)) == 0) {
+                                networkView.RPC("Victory", RPCMode.All, winningTeam);
+                        }
+                }
         }
 
         void ReadyUp() {
