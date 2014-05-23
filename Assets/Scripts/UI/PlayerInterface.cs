@@ -9,7 +9,6 @@ public class PlayerInterface : MonoBehaviour {
         void LateUpdate() {
                 // No raycasting when over a GUI widget.
                 if(GUIUtility.hotControl != 0) {
-                        print("GUI hot.");
                         disabledBecauseGUI = true;
                 }
                 // Wait for mouse0 to go up, then wait a frame.
