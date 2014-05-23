@@ -1,32 +1,48 @@
 using UnityEngine;
 using System.Collections;
 
+[RequireComponent (typeof(Entity))]
 public class Projectile : MonoBehaviour {
-        public DVector2 position;
-        public DReal rotation;
-        public DReal height;
+        public int damage;
+        public int initialSpeed;
+        private DVector2 velocity;
 
-        public int team = 0;
-        public Entity origin; // who spawned this.
+        public GameObject impactPrefab;
+        public TrailRenderer trail;
 
-        public int lifetime;
-        public DReal age;
+        Entity entity;
 
         void Awake() {
-                age = 0;
+                entity = gameObject.GetComponent<Entity>();
         }
 
-        public virtual void TickUpdate() {
-                age += ComSat.tickRate;
-                if(age >= lifetime) {
-                        ComSat.DestroyProjectile(this);
+        void Start() {
+                velocity = DVector2.FromAngle(entity.rotation) * initialSpeed;
+        }
+
+        void TickUpdate() {
+                DVector2 newPosition = entity.position + velocity * ComSat.tickRate;
+
+                DVector2 hitPosition;
+                Entity hit = ComSat.LineCast(entity.position, newPosition, out hitPosition, entity.team);
+                if(hit != null) {
+                        print("Projectile at " + entity.position + " impacted " + hit + " at " + hitPosition);
+
+                        hit.Damage(damage);
+
+                        Vector3 position = new Vector3((float)hitPosition.y, 0, (float)hitPosition.x);
+                        Object.Instantiate(impactPrefab, position, Quaternion.AngleAxis((float)entity.rotation, Vector3.up));
+
+                        if(trail) {
+                                trail.transform.parent = null;
+                                trail.autodestruct = true;
+                                trail = null;
+                        }
+
+                        ComSat.DestroyEntity(entity);
+                        return;
                 }
-        }
 
-        void Update() {
-                transform.localPosition = new Vector3((float)position.y,
-                                                      (float)height,
-                                                      (float)position.x);
-                transform.localRotation = Quaternion.AngleAxis((float)DReal.Degrees(rotation), Vector3.up);
+                entity.position = newPosition;
         }
 }

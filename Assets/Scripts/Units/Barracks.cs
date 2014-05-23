@@ -32,7 +32,7 @@ public class Barracks : MonoBehaviour {
                 var rotation = ComSat.RandomRange(0, DReal.TwoPI);
                 var offset = DVector2.FromAngle(rotation) * ComSat.RandomRange(entity.collisionRadius + 5, entity.collisionRadius + 15);
 
-                ComSat.SpawnEntity(prefabs[what], entity.team, entity.position + offset, rotation);
+                ComSat.SpawnEntity(entity, prefabs[what], entity.position + offset, rotation);
                 delay = buildTime;
         }
 

@@ -5,6 +5,7 @@ public class Entity : MonoBehaviour {
         public DVector2 position;
         public DReal rotation;
         public int team;
+        public Entity origin; // who spawned this.
 
         public int maxHealth;
         public int health;
@@ -12,7 +13,7 @@ public class Entity : MonoBehaviour {
         // This is super dumb.
         // The inspector can't display DReals, so expose the collisionRadius as a fraction.
         public int collisionRadiusNumerator;
-        public int collisionRadiusDenominator;
+        public int collisionRadiusDenominator = 1;
 
         public DReal collisionRadius;
 

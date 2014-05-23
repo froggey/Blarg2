@@ -66,7 +66,7 @@ public class TwinTank : MonoBehaviour {
 
         void FireOneBarrel(int sign, GameObject barrel) {
                 barrel.SendMessage("Fire");
-                ComSat.SpawnProjectile(entity, projectilePrefab, entity.position, entity.rotation + turretRotation);
+                ComSat.SpawnEntity(entity, projectilePrefab, entity.position, entity.rotation + turretRotation);
         }
 
         void Fire() {

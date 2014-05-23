@@ -41,7 +41,7 @@ public class Turret : MonoBehaviour {
                 }
 
                 fireDelay = barrelRecycleTime;
-                ComSat.SpawnProjectile(entity, projectilePrefab, entity.position, entity.rotation + turretRotation);
+                ComSat.SpawnEntity(entity, projectilePrefab, entity.position, entity.rotation + turretRotation);
                 turretBarrel.SendMessage("Fire");
         }
 

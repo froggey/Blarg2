@@ -29,7 +29,6 @@ public class ComSat : MonoBehaviour {
         private int nextEntityId;
         private Dictionary<int, Entity> worldEntities;
         private Dictionary<Entity, int> reverseWorldEntities;
-        private List<Projectile> worldProjectiles;
         private List<Entity> worldEntityCache;
 
         // Actions to be performed at the end of a tick.
@@ -103,6 +102,19 @@ public class ComSat : MonoBehaviour {
                                 thing.position = position;
                                 thing.rotation = rotation;
                                 thing.team = team;
+                                currentInstance.EntityCreated(thing);
+                        });
+        }
+
+        public static void SpawnEntity(Entity origin, GameObject prefab, DVector2 position, DReal rotation) {
+                currentInstance.deferredActions.Add(() => {
+                                Vector3 worldPosition = new Vector3((float)position.y, 0, (float)position.x);
+                                Quaternion worldRotation = Quaternion.AngleAxis((float)rotation, Vector3.up);
+                                Entity thing = (Object.Instantiate(prefab, worldPosition, worldRotation) as GameObject).GetComponent<Entity>();
+                                thing.position = position;
+                                thing.rotation = rotation;
+                                thing.team = origin.team;
+                                thing.origin = origin;
                                 currentInstance.EntityCreated(thing);
                         });
         }
@@ -231,7 +243,6 @@ public class ComSat : MonoBehaviour {
 
                 worldEntities = new Dictionary<int, Entity>();
                 reverseWorldEntities = new Dictionary<Entity, int>();
-                worldProjectiles = new List<Projectile>();
                 worldEntityCache = new List<Entity>(); // Faster to iterate through.
                 deferredActions = new List<System.Action>();
                 queuedCommands = new List<System.Action>();
@@ -249,11 +260,6 @@ public class ComSat : MonoBehaviour {
                 foreach(var e in worldEntityCache) {
                         if(e != null) {
                                 result += "Ent " + e + "[" + reverseWorldEntities[e] + "] " + e.position + ":" + e.rotation + "\n";
-                        }
-                }
-                foreach(var p in worldProjectiles) {
-                        if(p != null) {
-                                result += "Prj " + p + " " + p.position + ":" + p.rotation + "\n";
                         }
                 }
 
@@ -288,13 +294,6 @@ public class ComSat : MonoBehaviour {
         void TickUpdate() {
                 // Must tick all objects in a consistent order across machines.
                 foreach(Entity e in worldEntityCache) {
-                        if(e != null) {
-                                e.gameObject.SendMessage("TickUpdate", null, SendMessageOptions.DontRequireReceiver);
-                        }
-                }
-
-                // Lists are ordered, so are consistent anyway.
-                foreach(Projectile e in worldProjectiles) {
                         if(e != null) {
                                 e.gameObject.SendMessage("TickUpdate", null, SendMessageOptions.DontRequireReceiver);
                         }
@@ -381,7 +380,6 @@ public class ComSat : MonoBehaviour {
                 }
 
                 worldEntityCache.RemoveAll((Entity e) => { return e == null; });
-                worldProjectiles.RemoveAll((Projectile p) => { return p == null; });
         }
 
         void ReadyUp() {
@@ -418,30 +416,6 @@ public class ComSat : MonoBehaviour {
                         Debug.LogError("Duplicate NextTurn call!");
                 }
                 goForNextTurn = true;
-        }
-
-        public static void SpawnProjectile(Entity origin, GameObject prefab, DVector2 position, DReal rotation/*, DReal height*/) {
-                currentInstance.deferredActions.Add(() => {
-                                currentInstance.Log("{" + currentInstance.tickID + "} Spawn projectile " + prefab + " at " + position + ":" + rotation);
-                                Vector3 worldPosition = new Vector3((float)position.y, 0, (float)position.x);
-                                Quaternion worldRotation = Quaternion.AngleAxis((float)rotation, Vector3.up);
-                                var thing = (Object.Instantiate(prefab, worldPosition, worldRotation) as GameObject).GetComponent<Projectile>();
-                                thing.position = position;
-                                thing.rotation = rotation;
-                                if(origin != null) {
-                                        thing.team = origin.team;
-                                        thing.origin = origin;
-                                }
-                                currentInstance.worldProjectiles.Add(thing);
-                        });
-        }
-
-        public static void DestroyProjectile(Projectile p) {
-                currentInstance.deferredActions.Add(() => {
-                                currentInstance.Log("{" + currentInstance.tickID + "} Destroy projectile " + p + " at " + p.position + ":" + p.rotation);
-                                currentInstance.worldProjectiles.Remove(p);
-                                Object.Destroy(p.gameObject);
-                        });
         }
 
         Player SenderToPlayer(NetworkPlayer net) {
@@ -553,6 +527,7 @@ public class ComSat : MonoBehaviour {
                 foreach(Entity e in currentInstance.worldEntityCache) {
                         if(e == null) continue;
                         if(e.team == ignoreTeam) continue;
+                        if(e.collisionRadius == 0) continue;
 
                         DVector2 result;
                         if(Utility.IntersectLineCircle(e.position, e.collisionRadius, start, end, out result)) {
@@ -570,8 +545,8 @@ public class ComSat : MonoBehaviour {
         public static Entity FindEntityWithinRadius(DVector2 origin, DReal radius, int ignoreTeam = -1) {
                 foreach(Entity e in currentInstance.worldEntityCache) {
                         if(e == null) continue;
-
                         if(e.team == ignoreTeam) continue;
+                        if(e.collisionRadius == 0) continue;
 
                         if((e.position - origin).sqrMagnitude < radius*radius) {
                                 return e;
