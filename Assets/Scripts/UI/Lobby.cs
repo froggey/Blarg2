@@ -6,6 +6,7 @@ public class Lobby : MonoBehaviour {
                 public int id;
                 public string name;
                 public NetworkPlayer client;
+                public int team;
 
                 public Player(int id, string name, NetworkPlayer client) {
                         this.id = id;
@@ -30,10 +31,6 @@ public class Lobby : MonoBehaviour {
         private int myPlayerId;
         private int nextPlayerId;
         private List<Player> players;
-
-        //private GameObject remoteClientPrefab;
-        //private GameObject localClientPrefab;
-        //private GameObject serverPrefab;
 
         void Start() {
                 connectionInProgress = false;
@@ -104,17 +101,48 @@ public class Lobby : MonoBehaviour {
                 lastError = error;
         }
 
-        void ClientGUI() {
+        [RPC]
+        void SetPlayerTeam(int playerID, int team) {
+                print("Set player " + playerID + " team to " + team);
+                foreach(var player in players) {
+                        if(player.id == playerID) {
+                                player.team = team;
+                        }
+                }
+        }
+
+        void LobbyGUI() {
+                var admin = Network.isServer;
+
 		GUILayout.BeginArea(new Rect (100, 50, Screen.width-200, Screen.height-100));
                 GUILayout.BeginVertical();
 
                 foreach(var player in players) {
                         GUILayout.BeginHorizontal();
                         GUILayout.Label(player.name);
+                        GUILayout.Label(player.id.ToString());
+
+                        var prevColour = GUI.backgroundColor;
+
+                        if(player.team != 0) {
+                                GUI.backgroundColor = Utility.TeamColour(player.team);
+                        }
+                        if(GUILayout.Button(player.team == 0 ? "Spectate" : player.team.ToString()) &&
+                           (admin || player.id == myPlayerId)) {
+                                networkView.RPC("SetPlayerTeam", RPCMode.All, player.id, (player.team + 1) % 7);
+                        }
+                        GUI.backgroundColor = prevColour;
+
+                        if(admin && player.id != 0 && GUILayout.Button("Kick")) {
+                                Network.CloseConnection(player.client, true);
+                        }
                         GUILayout.EndHorizontal();
                 }
 
-		if(GUILayout.Button("Disconnect")) {
+		if(admin && GUILayout.Button("Start Game")) {
+                        StartGame();
+                }
+		if(GUILayout.Button(admin ? "Close Server" : "Disconnect")) {
                         Network.Disconnect();
                 }
 
@@ -122,28 +150,12 @@ public class Lobby : MonoBehaviour {
 		GUILayout.EndArea();
         }
 
+        void ClientGUI() {
+                LobbyGUI();
+        }
+
         void HostGUI() {
-		GUILayout.BeginArea(new Rect (100, 50, Screen.width-200, Screen.height-100));
-                GUILayout.BeginVertical();
-
-                foreach(var player in players) {
-                        GUILayout.BeginHorizontal();
-                        GUILayout.Label(player.name);
-                        if(player.id != 0 && GUILayout.Button("Kick")) {
-                                Network.CloseConnection(player.client, true);
-                        }
-                        GUILayout.EndHorizontal();
-                }
-
-		if(GUILayout.Button("Start Game")) {
-                        StartGame();
-                }
-		if(GUILayout.Button("Exit")) {
-                        Network.Disconnect();
-                }
-
-                GUILayout.EndVertical();
-		GUILayout.EndArea();
+                LobbyGUI();
         }
 
         private bool gameStarting;
@@ -152,15 +164,13 @@ public class Lobby : MonoBehaviour {
 
         void StartGame() {
                 gameStarting = true;
-                int nextTeam = 1;
                 var comSat = (Network.Instantiate(comSatPrefab, new Vector3(), new Quaternion(), 0) as GameObject).GetComponent<ComSat>();
 
                 foreach(var p in players) {
-                        comSat.ServerAddPlayer(p.id, p.client, p.name, nextTeam);
-                        nextTeam += 1;
+                        comSat.ServerAddPlayer(p.id, p.client, p.name, p.team);
                 }
 
-                networkView.RPC("BeginGame", RPCMode.AllBuffered, "main"); // level name
+                networkView.RPC("BeginGame", RPCMode.All, "main"); // level name
         }
 
         [RPC]
@@ -188,7 +198,7 @@ public class Lobby : MonoBehaviour {
 
                 foreach(var p in players) {
                         if(p.client == player) {
-                                networkView.RPC("ClientDisconnected", RPCMode.AllBuffered, p.id);
+                                networkView.RPC("ClientDisconnected", RPCMode.All, p.id);
                                 return;
                         }
                 }
@@ -202,6 +212,7 @@ public class Lobby : MonoBehaviour {
                 gameStarting = false;
 
                 var player = new Player(0, localPlayerName);
+                player.team = 1;
                 players.Add(player);
         }
 
@@ -215,24 +226,37 @@ public class Lobby : MonoBehaviour {
                                 return;
                         }
                 }
+                // Pick team.
+                var teams = new List<int>{ 1,2,3,4,5,6 };
                 foreach(var player in players) {
-                        networkView.RPC("ClientConnected", info.sender, player.id, player.name);
+                        teams.Remove(player.team);
+                }
+                var team = 0;
+                if(teams.Count != 0) {
+                        team = teams[0];
                 }
 
-                networkView.RPC("ClientConnected", RPCMode.OthersBuffered, nextPlayerId, clientName);
+                networkView.RPC("Greetz", info.sender, nextPlayerId);
+                foreach(var player in players) {
+                        networkView.RPC("ClientConnected", info.sender, player.id, player.name);
+                        networkView.RPC("SetPlayerTeam", info.sender, player.id, player.team);
+                }
+
+                networkView.RPC("ClientConnected", RPCMode.Others, nextPlayerId, clientName);
                 players.Add(new Player(nextPlayerId, clientName, info.sender));
+                networkView.RPC("SetPlayerTeam", RPCMode.All, nextPlayerId, team);
                 nextPlayerId += 1;
        }
 
         [RPC]
-        void ClientConnected(int playerId, string name) {
-                var player = new Player(nextPlayerId, name);
-                players.Add(player);
+        void Greetz(int playerId) {
+                myPlayerId = playerId;
+        }
 
-                if(name == localPlayerName) {
-                        // here I am!
-                        myPlayerId = playerId;
-                }
+        [RPC]
+        void ClientConnected(int playerId, string name) {
+                var player = new Player(playerId, name);
+                players.Add(player);
         }
 
         [RPC]
