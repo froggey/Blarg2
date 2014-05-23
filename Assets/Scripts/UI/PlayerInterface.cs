@@ -4,7 +4,22 @@ using System.Collections;
 public class PlayerInterface : MonoBehaviour {
         private GameObject selectedUnit;
 
-        void Update() {
+        private bool disabledBecauseGUI = false;
+
+        void LateUpdate() {
+                // No raycasting when over a GUI widget.
+                if(GUIUtility.hotControl != 0) {
+                        print("GUI hot.");
+                        disabledBecauseGUI = true;
+                }
+                // Wait for mouse0 to go up, then wait a frame.
+                if(disabledBecauseGUI) {
+                        if(Input.GetMouseButtonUp(0)) {
+                                disabledBecauseGUI = false;
+                        }
+                        return;
+                }
+
                 if(Input.GetButtonUp("Select")) {
                         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
