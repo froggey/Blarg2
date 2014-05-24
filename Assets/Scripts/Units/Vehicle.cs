@@ -7,6 +7,11 @@ public class Vehicle : MonoBehaviour {
         public int turnSpeed; // degrees/s
 
         static DReal maxMoveAngle = DReal.Radians(100);
+        public DVector2 currentVelocity;
+
+        // How far one loop of the animation moves the vehicle.
+        public float animationDistance = 1.0f;
+        public Animator animator;
 
         private Entity entity;
 
@@ -42,8 +47,26 @@ public class Vehicle : MonoBehaviour {
                         if(distance < tickSpeed) {
                                 tickSpeed = distance;
                         }
-                        var travel = DVector2.FromAngle(baseAngle) * (1 - (diff / DReal.PI)) * tickSpeed;
-                        entity.position += travel;
-		}
+                        var travel = DVector2.FromAngle(baseAngle) * (1 - (diff / DReal.PI));
+                        currentVelocity = travel * maxSpeed;
+                        entity.position += travel * tickSpeed;
+		} else {
+                        currentVelocity = new DVector2(0,0);
+                }
 	}
+
+        public void Stop() {
+                currentVelocity = new DVector2(0,0);
+        }
+
+        void Update() {
+                if(animator) {
+                        float speed = (float)currentVelocity.magnitude;
+                        animator.SetFloat("Speed", speed);
+                        animator.speed = speed / animationDistance;
+                        if(speed < 0.1) {
+                                animator.speed = 1;
+                        }
+                }
+        }
 }

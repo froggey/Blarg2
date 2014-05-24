@@ -25,6 +25,7 @@ public class SimpleMovable : MonoBehaviour {
                         if((destination - entity.position).sqrMagnitude < sqrPositioningAccuracy) {
                                 // Close enough.
                                 moving = false;
+                                motor.Stop();
                         } else {
                                 motor.MoveTowards(destination);
                         }
