@@ -411,6 +411,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 14c77d79f5eb74dde8383e864596c0a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  marqueeGraphics: {fileID: 2800000, guid: 0000f2aa6732d4337a69892fee4f4916, type: 3}
+  overlayColour: {r: 0, g: 0, b: 0, a: .372549027}
 --- !u!114 &377710313
 MonoBehaviour:
   m_ObjectHideFlags: 0
