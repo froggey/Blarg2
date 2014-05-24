@@ -1,0 +1,191 @@
+fileFormatVersion: 2
+guid: 9ff952754025741b8aac9b115df1c630
+ModelImporter:
+  serializedVersion: 16
+  fileIDToRecycleName:
+    100000: Armature
+    100002: b_axle_left
+    100004: b_axle_right
+    100006: b_lower_leg_left
+    100008: b_lower_leg_right
+    100010: b_root
+    100012: b_upper_leg_left
+    100014: b_upper_leg_right
+    100016: b_wheel_left
+    100018: b_wheel_right
+    100020: Cube
+    100022: //RootNode
+    400000: Armature
+    400002: b_axle_left
+    400004: b_axle_right
+    400006: b_lower_leg_left
+    400008: b_lower_leg_right
+    400010: b_root
+    400012: b_upper_leg_left
+    400014: b_upper_leg_right
+    400016: b_wheel_left
+    400018: b_wheel_right
+    400020: Cube
+    400022: //RootNode
+    4300000: Cube
+    7400000: Default Take
+    7400002: ArmatureAction_002
+    7400004: ArmatureAction_0020
+    7400006: Idle
+    7400008: Walk
+    7400010: Walk0
+    9500000: //RootNode
+    13700000: Cube
+  materials:
+    importMaterials: 0
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    optimizeGameObjects: 0
+    animationCompression: 1
+    animationRotationError: .5
+    animationPositionError: .5
+    animationScaleError: .5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations:
+    - serializedVersion: 16
+      name: Idle
+      takeName: Idle
+      firstFrame: 7
+      lastFrame: 8
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      loopTime: 1
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: Armature
+        weight: 1
+      - path: Armature/b_root
+        weight: 1
+      - path: Armature/b_root/b_axle_left
+        weight: 1
+      - path: Armature/b_root/b_axle_left/b_wheel_left
+        weight: 1
+      - path: Armature/b_root/b_axle_left/b_wheel_left/b_upper_leg_left
+        weight: 1
+      - path: Armature/b_root/b_axle_left/b_wheel_left/b_upper_leg_left/b_lower_leg_left
+        weight: 1
+      - path: Armature/b_root/b_axle_right
+        weight: 1
+      - path: Armature/b_root/b_axle_right/b_wheel_right
+        weight: 1
+      - path: Armature/b_root/b_axle_right/b_wheel_right/b_upper_leg_right
+        weight: 1
+      - path: Armature/b_root/b_axle_right/b_wheel_right/b_upper_leg_right/b_lower_leg_right
+        weight: 1
+      - path: Cube
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+    - serializedVersion: 16
+      name: Walk
+      takeName: Walk
+      firstFrame: 7
+      lastFrame: 68
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      loopTime: 1
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: Armature
+        weight: 1
+      - path: Armature/b_root
+        weight: 1
+      - path: Armature/b_root/b_axle_left
+        weight: 1
+      - path: Armature/b_root/b_axle_left/b_wheel_left
+        weight: 1
+      - path: Armature/b_root/b_axle_left/b_wheel_left/b_upper_leg_left
+        weight: 1
+      - path: Armature/b_root/b_axle_left/b_wheel_left/b_upper_leg_left/b_lower_leg_left
+        weight: 1
+      - path: Armature/b_root/b_axle_right
+        weight: 1
+      - path: Armature/b_root/b_axle_right/b_wheel_right
+        weight: 1
+      - path: Armature/b_root/b_axle_right/b_wheel_right/b_upper_leg_right
+        weight: 1
+      - path: Armature/b_root/b_axle_right/b_wheel_right/b_upper_leg_right/b_lower_leg_right
+        weight: 1
+      - path: Cube
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+  tangentSpace:
+    normalSmoothAngle: 60
+    splitTangentsAcrossUV: 1
+    normalImportMode: 0
+    tangentImportMode: 1
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    human: []
+    skeleton: []
+    armTwist: .5
+    foreArmTwist: .5
+    upperLegTwist: .5
+    legTwist: .5
+    armStretch: .0500000007
+    legStretch: .0500000007
+    feetSpacing: 0
+    rootMotionBoneName: b_root
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  additionalBone: 0
+  userData: 
