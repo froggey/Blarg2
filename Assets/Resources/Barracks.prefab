@@ -61,7 +61,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100000}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 253.819458, y: 10.7543297, z: 257.70578}
+  m_LocalPosition: {x: 21.3308163, y: 382.358765, z: 577.0625}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 400002}
@@ -199,6 +199,8 @@ MonoBehaviour:
   collisionRadiusNumerator: 3
   collisionRadiusDenominator: 1
   baseMesh: {fileID: 100004}
+  buildTime: 0
+  buildIcon: {fileID: 2800000, guid: dca59bc4a1f864a30abf287079b8a482, type: 3}
 --- !u!114 &11400006
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -211,18 +213,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   prefabs:
-  - {fileID: 100000, guid: f84c16673625c4e4abea2824922b9e22, type: 2}
-  - {fileID: 100006, guid: ec693c88864ab47a397cd9ecad7497ca, type: 2}
-  - {fileID: 100020, guid: db717139a2f9b4014a84e348e4622957, type: 2}
-  - {fileID: 100008, guid: 1deedf8488c5a4c1b9cf8d5e9096c2a2, type: 2}
-  - {fileID: 100020, guid: 1bd46ae9e3366413b91a06c653a58b0c, type: 2}
-  icons:
-  - {fileID: 2800000, guid: e36a9dd5251d0409bbd1395fbaeda27a, type: 3}
-  - {fileID: 2800000, guid: f45af5b678e924c0abce05f54bc73da1, type: 3}
-  - {fileID: 2800000, guid: 1e5fb268caf8f4dbfbaa127ecc861ff8, type: 3}
-  - {fileID: 2800000, guid: dc6247a694e6049a1b3a43d62bbe71df, type: 3}
-  - {fileID: 2800000, guid: c0a0dae24052c44469686352611d4dd6, type: 3}
-  buildTime: 5
+  - {fileID: 11400006, guid: f84c16673625c4e4abea2824922b9e22, type: 2}
+  - {fileID: 11400004, guid: ec693c88864ab47a397cd9ecad7497ca, type: 2}
+  - {fileID: 11400006, guid: db717139a2f9b4014a84e348e4622957, type: 2}
+  - {fileID: 11400006, guid: 1bd46ae9e3366413b91a06c653a58b0c, type: 2}
+  - {fileID: 11400008, guid: 1deedf8488c5a4c1b9cf8d5e9096c2a2, type: 2}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

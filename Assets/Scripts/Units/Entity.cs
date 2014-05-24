@@ -19,6 +19,9 @@ public class Entity : MonoBehaviour {
 
         public GameObject baseMesh;
 
+        public int buildTime = 0;
+        public Texture2D buildIcon;
+
         void Awake() {
                 collisionRadius = (DReal)collisionRadiusNumerator / collisionRadiusDenominator;
 

@@ -4,10 +4,8 @@ using System.Collections.Generic;
 
 [RequireComponent (typeof(Entity))]
 public class Factory : MonoBehaviour {
-        public GameObject[] prefabs;
-        public Texture2D[] icons;
+        public Entity[] prefabs;
 
-        public int buildTime;
         private DReal delay;
 
         Entity entity;
@@ -32,8 +30,8 @@ public class Factory : MonoBehaviour {
                 var rotation = ComSat.RandomRange(0, DReal.TwoPI);
                 var offset = DVector2.FromAngle(rotation) * ComSat.RandomRange(entity.collisionRadius + 5, entity.collisionRadius + 15);
 
-                ComSat.SpawnEntity(entity, prefabs[what], entity.position + offset, rotation);
-                delay = buildTime;
+                ComSat.SpawnEntity(entity, prefabs[what].gameObject, entity.position + offset, rotation);
+                delay = prefabs[what].buildTime;
         }
 
         private bool isSelected;
@@ -57,7 +55,7 @@ public class Factory : MonoBehaviour {
                 }
 
                 for(int i = 0; i < prefabs.Length; ++i) {
-                        if(GUI.Button(new Rect(10, 45 + i * 74, 64, 64), icons[i])) {
+                        if(GUI.Button(new Rect(10, 45 + i * 74, 64, 64), prefabs[i].buildIcon)) {
                                 ComSat.IssueUIAction(entity, i);
                         }
                 }

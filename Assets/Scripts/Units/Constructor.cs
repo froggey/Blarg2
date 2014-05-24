@@ -5,15 +5,14 @@ using System.Collections;
 public class Constructor : MonoBehaviour {
         Entity entity;
 
-        public Texture2D constructionIcon;
-        public GameObject constructionPrefab;
+        public Entity constructionPrefab;
 
         void Awake() {
                 entity = GetComponent<Entity>();
         }
 
         void UIAction(int what) {
-                ComSat.SpawnEntity(constructionPrefab, entity.team, entity.position, entity.rotation);
+                ComSat.SpawnEntity(constructionPrefab.gameObject, entity.team, entity.position, entity.rotation);
                 ComSat.DestroyEntity(entity);
         }
 
@@ -30,7 +29,8 @@ public class Constructor : MonoBehaviour {
         private void OnGUI() {
                 if(!isSelected) return;
 
-                if(GUI.Button(new Rect(10, 10, 64, 64), constructionIcon)) {
+                // TODO: follow Entity.buildTime.
+                if(GUI.Button(new Rect(10, 10, 64, 64), constructionPrefab.buildIcon)) {
                         ComSat.IssueUIAction(entity, 0);
                 }
         }
