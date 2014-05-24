@@ -5,7 +5,8 @@ using System.Collections;
 public class Projectile : MonoBehaviour {
         public int damage;
         public int initialSpeed;
-        private DVector2 velocity;
+        public int turnSpeed;
+        public Entity target;
 
         public GameObject impactPrefab;
         public TrailRenderer trail;
@@ -17,11 +18,14 @@ public class Projectile : MonoBehaviour {
                 entity.AddUpdateAction(1, TickUpdate);
         }
 
-        void Start() {
-                velocity = DVector2.FromAngle(entity.rotation) * initialSpeed;
-        }
-
         void TickUpdate() {
+                if(target != null) {
+                        var dir = target.position - entity.position; // also vector to dest.
+                        var targetAngle = DVector2.ToAngle(dir);
+                        var baseAngle = Utility.CalculateNewAngle(entity.rotation, targetAngle, DReal.Radians(turnSpeed));
+                        entity.rotation = baseAngle;
+                }
+                var velocity = DVector2.FromAngle(entity.rotation) * initialSpeed;
                 DVector2 newPosition = entity.position + velocity * ComSat.tickRate;
 
                 DVector2 hitPosition;

@@ -67,7 +67,14 @@ public class TwinTank : MonoBehaviour {
 
         void FireOneBarrel(int sign, GameObject barrel) {
                 barrel.SendMessage("Fire");
-                ComSat.SpawnEntity(entity, projectilePrefab, entity.position, entity.rotation + turretRotation);
+                ComSat.SpawnEntity(entity, projectilePrefab,
+                                   entity.position, entity.rotation + turretRotation,
+                                   (Entity ent) => {
+                                           var proj = ent.gameObject.GetComponent<Projectile>();
+                                           if(proj != null && target != null) {
+                                                   proj.target = target;
+                                           }
+                                   });
         }
 
         void Fire() {
@@ -101,6 +108,7 @@ public class TwinTank : MonoBehaviour {
                         if(dist < attackDistance) {
                                 // Close enough.
                                 movingToTarget = false;
+                                vehicle.Stop();
                         } else if(movingToTarget || (dist >= attackRange)) {
                                 movingToTarget = true;
                                 // Approach target.
@@ -116,6 +124,7 @@ public class TwinTank : MonoBehaviour {
                         if((destination - entity.position).sqrMagnitude < sqrPositioningAccuracy) {
                                 // Close enough.
                                 mode = Mode.IDLE;
+                                vehicle.Stop();
                         } else {
                                 vehicle.MoveTowards(destination);
                         }

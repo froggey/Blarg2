@@ -169,7 +169,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 10
-  initialSpeed: 50
+  initialSpeed: 100
   impactPrefab: {fileID: 100012, guid: d9d02c0a3ffc84ca1b5dfdccebb87c66, type: 2}
   trail: {fileID: 9600000}
 --- !u!114 &11400002
@@ -201,6 +201,8 @@ MonoBehaviour:
   collisionRadiusNumerator: 0
   collisionRadiusDenominator: 1
   baseMesh: {fileID: 0}
+  buildTime: 0
+  buildIcon: {fileID: 0}
 --- !u!114 &11400006
 MonoBehaviour:
   m_ObjectHideFlags: 1

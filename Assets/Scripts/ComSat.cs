@@ -150,6 +150,20 @@ public class ComSat : MonoBehaviour {
                         });
         }
 
+        public static void SpawnEntity(Entity origin, GameObject prefab, DVector2 position, DReal rotation, System.Action<Entity> onSpawn) {
+                currentInstance.deferredActions.Add(() => {
+                                Vector3 worldPosition = new Vector3((float)position.y, 0, (float)position.x);
+                                Quaternion worldRotation = Quaternion.AngleAxis((float)rotation, Vector3.up);
+                                Entity thing = (Object.Instantiate(prefab, worldPosition, worldRotation) as GameObject).GetComponent<Entity>();
+                                thing.position = position;
+                                thing.rotation = rotation;
+                                thing.team = origin.team;
+                                thing.origin = origin;
+                                currentInstance.EntityCreated(thing);
+                                onSpawn(thing);
+                        });
+        }
+
         // Create a new entity at whereever.
         // Called by all, but ignored everywhere but the server.
         public static void Spawn(string entityName, int team, DVector2 position, DReal rotation) {
