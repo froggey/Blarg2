@@ -14,6 +14,7 @@ public class Projectile : MonoBehaviour {
 
         void Awake() {
                 entity = gameObject.GetComponent<Entity>();
+                entity.AddUpdateAction(1, TickUpdate);
         }
 
         void Start() {

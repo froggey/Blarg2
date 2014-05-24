@@ -13,6 +13,7 @@ public class Factory : MonoBehaviour {
 
         void Awake() {
                 entity = GetComponent<Entity>();
+                entity.AddUpdateAction(2, TickUpdate);
                 buildMe = -1;
         }
 

@@ -24,6 +24,7 @@ public class Turret : MonoBehaviour {
 
         void Awake() {
                 entity = GetComponent<Entity>();
+                entity.AddUpdateAction(4, TickUpdate);
 
                 target = null;
                 turretRotation = 0;

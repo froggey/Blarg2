@@ -19,6 +19,7 @@ public class TwinTank : MonoBehaviour {
 
         void Awake() {
                 entity = GetComponent<Entity>();
+                entity.AddUpdateAction(5, TickUpdate);
                 vehicle = GetComponent<Vehicle>();
 
                 mode = Mode.IDLE;

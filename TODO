@@ -1,0 +1,8 @@
+01:51 < froggey> I think the tanks might be a bit fast and the shells a bit slow
+01:59 < solemnwarning> Collision detection?
+01:59 < scgtrp> make it easier to target stuff, i can't reliably click a tank when it's zipping around
+01:59 < solemnwarning> (And good enough pathfinding that tanks will move in some kind of formation)
+02:01 < solemnwarning> Change cursor depending on effect?
+02:05 < scgtrp> non-instant unit building, ability to queue units to build
+02:05 < scgtrp> units with more specialized attacks
+02:05 < scgtrp> giant robots

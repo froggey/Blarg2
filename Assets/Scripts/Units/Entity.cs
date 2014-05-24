@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class Entity : MonoBehaviour {
         public DVector2 position;
@@ -22,6 +23,8 @@ public class Entity : MonoBehaviour {
         public int buildTime = 0;
         public Texture2D buildIcon;
 
+        private Dictionary<int, System.Action> updateActions = new Dictionary<int, System.Action>();
+
         void Awake() {
                 collisionRadius = (DReal)collisionRadiusNumerator / collisionRadiusDenominator;
 
@@ -39,6 +42,22 @@ public class Entity : MonoBehaviour {
                                                       transform.localPosition.y,
                                                       (float)position.x);
                 transform.localRotation = Quaternion.AngleAxis((float)DReal.Degrees(rotation), Vector3.up);
+        }
+
+        public void TickUpdate() {
+                foreach(var a in updateActions.Values) {
+                        a();
+                }
+        }
+
+        public void AddUpdateAction(int priority, System.Action action) {
+                if(updateActions.ContainsKey(priority)) {
+                        Debug.LogError("Action with conflicting priority " + priority);
+                        AddUpdateAction(priority+1, action);
+                        return;
+                }
+
+                updateActions[priority] = action;
         }
 
         public void Damage(int damage) {

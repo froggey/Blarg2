@@ -346,7 +346,7 @@ public class ComSat : MonoBehaviour {
                 // Must tick all objects in a consistent order across machines.
                 foreach(Entity e in worldEntityCache) {
                         if(e != null) {
-                                e.gameObject.SendMessage("TickUpdate", null, SendMessageOptions.DontRequireReceiver);
+                                e.TickUpdate();
                         }
                 }
 
