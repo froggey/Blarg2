@@ -1,8 +1,10 @@
 /Temp
 /obj
 /Library
-/.DS_Store
+.DS_Store
 *.csproj
 *.unityproj
 *.sln
 /Builds
+*.blend1
+*.blend1.meta
