@@ -7,16 +7,29 @@ public class Factory : MonoBehaviour {
         public Entity[] prefabs;
 
         private DReal delay;
+        private int buildMe;
 
         Entity entity;
 
         void Awake() {
                 entity = GetComponent<Entity>();
+                buildMe = -1;
         }
 
         void TickUpdate() {
                 if(delay > 0) {
                         delay -= ComSat.tickRate;
+                }
+                if(delay <= 0 && buildMe != -1) {
+                        // Timer expired and we're building something.
+                        print("Build new " + prefabs[buildMe]);
+
+                        var rotation = ComSat.RandomRange(0, DReal.TwoPI);
+                        var offset = DVector2.FromAngle(rotation) * ComSat.RandomRange(entity.collisionRadius + 5, entity.collisionRadius + 15);
+
+                        ComSat.SpawnEntity(entity, prefabs[buildMe].gameObject, entity.position + offset, rotation);
+
+                        buildMe = -1;
                 }
         }
 
@@ -25,13 +38,8 @@ public class Factory : MonoBehaviour {
                         return;
                 }
 
-                print("Build new " + prefabs[what]);
-
-                var rotation = ComSat.RandomRange(0, DReal.TwoPI);
-                var offset = DVector2.FromAngle(rotation) * ComSat.RandomRange(entity.collisionRadius + 5, entity.collisionRadius + 15);
-
-                ComSat.SpawnEntity(entity, prefabs[what].gameObject, entity.position + offset, rotation);
                 delay = prefabs[what].buildTime;
+                buildMe = what;
         }
 
         private bool isSelected;
