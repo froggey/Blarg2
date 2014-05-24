@@ -215,11 +215,13 @@ MonoBehaviour:
   - {fileID: 100006, guid: ec693c88864ab47a397cd9ecad7497ca, type: 2}
   - {fileID: 100020, guid: db717139a2f9b4014a84e348e4622957, type: 2}
   - {fileID: 100008, guid: 1deedf8488c5a4c1b9cf8d5e9096c2a2, type: 2}
+  - {fileID: 100020, guid: 1bd46ae9e3366413b91a06c653a58b0c, type: 2}
   icons:
   - {fileID: 2800000, guid: e36a9dd5251d0409bbd1395fbaeda27a, type: 3}
   - {fileID: 2800000, guid: f45af5b678e924c0abce05f54bc73da1, type: 3}
   - {fileID: 2800000, guid: 1e5fb268caf8f4dbfbaa127ecc861ff8, type: 3}
   - {fileID: 2800000, guid: dc6247a694e6049a1b3a43d62bbe71df, type: 3}
+  - {fileID: 2800000, guid: c0a0dae24052c44469686352611d4dd6, type: 3}
   buildTime: 5
 --- !u!1001 &100100000
 Prefab:
