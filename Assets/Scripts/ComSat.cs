@@ -79,6 +79,20 @@ public class ComSat : MonoBehaviour {
                 GUILayout.EndArea();
         }
 
+        void OnPlayerDisconnected(NetworkPlayer player) {
+                var p = SenderToPlayer(player);
+                // Should kill all their units or something.
+                if(p != null) {
+                        networkView.RPC("PlayerDrop", RPCMode.All, p.name);
+                        players.Remove(p);
+                }
+        }
+
+        [RPC]
+        void PlayerDrop(string name) {
+                Debug.LogError("Player " + name + " has dropped!");
+        }
+
         void OnDisconnectedFromServer() {
                 Destroy(gameObject);
                 Application.LoadLevel("Lobby");
@@ -312,13 +326,18 @@ public class ComSat : MonoBehaviour {
                 foreach(var p in players) {
                         if(!p.ready) {
                                 if(p.unreadyTime > 1) {
-                                        Debug.LogWarning("Player " + p.name + "[" + p.id + "] is lagging.");
+                                        networkView.RPC("LagWarning", RPCMode.All, p.name);
                                 }
                                 p.unreadyTime += 1;
                                 result = false;
                         }
                 }
                 return result;
+        }
+
+        [RPC]
+        void LagWarning(string name) {
+                Debug.LogError("Player " + name + " is lagging.");
         }
 
         // Called every tickRate seconds when the world is live.
