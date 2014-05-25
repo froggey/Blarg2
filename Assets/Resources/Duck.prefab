@@ -159,12 +159,12 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100008}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 223.547379, y: 1.44040585, z: 248.986023}
+  m_LocalPosition: {x: -28.7072544, y: 22.0569954, z: 6.085392}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 400010}
-  - {fileID: 400006}
   - {fileID: 400004}
+  - {fileID: 400006}
   m_Father: {fileID: 0}
 --- !u!4 &400010
 Transform:
@@ -456,6 +456,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isSelected: 0
   highlight: {fileID: 2300002}
+  highlightColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!114 &11400006
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -470,6 +471,7 @@ MonoBehaviour:
   minSpeed: 0
   maxSpeed: 30
   turnSpeed: 360
+  canMoveWithoutTurning: 0
   animationDistance: 1
   animator: {fileID: 0}
 --- !u!114 &11400008
@@ -489,10 +491,11 @@ MonoBehaviour:
   health: 0
   collisionRadiusNumerator: 3
   collisionRadiusDenominator: 4
-  baseMesh: {fileID: 100006}
+  baseMesh: {fileID: 0}
   buildTime: 2
   buildIcon: {fileID: 2800000, guid: dc6247a694e6049a1b3a43d62bbe71df, type: 3}
   hitOnlyIfTargetted: 0
+  teamColourRenderer: {fileID: 2300002}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1
