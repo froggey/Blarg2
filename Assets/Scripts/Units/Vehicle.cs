@@ -6,6 +6,7 @@ public class Vehicle : MonoBehaviour {
         public int minSpeed; // m/s
         public int maxSpeed; // m/s
         public int turnSpeed; // degrees/s
+        public bool canMoveWithoutTurning;
 
         static DReal maxMoveAngle = DReal.Radians(100);
 
@@ -40,14 +41,14 @@ public class Vehicle : MonoBehaviour {
                         targetAngle -= DReal.TwoPI;
                 }
                 var diff = DReal.Abs(baseAngle - targetAngle);
-		if(diff < maxMoveAngle) {
+		if(canMoveWithoutTurning || diff < maxMoveAngle) {
                         var distance = dir.magnitude;
                         //print("Distance: " + distance + "  speed is: " + tickSpeed);
                         var speed = minSpeed + (maxSpeed - minSpeed) * (1 - (diff / DReal.PI));
                         if(distance < speed) {
                                 speed = DReal.Max(minSpeed, distance);
                         }
-                        entity.velocity = DVector2.FromAngle(baseAngle) * speed;
+                        entity.velocity = canMoveWithoutTurning ? dir.normalized * speed : DVector2.FromAngle(baseAngle) * speed;
 		} else {
                         Stop();
                 }
