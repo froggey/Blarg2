@@ -544,7 +544,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   team: 0
   origin: {fileID: 0}
-  maxHealth: 25
+  maxHealth: 40
   health: 0
   collisionRadiusNumerator: 8
   collisionRadiusDenominator: 3
