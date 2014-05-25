@@ -86,23 +86,23 @@ public class Factory : MonoBehaviour {
 
                 if(delay > 0) {
                         if(sabotageTime > 0) {
-                                GUI.Box(new Rect(10, 10, 64, 25), ((int)Mathf.Ceil((float)(delay * sabotageTimeMultiplier))).ToString());
+                                GUI.Box(new Rect(10, Camera.main.pixelHeight - 100, 64, 25), ((int)Mathf.Ceil((float)(delay * sabotageTimeMultiplier))).ToString());
                         } else {
-                                GUI.Box(new Rect(10, 10, 64, 25), ((int)Mathf.Ceil((float)delay)).ToString());
+                                GUI.Box(new Rect(10, Camera.main.pixelHeight - 100, 64, 25), ((int)Mathf.Ceil((float)delay)).ToString());
                         }
                 } else {
-                        GUI.Box(new Rect(10, 10, 64, 25), "Ready");
+                        GUI.Box(new Rect(10, Camera.main.pixelHeight - 100, 64, 25), "Ready");
                 }
                 if(sabotageTime > 0) {
-                        GUI.Box(new Rect(84, 10, 100, 25), "Sabotaged! " + Mathf.Ceil((float)sabotageTime));
+                        GUI.Box(new Rect(84, Camera.main.pixelHeight - 100, 100, 25), "Sabotaged! " + Mathf.Ceil((float)sabotageTime));
                 }
 
                 var building = buildQueue.Any() ? buildQueue.Peek() : -1;
 
                 for(int i = 0; i < prefabs.Length; ++i) {
-                        GUI.backgroundColor = (i == building && Time.time % 1 < 0.5f) ? Color.yellow : Color.white;
+                        GUI.backgroundColor = (i == building && Time.time % 1 < 0.5f) ? Color.green : Color.white;
 
-                        if(GUI.Button(new Rect(10, 45 + i * 74, 64, 64), prefabs[i].buildIcon)) {
+                        if(GUI.Button(new Rect(10 + i * 74, Camera.main.pixelHeight - 74, 64, 64), prefabs[i].buildIcon)) {
                                 ComSat.IssueUIAction(entity, i);
                         }
 
@@ -110,11 +110,11 @@ public class Factory : MonoBehaviour {
 
                         var queued = buildQueue.Count(qi => qi == i);
                         if(queued > 0) {
-                                GUI.Label(new Rect(10, 45 + i * 74, 64, 24), queued.ToString());
+                                GUI.Label(new Rect(14 + i * 74, Camera.main.pixelHeight - 70, 64, 24), queued.ToString());
                         }
                 }
 
-                if(buildQueue.Any() && GUI.Button(new Rect(10, 45 + prefabs.Length * 74, 64, 24), "Stop")) {
+                if(buildQueue.Any() && GUI.Button(new Rect(10 + prefabs.Length * 74, Camera.main.pixelHeight - 74, 64, 64), "Stop")) {
                         ComSat.IssueUIAction(entity, clearQueue);
                 }
         }

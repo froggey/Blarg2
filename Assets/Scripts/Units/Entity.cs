@@ -27,7 +27,7 @@ public class Entity : MonoBehaviour {
 
         public bool hitOnlyIfTargetted = false;
 
-        public MeshRenderer teamColourRenderer;
+        public Renderer teamColourRenderer;
 
         private Dictionary<int, System.Action> updateActions = new Dictionary<int, System.Action>();
 
