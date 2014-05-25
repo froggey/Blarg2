@@ -5,6 +5,7 @@ using System.Collections;
 public class Vehicle : MonoBehaviour {
         public int maxSpeed; // m/s
         public int turnSpeed; // degrees/s
+        public bool canMoveWithoutTurning;
 
         static DReal maxMoveAngle = DReal.Radians(100);
         public DVector2 currentVelocity;
@@ -40,14 +41,14 @@ public class Vehicle : MonoBehaviour {
                         targetAngle -= DReal.TwoPI;
                 }
                 var diff = DReal.Abs(baseAngle - targetAngle);
-		if(diff < maxMoveAngle) {
+		if(canMoveWithoutTurning || diff < maxMoveAngle) {
                         var tickSpeed = maxSpeed * ComSat.tickRate;
                         var distance = dir.magnitude;
                         //print("Distance: " + distance + "  speed is: " + tickSpeed);
                         if(distance < tickSpeed) {
                                 tickSpeed = distance;
                         }
-                        var travel = DVector2.FromAngle(baseAngle) * (1 - (diff / DReal.PI));
+                        var travel = canMoveWithoutTurning ? dir.normalized : (DVector2.FromAngle(baseAngle) * (1 - (diff / DReal.PI)));
                         currentVelocity = travel * maxSpeed;
                         entity.position += travel * tickSpeed;
 		} else {
