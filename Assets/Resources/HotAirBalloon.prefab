@@ -166,6 +166,8 @@ MonoBehaviour:
   baseMesh: {fileID: 100006}
   buildTime: 4
   buildIcon: {fileID: 2800000, guid: 97c0609d01ef88a4c9bd05ad613b81dd, type: 3}
+  hitOnlyIfTargetted: 0
+  teamColourRenderer: {fileID: 2300000}
 --- !u!114 &11400002
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -177,6 +179,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a1259e19f45a45c6b92c652dfeb9264, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  minSpeed: 0
   maxSpeed: 5
   turnSpeed: 15
   canMoveWithoutTurning: 1
@@ -195,6 +198,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isSelected: 0
   highlight: {fileID: 2300000}
+  highlightColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!114 &11400006
 MonoBehaviour:
   m_ObjectHideFlags: 1
