@@ -47,7 +47,8 @@ public class Factory : MonoBehaviour {
                 }
                 else if(what >= 0 && what < prefabs.Length) {
                         buildQueue.Enqueue(what);
-                        delay = prefabs[buildQueue.Peek()].buildTime;
+                        if (buildQueue.Count == 1)
+                                delay = prefabs[buildQueue.Peek()].buildTime;
                 }
         }
 
