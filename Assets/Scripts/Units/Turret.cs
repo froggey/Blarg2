@@ -66,9 +66,9 @@ public class Turret : MonoBehaviour {
                                 audio.Play();
                         }
                 } else {
-                        var distVec = target.position - entity.position;
-                        var dist = distVec.magnitude;
-                        var targetTurretAngle = DReal.Mod(DVector2.ToAngle(distVec) - entity.rotation, DReal.TwoPI);
+                        var dp = target.position - entity.position;
+
+                        var targetTurretAngle = DReal.Mod(DVector2.ToAngle(dp) - entity.rotation, DReal.TwoPI);
 
                         // Turn turret to point at target.
                         TurnTurret(targetTurretAngle);
@@ -78,7 +78,7 @@ public class Turret : MonoBehaviour {
                         }
 
                         // Stop shooting when out of range.
-                        if(dist >= attackRange) {
+                        if(dp.sqrMagnitude >= attackRange * attackRange) {
                                 audio.Stop();
                                 target = null;
                         }

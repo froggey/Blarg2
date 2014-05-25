@@ -7,6 +7,7 @@ public class Projectile : MonoBehaviour {
         public int initialSpeed;
         public int turnSpeed;
         public Entity target;
+        public DVector2 velocity;
 
         public GameObject impactPrefab;
         public TrailRenderer trail;
@@ -25,7 +26,7 @@ public class Projectile : MonoBehaviour {
                         var baseAngle = Utility.CalculateNewAngle(entity.rotation, targetAngle, DReal.Radians(turnSpeed));
                         entity.rotation = baseAngle;
                 }
-                var velocity = DVector2.FromAngle(entity.rotation) * initialSpeed;
+                velocity = DVector2.FromAngle(entity.rotation) * initialSpeed;
                 DVector2 newPosition = entity.position + velocity * ComSat.tickRate;
 
                 DVector2 hitPosition;

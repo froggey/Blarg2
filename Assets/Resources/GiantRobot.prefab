@@ -489,7 +489,7 @@ MonoBehaviour:
   collisionRadiusNumerator: 8
   collisionRadiusDenominator: 3
   baseMesh: {fileID: 100000}
-  buildTime: 4
+  buildTime: 6
   buildIcon: {fileID: 2800000, guid: e2a3e278973194529b6e9a7a4dba57be, type: 3}
 --- !u!114 &11400006
 MonoBehaviour:

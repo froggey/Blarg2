@@ -83,6 +83,7 @@ public class GiantRobot : MonoBehaviour {
                 if(mode == Mode.ATTACK && target == null) {
                         target = null;
                         mode = Mode.IDLE;
+                        vehicle.Stop();
                 }
 
                 if(mode == Mode.ATTACK) {
