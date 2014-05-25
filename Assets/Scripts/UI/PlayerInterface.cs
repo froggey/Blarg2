@@ -147,6 +147,10 @@ public class PlayerInterface : MonoBehaviour {
                 GroupStuff();
         }
 
+        bool ModifierActive(string name) {
+                return Input.GetKey(name) || Input.GetKeyUp(name) || Input.GetKeyDown(name);
+        }
+
         void GroupStuff() {
                 int groupID = -1;
                 if(Input.GetButtonUp("Group 0")) {
@@ -173,7 +177,7 @@ public class PlayerInterface : MonoBehaviour {
                         return;
                 }
 
-                if(Input.GetKey("left ctrl") || Input.GetKey("right ctrl")) {
+                if(ModifierActive("left ctrl") || ModifierActive("right ctrl")) {
                         // Set group.
                         unitGroups[groupID] = new List<GameObject>(selectedUnits);
                 } else {
