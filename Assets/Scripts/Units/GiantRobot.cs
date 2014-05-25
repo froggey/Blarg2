@@ -3,6 +3,7 @@ using System.Collections;
 
 [RequireComponent (typeof(Entity))]
 [RequireComponent (typeof(Vehicle))]
+[RequireComponent(typeof(AudioSource))]
 public class GiantRobot : MonoBehaviour {
         // Can't use GameObjects to set these up because floats.
         // Unity refuses to edit these because they're structs.
@@ -59,6 +60,7 @@ public class GiantRobot : MonoBehaviour {
         DReal barrelRecycleTime = 2; // Delay before refiring one barrel.
 
         void FireOneBarrel(int sign) {
+                audio.PlayOneShot(audio.clip);
                 ComSat.SpawnEntity(entity, projectilePrefab,
                                    entity.position, entity.rotation,
                                    (Entity ent) => {
