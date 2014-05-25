@@ -12,7 +12,7 @@ public class CameraController : MonoBehaviour {
                 transform.localRotation *= Quaternion.AngleAxis(Input.GetAxis("Rotation"), Vector3.up);
 
                 cameraTransform.localRotation = Quaternion.AngleAxis(45, new Vector3(1,0,0));
-                cameraTransform.Translate(0, 0, Input.GetAxis("Mouse ScrollWheel") * 50);
+                cameraTransform.Translate(0, 0, Input.GetAxis("Zoom") * 50);
                 if(cameraTransform.localPosition.y < maxZoom) {
                         cameraTransform.localPosition = new Vector3(0, maxZoom, -maxZoom);
                 } else if(cameraTransform.localPosition.y > minZoom) {

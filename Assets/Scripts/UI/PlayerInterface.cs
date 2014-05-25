@@ -13,10 +13,21 @@ public class PlayerInterface : MonoBehaviour {
 
         List<GameObject> selectedUnits = new List<GameObject>();
 
+        List<GameObject>[] unitGroups = new List<GameObject>[10];
+
         void OnGUI() {
                 if(marqueeActive) {
                         GUI.color = overlayColour;
                         GUI.DrawTexture(marqueeRect, marqueeGraphics);
+                }
+                for(int i = 0; i < unitGroups.Length; ++i) {
+                        if(unitGroups[i] == null) continue;
+                        foreach(var unit in unitGroups[i]) {
+                                if(unit == null) continue;
+                                if(!selectedUnits.Exists(other => unit == other)) continue;
+                                Vector3 screenPos = Camera.main.WorldToScreenPoint(unit.transform.position);
+                                GUI.Label(new Rect(screenPos.x, Screen.height - screenPos.y, 64, 24), i.ToString());
+                        }
                 }
         }
 
@@ -131,6 +142,63 @@ public class PlayerInterface : MonoBehaviour {
                                 marqueeRect.y += marqueeRect.height;
                                 marqueeRect.height = -marqueeRect.height;
                         }
+                }
+
+                GroupStuff();
+        }
+
+        void GroupStuff() {
+                int groupID = -1;
+                if(Input.GetButtonUp("Group 0")) {
+                        groupID = 0;
+                } else if(Input.GetButtonUp("Group 1")) {
+                        groupID = 1;
+                } else if(Input.GetButtonUp("Group 2")) {
+                        groupID = 2;
+                } else if(Input.GetButtonUp("Group 3")) {
+                        groupID = 3;
+                } else if(Input.GetButtonUp("Group 4")) {
+                        groupID = 4;
+                } else if(Input.GetButtonUp("Group 5")) {
+                        groupID = 5;
+                } else if(Input.GetButtonUp("Group 6")) {
+                        groupID = 6;
+                } else if(Input.GetButtonUp("Group 7")) {
+                        groupID = 7;
+                } else if(Input.GetButtonUp("Group 8")) {
+                        groupID = 8;
+                } else if(Input.GetButtonUp("Group 9")) {
+                        groupID = 9;
+                } else {
+                        return;
+                }
+
+                if(Input.GetKey("left ctrl") || Input.GetKey("right ctrl")) {
+                        // Set group.
+                        unitGroups[groupID] = new List<GameObject>(selectedUnits);
+                } else {
+                        // Load group.
+                        foreach(var unit in selectedUnits) {
+                                if(unit != null) {
+                                        unit.SendMessage("OnUnselected", SendMessageOptions.DontRequireReceiver);
+                                }
+                        }
+                        if(unitGroups[groupID] == null) {
+                                selectedUnits.Clear();
+                        } else {
+                                selectedUnits = new List<GameObject>(unitGroups[groupID]);
+                                foreach(var unit in selectedUnits) {
+                                        if(unit != null) {
+                                                unit.SendMessage("OnSelected", SendMessageOptions.DontRequireReceiver);
+                                        }
+                                }
+                        }
+                }
+
+                // Flush away any null units in the groups.
+                foreach(var group in unitGroups) {
+                        if(group == null) continue;
+                        group.RemoveAll(go => go == null);
                 }
         }
 }
