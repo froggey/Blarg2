@@ -7,6 +7,14 @@ using System.Linq;
 public class Factory : MonoBehaviour {
         public Entity[] prefabs;
 
+        // Sabotage time remaining.
+        DReal sabotageTime;
+        // Sabotage lasts this long.
+        public int sabotageRepairTime;
+        // Sabotage causes everything to take this much longer.
+        public int sabotageTimeMultiplier = 3;
+
+        // Construction time remaining.
         private DReal delay;
 
         private Queue<int> buildQueue;
@@ -22,8 +30,15 @@ public class Factory : MonoBehaviour {
         }
 
         void TickUpdate() {
+                if(sabotageTime > 0) {
+                        sabotageTime -= ComSat.tickRate;
+                }
                 if(delay > 0) {
-                        delay -= ComSat.tickRate;
+                        if(sabotageTime > 0) {
+                                delay -= ComSat.tickRate / sabotageTimeMultiplier;
+                        } else {
+                                delay -= ComSat.tickRate;
+                        }
                 }
                 if(delay <= 0 && buildQueue.Any()) {
                         // Timer expired and we're building something.
@@ -52,6 +67,10 @@ public class Factory : MonoBehaviour {
                 }
         }
 
+        public void Sabotage() {
+                sabotageTime += sabotageRepairTime;
+        }
+
         private bool isSelected;
 
         private void OnSelected() {
@@ -66,9 +85,16 @@ public class Factory : MonoBehaviour {
                 if(!isSelected) return;
 
                 if(delay > 0) {
-                        GUI.Box(new Rect(10, 10, 64, 25), ((int)Mathf.Ceil((float)delay)).ToString());
+                        if(sabotageTime > 0) {
+                                GUI.Box(new Rect(10, 10, 64, 25), ((int)Mathf.Ceil((float)(delay * sabotageTimeMultiplier))).ToString());
+                        } else {
+                                GUI.Box(new Rect(10, 10, 64, 25), ((int)Mathf.Ceil((float)delay)).ToString());
+                        }
                 } else {
                         GUI.Box(new Rect(10, 10, 64, 25), "Ready");
+                }
+                if(sabotageTime > 0) {
+                        GUI.Box(new Rect(84, 10, 100, 25), "Sabotaged! " + Mathf.Ceil((float)sabotageTime));
                 }
 
                 var building = buildQueue.Any() ? buildQueue.Peek() : -1;

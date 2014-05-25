@@ -221,6 +221,8 @@ MonoBehaviour:
   - {fileID: 11400008, guid: 1deedf8488c5a4c1b9cf8d5e9096c2a2, type: 2}
   - {fileID: 11400004, guid: 1bc94550de09f4e8d9a6a606192d4542, type: 2}
   - {fileID: 11400004, guid: 4297a2b692f0a432ab453dc809305b51, type: 2}
+  sabotageRepairTime: 60
+  sabotageTimeMultiplier: 3
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

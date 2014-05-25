@@ -80,8 +80,8 @@ GameObject:
   - 114: {fileID: 11400006}
   - 114: {fileID: 11400000}
   - 65: {fileID: 6500000}
-  - 114: {fileID: 11400002}
   - 114: {fileID: 11400004}
+  - 114: {fileID: 11400002}
   m_Layer: 8
   m_Name: Duck
   m_TagString: MultiSelectableUnit
@@ -440,7 +440,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 100008}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 43e01da0899484315867a206997b461a, type: 3}
+  m_Script: {fileID: 11500000, guid: 61e26f050e9384dd593a73d8d4f99452, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &11400004
@@ -467,8 +467,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a1259e19f45a45c6b92c652dfeb9264, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  minSpeed: 0
   maxSpeed: 30
   turnSpeed: 360
+  animationDistance: 1
+  animator: {fileID: 0}
 --- !u!114 &11400008
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -489,6 +492,7 @@ MonoBehaviour:
   baseMesh: {fileID: 100006}
   buildTime: 2
   buildIcon: {fileID: 2800000, guid: dc6247a694e6049a1b3a43d62bbe71df, type: 3}
+  hitOnlyIfTargetted: 0
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1
