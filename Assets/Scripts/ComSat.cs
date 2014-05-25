@@ -48,6 +48,8 @@ public class ComSat : MonoBehaviour {
         private bool gameOver;
         private int winningTeam;
 
+        public static int localTeam;
+
         void Log(string s) {
                 if(debugVomit) {
                         Debug.Log(s);

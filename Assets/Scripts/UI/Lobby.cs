@@ -166,15 +166,21 @@ public class Lobby : MonoBehaviour {
                 gameStarting = true;
                 var comSat = (Network.Instantiate(comSatPrefab, new Vector3(), new Quaternion(), 0) as GameObject).GetComponent<ComSat>();
 
+                string levelName = "main";
+
                 foreach(var p in players) {
                         comSat.ServerAddPlayer(p.id, p.client, p.name, p.team);
+                        if(p.id != 0) {
+                                networkView.RPC("BeginGame", p.client, levelName, p.team);
+                        }
                 }
 
-                networkView.RPC("BeginGame", RPCMode.All, "main"); // level name
+                BeginGame(levelName, players[0].team);
         }
 
         [RPC]
-        void BeginGame(string levelName) {
+        void BeginGame(string levelName, int team) {
+                ComSat.localTeam = team;
                 Application.LoadLevel(levelName);
         }
 

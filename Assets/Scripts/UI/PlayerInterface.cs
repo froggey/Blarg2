@@ -93,6 +93,8 @@ public class PlayerInterface : MonoBehaviour {
 
                                 var selectableUnits = GameObject.FindGameObjectsWithTag("MultiSelectableUnit");
                                 foreach(GameObject unit in selectableUnits) {
+                                        if(unit.GetComponent<Entity>().team != ComSat.localTeam) continue;
+
                                         // Convert the world position of the unit to a screen position and then to a GUI point.
                                         Vector3 screenPos = Camera.main.WorldToScreenPoint(unit.transform.position);
                                         Vector2 screenPoint = new Vector2(screenPos.x, Screen.height - screenPos.y);
