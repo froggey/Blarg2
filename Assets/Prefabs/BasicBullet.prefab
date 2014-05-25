@@ -104,6 +104,9 @@ MonoBehaviour:
   collisionRadiusNumerator: 0
   collisionRadiusDenominator: 1
   baseMesh: {fileID: 0}
+  buildTime: 0
+  buildIcon: {fileID: 0}
+  hitOnlyIfTargetted: 0
 --- !u!114 &11400006
 MonoBehaviour:
   m_ObjectHideFlags: 1
