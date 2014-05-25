@@ -27,6 +27,8 @@ public class Entity : MonoBehaviour {
 
         public bool hitOnlyIfTargetted = false;
 
+        public MeshRenderer teamColourRenderer;
+
         private Dictionary<int, System.Action> updateActions = new Dictionary<int, System.Action>();
 
         void Awake() {
@@ -42,6 +44,10 @@ public class Entity : MonoBehaviour {
         }
 
         void Update() {
+                if(teamColourRenderer != null) {
+                        teamColourRenderer.material.SetColor("_TeamColor", Utility.TeamColour(team));
+                }
+
                 transform.localPosition = new Vector3((float)position.y,
                                                       transform.localPosition.y,
                                                       (float)position.x);
