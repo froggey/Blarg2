@@ -13,6 +13,8 @@ public class Factory : MonoBehaviour {
 
         Entity entity;
 
+        private const int clearQueue = -1;
+
         void Awake() {
                 entity = GetComponent<Entity>();
                 entity.AddUpdateAction(2, TickUpdate);
@@ -39,11 +41,14 @@ public class Factory : MonoBehaviour {
         }
 
         void UIAction(int what) {
-                if(what < 0 || what >= prefabs.Length) {
-                        return;
+                if(what == clearQueue) {
+                        buildQueue.Clear();
+                        delay = 0;
                 }
-                buildQueue.Enqueue(what);
-                delay = prefabs[buildQueue.Peek()].buildTime;
+                else if(what >= 0 && what < prefabs.Length) {
+                        buildQueue.Enqueue(what);
+                        delay = prefabs[buildQueue.Peek()].buildTime;
+                }
         }
 
         private bool isSelected;
@@ -77,9 +82,13 @@ public class Factory : MonoBehaviour {
                         GUI.backgroundColor = Color.white;
 
                         var queued = buildQueue.Count(qi => qi == i);
-                        if (queued > 0) {
+                        if(queued > 0) {
                                 GUI.Label(new Rect(10, 45 + i * 74, 64, 24), queued.ToString());
                         }
+                }
+
+                if(buildQueue.Any() && GUI.Button(new Rect(10, 45 + prefabs.Length * 74, 64, 24), "Stop")) {
+                        ComSat.IssueUIAction(entity, clearQueue);
                 }
         }
 }
