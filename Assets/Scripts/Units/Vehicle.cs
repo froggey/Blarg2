@@ -3,11 +3,11 @@ using System.Collections;
 
 [RequireComponent (typeof(Entity))]
 public class Vehicle : MonoBehaviour {
+        public int minSpeed; // m/s
         public int maxSpeed; // m/s
         public int turnSpeed; // degrees/s
 
         static DReal maxMoveAngle = DReal.Radians(100);
-        public DVector2 currentVelocity;
 
         // How far one loop of the animation moves the vehicle.
         public float animationDistance = 1.0f;
@@ -41,27 +41,25 @@ public class Vehicle : MonoBehaviour {
                 }
                 var diff = DReal.Abs(baseAngle - targetAngle);
 		if(diff < maxMoveAngle) {
-                        var tickSpeed = maxSpeed * ComSat.tickRate;
                         var distance = dir.magnitude;
                         //print("Distance: " + distance + "  speed is: " + tickSpeed);
-                        if(distance < tickSpeed) {
-                                tickSpeed = distance;
+                        var speed = minSpeed + (maxSpeed - minSpeed) * (1 - (diff / DReal.PI));
+                        if(distance < speed) {
+                                speed = DReal.Max(minSpeed, distance);
                         }
-                        var travel = DVector2.FromAngle(baseAngle) * (1 - (diff / DReal.PI));
-                        currentVelocity = travel * maxSpeed;
-                        entity.position += travel * tickSpeed;
+                        entity.velocity = DVector2.FromAngle(baseAngle) * speed;
 		} else {
-                        currentVelocity = new DVector2(0,0);
+                        Stop();
                 }
 	}
 
         public void Stop() {
-                currentVelocity = new DVector2(0,0);
+                entity.velocity = DVector2.FromAngle(entity.rotation) * minSpeed;
         }
 
         void Update() {
                 if(animator) {
-                        float speed = (float)currentVelocity.magnitude;
+                        float speed = (float)entity.velocity.magnitude;
                         animator.SetFloat("Speed", speed);
                         animator.speed = speed / animationDistance;
                         if(speed < 0.1) {

@@ -7,7 +7,6 @@ public class Projectile : MonoBehaviour {
         public int initialSpeed;
         public int turnSpeed;
         public Entity target;
-        public DVector2 velocity;
 
         public GameObject impactPrefab;
         public TrailRenderer trail;
@@ -26,14 +25,13 @@ public class Projectile : MonoBehaviour {
                         var baseAngle = Utility.CalculateNewAngle(entity.rotation, targetAngle, DReal.Radians(turnSpeed));
                         entity.rotation = baseAngle;
                 }
-                velocity = DVector2.FromAngle(entity.rotation) * initialSpeed;
-                DVector2 newPosition = entity.position + velocity * ComSat.tickRate;
+                entity.velocity = DVector2.FromAngle(entity.rotation) * initialSpeed;
+                DVector2 newPosition = entity.position + entity.velocity * ComSat.tickRate;
 
+                // FIXME: this should do something to account for hitting fast-moving projectiles.
                 DVector2 hitPosition;
                 Entity hit = ComSat.LineCast(entity.position, newPosition, out hitPosition, entity.team);
-                if(hit != null) {
-                        print("Projectile at " + entity.position + " impacted " + hit + " at " + hitPosition);
-
+                if(hit != null && (!hit.hitOnlyIfTargetted || hit == target)) {
                         hit.Damage(damage);
 
                         Vector3 position = new Vector3((float)hitPosition.y, 0, (float)hitPosition.x);
@@ -48,7 +46,5 @@ public class Projectile : MonoBehaviour {
                         ComSat.DestroyEntity(entity);
                         return;
                 }
-
-                entity.position = newPosition;
         }
 }

@@ -5,6 +5,8 @@ using System.Collections.Generic;
 public class Entity : MonoBehaviour {
         public DVector2 position;
         public DReal rotation;
+        public DVector2 velocity;
+
         public int team;
         public Entity origin; // who spawned this.
 
@@ -22,6 +24,8 @@ public class Entity : MonoBehaviour {
 
         public int buildTime = 0;
         public Texture2D buildIcon;
+
+        public bool hitOnlyIfTargetted = false;
 
         private Dictionary<int, System.Action> updateActions = new Dictionary<int, System.Action>();
 
@@ -48,6 +52,7 @@ public class Entity : MonoBehaviour {
                 foreach(var a in updateActions.Values) {
                         a();
                 }
+                position += velocity * ComSat.tickRate;
         }
 
         public void AddUpdateAction(int priority, System.Action action) {

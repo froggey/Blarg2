@@ -80,8 +80,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6110fd3653f2044749ca11930d679009, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damage: 1
+  damage: 2
   initialSpeed: 100
+  turnSpeed: 0
+  target: {fileID: 0}
   impactPrefab: {fileID: 100000, guid: 036c64bc821f341aeb7ef613941c59a3, type: 2}
   trail: {fileID: 0}
 --- !u!114 &11400004

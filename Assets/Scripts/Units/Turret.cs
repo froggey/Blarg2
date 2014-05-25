@@ -68,7 +68,34 @@ public class Turret : MonoBehaviour {
                 } else {
                         var dp = target.position - entity.position;
 
-                        var targetTurretAngle = DReal.Mod(DVector2.ToAngle(dp) - entity.rotation, DReal.TwoPI);
+                        DReal targetTurretAngle;
+
+                        var projectileProjectile = projectilePrefab.GetComponent<Projectile>();
+                        if(projectileProjectile != null) {
+                                // Try to lead the target.
+                                var a = DVector2.Dot(target.velocity, target.velocity) - projectileProjectile.initialSpeed * projectileProjectile.initialSpeed;
+                                var b = 2 * DVector2.Dot(target.velocity, dp);
+                                var c = DVector2.Dot(dp, dp);
+
+                                var p = -b / (2 * a);
+                                var q = DReal.Sqrt((b * b) - 4 * a * c) / (2 * a);
+
+                                var t1 = p - q;
+                                var t2 = p + q;
+                                DReal t;
+
+                                if (t1 > t2 && t2 > 0) {
+                                        t = t2;
+                                } else {
+                                        t = t1;
+                                }
+
+                                var aimSpot = target.position + target.velocity * t;
+
+                                targetTurretAngle = DReal.Mod(DVector2.ToAngle(aimSpot - entity.position) - entity.rotation, DReal.TwoPI);
+                        } else {
+                                targetTurretAngle = DReal.Mod(DVector2.ToAngle(dp) - entity.rotation, DReal.TwoPI);
+                        }
 
                         // Turn turret to point at target.
                         TurnTurret(targetTurretAngle);
