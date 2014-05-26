@@ -97,7 +97,18 @@ public class TwinTank : MonoBehaviour {
                 if(mode == Mode.ATTACK) {
                         var distVec = target.position - entity.position;
                         var dist = distVec.magnitude;
-                        var targetTurretAngle = DReal.Mod(DVector2.ToAngle(distVec) - entity.rotation, DReal.TwoPI);
+
+                        DReal targetTurretAngle;
+
+                        var projectileProjectile = projectilePrefab.GetComponent<Projectile>();
+                        if(projectileProjectile != null) {
+                                var aimSpot = Utility.PredictShot(entity.position, projectileProjectile.initialSpeed,
+                                                                  target.position, target.velocity);
+
+                                targetTurretAngle = DReal.Mod(DVector2.ToAngle(aimSpot - entity.position) - entity.rotation, DReal.TwoPI);
+                        } else {
+                                targetTurretAngle = DReal.Mod(DVector2.ToAngle(distVec) - entity.rotation, DReal.TwoPI);
+                        }
 
                         // Turn turret to point at target when close.
                         if(dist < attackRange * 2) {

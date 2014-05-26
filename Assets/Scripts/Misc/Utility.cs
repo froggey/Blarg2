@@ -100,4 +100,37 @@ static public class Utility {
                 }
                 return Color.white;
         }
+
+        public static DVector2 PredictShot(DVector2 origin, DReal projectileSpeed, DVector2 targetPosition, DVector2 targetVelocity) {
+                var dp = targetPosition - origin;
+
+                // Try to lead the target.
+                var a = DVector2.Dot(targetVelocity, targetVelocity) - projectileSpeed * projectileSpeed;
+                var b = 2 * DVector2.Dot(targetVelocity, dp);
+                var c = DVector2.Dot(dp, dp);
+
+                var p = -b / (2 * a);
+
+                var discriminant = b * b - 4 * a * c;
+
+                if(discriminant <= 0) {
+                        return targetPosition;
+                }
+
+                var q = DReal.Sqrt(discriminant) / (2 * a);
+
+                var t1 = p - q;
+                var t2 = p + q;
+                DReal t;
+
+                if (t1 > t2 && t2 > 0) {
+                        t = t2;
+                } else if(t1 > 0) {
+                        t = t1;
+                } else {
+                        return targetPosition;
+                }
+
+                return targetPosition + targetVelocity * t;
+        }
 }
