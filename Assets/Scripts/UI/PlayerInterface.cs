@@ -190,6 +190,14 @@ public class PlayerInterface : MonoBehaviour {
                 if(ModifierActive("left ctrl") || ModifierActive("right ctrl")) {
                         // Set group.
                         unitGroups[groupID] = new List<GameObject>(selectedUnits);
+                } else if(ModifierActive("left shift") || ModifierActive("right shift")) {
+                        // Merge group with current.
+                        foreach(var unit in unitGroups[groupID]) {
+                                if(unit == null) continue;
+                                if(selectedUnits.Contains(unit)) continue;
+                                unit.SendMessage("OnSelected", SendMessageOptions.DontRequireReceiver);
+                                selectedUnits.Add(unit);
+                        }
                 } else {
                         // Load group.
                         foreach(var unit in selectedUnits) {
