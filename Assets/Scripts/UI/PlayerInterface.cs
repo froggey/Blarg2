@@ -51,22 +51,31 @@ public class PlayerInterface : MonoBehaviour {
                         }
                 }
 
+                bool addToSelection = ModifierActive("left shift") || ModifierActive("right shift");
+
                 if(Input.GetButtonUp("Select")) {
                         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-                        foreach(var unit in selectedUnits) {
-                                if(unit != null) {
-                                        unit.SendMessage("OnUnselected", SendMessageOptions.DontRequireReceiver);
+                        if(!addToSelection) {
+                                foreach(var unit in selectedUnits) {
+                                        if(unit != null) {
+                                                unit.SendMessage("OnUnselected", SendMessageOptions.DontRequireReceiver);
+                                        }
                                 }
+                                selectedUnits.Clear();
                         }
-                        selectedUnits.Clear();
 
                         // Selectable units only.
                         RaycastHit hit;
                         if(Physics.Raycast(ray, out hit, Mathf.Infinity, 1<<8)) {
                                 var unit = hit.transform.gameObject;
-                                unit.SendMessage("OnSelected", SendMessageOptions.DontRequireReceiver);
-                                selectedUnits.Add(unit);
+                                if(!selectedUnits.Contains(unit)) {
+                                        unit.SendMessage("OnSelected", SendMessageOptions.DontRequireReceiver);
+                                        selectedUnits.Add(unit);
+                                } else if(addToSelection) {
+                                        unit.SendMessage("OnUnselected", SendMessageOptions.DontRequireReceiver);
+                                        selectedUnits.Remove(unit);
+                                }
                         }
                 }
 
@@ -95,12 +104,14 @@ public class PlayerInterface : MonoBehaviour {
 
                 if(Input.GetMouseButtonUp(0)) {
                         if(marqueeRect.width != 0 && marqueeRect.height != 0) {
-                                foreach(var unit in selectedUnits) {
-                                        if(unit != null) {
-                                                unit.SendMessage("OnUnselected", SendMessageOptions.DontRequireReceiver);
+                                if(!addToSelection) {
+                                        foreach(var unit in selectedUnits) {
+                                                if(unit != null) {
+                                                        unit.SendMessage("OnUnselected", SendMessageOptions.DontRequireReceiver);
+                                                }
                                         }
+                                        selectedUnits.Clear();
                                 }
-                                selectedUnits.Clear();
 
                                 var selectableUnits = GameObject.FindGameObjectsWithTag("MultiSelectableUnit");
                                 foreach(GameObject unit in selectableUnits) {
@@ -110,8 +121,7 @@ public class PlayerInterface : MonoBehaviour {
                                         Vector3 screenPos = Camera.main.WorldToScreenPoint(unit.transform.position);
                                         Vector2 screenPoint = new Vector2(screenPos.x, Screen.height - screenPos.y);
 
-                                        // Ensure that any units not within the marquee are currently unselected.
-                                        if(marqueeRect.Contains(screenPoint)) {
+                                        if(!selectedUnits.Contains(unit) && marqueeRect.Contains(screenPoint)) {
                                                 unit.SendMessage("OnSelected", SendMessageOptions.DontRequireReceiver);
                                                 selectedUnits.Add(unit);
                                         }
