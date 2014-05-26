@@ -340,7 +340,7 @@ MonoBehaviour:
   collisionRadiusNumerator: 3
   collisionRadiusDenominator: 2
   baseMesh: {fileID: 0}
-  buildTime: 2
+  buildTime: 5
   buildIcon: {fileID: 2800000, guid: f45af5b678e924c0abce05f54bc73da1, type: 3}
   hpBarTexture: {fileID: 2800000, guid: fe5e9061a9af5c24ab18c18b3c0f7857, type: 3}
   hitOnlyIfTargetted: 0
