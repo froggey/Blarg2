@@ -181,6 +181,12 @@ public class Lobby : MonoBehaviour {
         [RPC]
         void BeginGame(string levelName, int team) {
                 ComSat.localTeam = team;
+
+                if(!System.IO.Directory.Exists("Replays")) {
+                        System.IO.Directory.CreateDirectory("Replays");
+                }
+
+                ComSat.SaveReplay("Replays/" + System.DateTime.UtcNow.ToString("o") + ".replay");
                 Application.LoadLevel(levelName);
         }
 

@@ -50,10 +50,20 @@ public class ComSat : MonoBehaviour {
 
         public static int localTeam;
 
+        private System.IO.StreamWriter replayOutput;
+        private int lastReplayCommandTurn;
+
         void Log(string s) {
                 if(debugVomit) {
                         Debug.Log(s);
                 }
+        }
+
+        static public void SaveReplay(string path) {
+                if(currentInstance.worldRunning) {
+                        throw new System.Exception("Tried to start a replay after the world began!");
+                }
+                currentInstance.replayOutput = new System.IO.StreamWriter(path);
         }
 
         void OnGUI() {
@@ -102,6 +112,9 @@ public class ComSat : MonoBehaviour {
 
         void OnDestroy() {
                 currentInstance = null;
+                if(replayOutput != null) {
+                        replayOutput.Close();
+                }
         }
 
         void Awake() {
@@ -196,6 +209,7 @@ public class ComSat : MonoBehaviour {
         // (Client)
         [RPC]
         void SpawnCommand(int onTurn, string entityName, int team, string positionX, string positionY, string rotation_) {
+                SaveReplayCommand(onTurn, "S " + entityName + " " + team + " " + positionX + " " + positionY + " " + rotation_);
                 var position = new DVector2(DReal.Deserialize(positionX), DReal.Deserialize(positionY));
                 var rotation = DReal.Deserialize(rotation_);
                 GameObject go = Resources.Load<GameObject>(entityName);
@@ -242,6 +256,7 @@ public class ComSat : MonoBehaviour {
                 var position = new DVector2(DReal.Deserialize(positionX), DReal.Deserialize(positionY));
                 var entity = worldEntities[entityID];
                 Log("Got move action on " + turnID + "@" + tickID + " for turn " + onTurn);
+                SaveReplayCommand(onTurn, "M " + entityID + " " + positionX + " " + positionY);
                 QueueCommand(onTurn, () => {
                                 if(entity != null) {
                                         Log("{" + tickID + "} Move " + entity + "[" + entityID + "] to " + position);
@@ -255,6 +270,7 @@ public class ComSat : MonoBehaviour {
         void AttackCommand(int onTurn, int entityID, int targetID) {
                 var entity = worldEntities[entityID];
                 var target = worldEntities[targetID];
+                SaveReplayCommand(onTurn, "A " + entityID + " " + targetID);
                 QueueCommand(onTurn, () => {
                                 if(entity != null && target != null) {
                                         Log("{" + tickID + "} " + entity + "[" + entityID + "] attack " + target + "[" + targetID + "]");
@@ -267,12 +283,20 @@ public class ComSat : MonoBehaviour {
         [RPC]
         void UIActionCommand(int onTurn, int entityID, int what) {
                 var entity = worldEntities[entityID];
+                SaveReplayCommand(onTurn, "U " + entityID + " " + what);
                 QueueCommand(onTurn, () => {
                                 if(entity != null) {
                                         Log("{" + tickID + "} " + entity + "[" + entityID + "] UI action " + what);
                                         entity.gameObject.SendMessage("UIAction", what, SendMessageOptions.DontRequireReceiver);
                                 }
                         });
+        }
+
+        void SaveReplayCommand(int onTurn, string command) {
+                lastReplayCommandTurn = onTurn;
+                if(replayOutput != null) {
+                        replayOutput.WriteLine(onTurn + " " + command);
+                }
         }
 
         // (Client)
@@ -418,6 +442,9 @@ public class ComSat : MonoBehaviour {
                                 }
 
                                 if(goForNextTurn) {
+                                        if(replayOutput != null && lastReplayCommandTurn == turnID) {
+                                                replayOutput.WriteLine(turnID + " T");
+                                        }
                                         if(Network.isServer) {
                                                 currentGameState = DumpGameState();
                                                 Log(currentGameState);
