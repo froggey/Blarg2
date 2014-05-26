@@ -209,7 +209,6 @@ public class ComSat : MonoBehaviour {
         // (Client)
         [RPC]
         void SpawnCommand(int onTurn, string entityName, int team, string positionX, string positionY, string rotation_) {
-                SaveReplayCommand(onTurn, "S " + entityName + " " + team + " " + positionX + " " + positionY + " " + rotation_);
                 var position = new DVector2(DReal.Deserialize(positionX), DReal.Deserialize(positionY));
                 var rotation = DReal.Deserialize(rotation_);
                 GameObject go = Resources.Load<GameObject>(entityName);
@@ -217,6 +216,7 @@ public class ComSat : MonoBehaviour {
                 Quaternion worldRotation = Quaternion.AngleAxis((float)rotation, Vector3.up);
 
                 QueueCommand(onTurn, () => {
+                                SaveReplayCommand(onTurn, "S " + entityName + " " + team + " " + positionX + " " + positionY + " " + rotation_);
                                 Log("{" + tickID + "} Spawn " + entityName + " on team " + team + " at " + position + ":" + rotation);
                                 Entity thing = (Object.Instantiate(go, worldPosition, worldRotation) as GameObject).GetComponent<Entity>();
                                 thing.position = position;
@@ -256,8 +256,8 @@ public class ComSat : MonoBehaviour {
                 var position = new DVector2(DReal.Deserialize(positionX), DReal.Deserialize(positionY));
                 var entity = worldEntities[entityID];
                 Log("Got move action on " + turnID + "@" + tickID + " for turn " + onTurn);
-                SaveReplayCommand(onTurn, "M " + entityID + " " + positionX + " " + positionY);
                 QueueCommand(onTurn, () => {
+                                SaveReplayCommand(onTurn, "M " + entityID + " " + positionX + " " + positionY);
                                 if(entity != null) {
                                         Log("{" + tickID + "} Move " + entity + "[" + entityID + "] to " + position);
                                         entity.gameObject.SendMessage("Move", position, SendMessageOptions.DontRequireReceiver);
@@ -270,8 +270,8 @@ public class ComSat : MonoBehaviour {
         void AttackCommand(int onTurn, int entityID, int targetID) {
                 var entity = worldEntities[entityID];
                 var target = worldEntities[targetID];
-                SaveReplayCommand(onTurn, "A " + entityID + " " + targetID);
                 QueueCommand(onTurn, () => {
+                                SaveReplayCommand(onTurn, "A " + entityID + " " + targetID);
                                 if(entity != null && target != null) {
                                         Log("{" + tickID + "} " + entity + "[" + entityID + "] attack " + target + "[" + targetID + "]");
                                         entity.gameObject.SendMessage("Attack", target, SendMessageOptions.DontRequireReceiver);
@@ -283,8 +283,8 @@ public class ComSat : MonoBehaviour {
         [RPC]
         void UIActionCommand(int onTurn, int entityID, int what) {
                 var entity = worldEntities[entityID];
-                SaveReplayCommand(onTurn, "U " + entityID + " " + what);
                 QueueCommand(onTurn, () => {
+                                SaveReplayCommand(onTurn, "U " + entityID + " " + what);
                                 if(entity != null) {
                                         Log("{" + tickID + "} " + entity + "[" + entityID + "] UI action " + what);
                                         entity.gameObject.SendMessage("UIAction", what, SendMessageOptions.DontRequireReceiver);
@@ -442,9 +442,6 @@ public class ComSat : MonoBehaviour {
                                 }
 
                                 if(goForNextTurn) {
-                                        if(replayOutput != null && lastReplayCommandTurn == turnID) {
-                                                replayOutput.WriteLine(turnID + " T");
-                                        }
                                         if(Network.isServer) {
                                                 currentGameState = DumpGameState();
                                                 Log(currentGameState);
@@ -464,6 +461,9 @@ public class ComSat : MonoBehaviour {
                                         queuedCommands.Clear();
                                         var tmp = queuedCommands;
                                         queuedCommands = futureQueuedCommands;
+                                        if(replayOutput != null && lastReplayCommandTurn == turnID) {
+                                                replayOutput.WriteLine(turnID + " T");
+                                        }
                                         futureQueuedCommands = tmp;
                                         goForNextTurn = false;
                                         ReadyUp();
