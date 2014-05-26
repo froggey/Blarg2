@@ -552,6 +552,7 @@ MonoBehaviour:
   baseMesh: {fileID: 100000}
   buildTime: 6
   buildIcon: {fileID: 2800000, guid: e2a3e278973194529b6e9a7a4dba57be, type: 3}
+  hpBarTexture: {fileID: 2800000, guid: fe5e9061a9af5c24ab18c18b3c0f7857, type: 3}
   hitOnlyIfTargetted: 0
   teamColourRenderer: {fileID: 13700000}
 --- !u!114 &11400006

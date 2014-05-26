@@ -13,6 +13,8 @@ public class Entity : MonoBehaviour {
         public int maxHealth;
         public int health;
 
+        private bool isSelected;
+
         // This is super dumb.
         // The inspector can't display DReals, so expose the collisionRadius as a fraction.
         public int collisionRadiusNumerator;
@@ -24,6 +26,7 @@ public class Entity : MonoBehaviour {
 
         public int buildTime = 0;
         public Texture2D buildIcon;
+        public Texture2D hpBarTexture;
 
         public bool hitOnlyIfTargetted = false;
 
@@ -81,5 +84,23 @@ public class Entity : MonoBehaviour {
         void OnDrawGizmosSelected() {
                 Gizmos.color = Color.green;
                 Gizmos.DrawWireSphere(transform.position, (float)collisionRadiusNumerator / collisionRadiusDenominator);
+        }
+        
+        private void OnSelected() {
+                isSelected = true;
+        }
+
+        private void OnUnselected() {
+                isSelected = false;
+        }
+
+        void OnGUI() {
+                if (!isSelected) return;
+                
+                var p = Camera.main.WorldToScreenPoint(transform.position);
+                GUI.DrawTextureWithTexCoords(
+                        new Rect(p.x - 16, Camera.main.pixelHeight - p.y + 8, 32, 4),
+                        hpBarTexture,
+                        new Rect((float)(maxHealth - health) / maxHealth / 2, 0, 0.5f, 1));
         }
 }
