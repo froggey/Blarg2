@@ -550,6 +550,7 @@ MonoBehaviour:
   collisionRadiusNumerator: 8
   collisionRadiusDenominator: 3
   baseMesh: {fileID: 100000}
+  ghostPrefab: {fileID: 100002, guid: 2d3c5e002f70448a78c4d5a6cae5f1a5, type: 2}
   buildTime: 6
   buildIcon: {fileID: 2800000, guid: e2a3e278973194529b6e9a7a4dba57be, type: 3}
   hpBarTexture: {fileID: 2800000, guid: fe5e9061a9af5c24ab18c18b3c0f7857, type: 3}

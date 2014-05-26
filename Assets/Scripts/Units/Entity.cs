@@ -24,6 +24,9 @@ public class Entity : MonoBehaviour {
 
         public GameObject baseMesh;
 
+        // Ghost is used during construction and formation moves.
+        public GameObject ghostPrefab;
+
         public int buildTime = 0;
         public Texture2D buildIcon;
         public Texture2D hpBarTexture;
@@ -85,7 +88,7 @@ public class Entity : MonoBehaviour {
                 Gizmos.color = Color.green;
                 Gizmos.DrawWireSphere(transform.position, (float)collisionRadiusNumerator / collisionRadiusDenominator);
         }
-        
+
         private void OnSelected() {
                 isSelected = true;
         }
@@ -96,7 +99,7 @@ public class Entity : MonoBehaviour {
 
         void OnGUI() {
                 if (!isSelected) return;
-                
+
                 var p = Camera.main.WorldToScreenPoint(transform.position);
                 GUI.DrawTextureWithTexCoords(
                         new Rect(p.x - 16, Camera.main.pixelHeight - p.y + 8, 32, 4),

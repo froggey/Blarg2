@@ -135,6 +135,7 @@ MonoBehaviour:
   collisionRadiusNumerator: 3
   collisionRadiusDenominator: 4
   baseMesh: {fileID: 0}
+  ghostPrefab: {fileID: 100000, guid: 63effbfdb33bf44c4b4feccc480a2dee, type: 2}
   buildTime: 4
   buildIcon: {fileID: 2800000, guid: 97c0609d01ef88a4c9bd05ad613b81dd, type: 3}
   hpBarTexture: {fileID: 2800000, guid: fe5e9061a9af5c24ab18c18b3c0f7857, type: 3}
