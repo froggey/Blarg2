@@ -36,6 +36,26 @@ public class PlayerInterface : MonoBehaviour {
                 return new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
         }
 
+        void ClearSelected() {
+                foreach(var unit in selectedUnits) {
+                        if(unit != null) {
+                                unit.SendMessage("OnUnselected", SendMessageOptions.DontRequireReceiver);
+                        }
+                }
+                selectedUnits.Clear();
+        }
+
+        void SelectUnit(GameObject unit) {
+                if(selectedUnits.Contains(unit)) return;
+                unit.SendMessage("OnSelected", SendMessageOptions.DontRequireReceiver);
+                selectedUnits.Add(unit);
+        }
+
+        void DeselectUnit(GameObject unit) {
+                unit.SendMessage("OnUnselected", SendMessageOptions.DontRequireReceiver);
+                selectedUnits.Remove(unit);
+        }
+
         void LateUpdate() {
                 if(!marqueeActive) {
                         // No raycasting when over a GUI widget.
@@ -57,12 +77,7 @@ public class PlayerInterface : MonoBehaviour {
                         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
                         if(!addToSelection) {
-                                foreach(var unit in selectedUnits) {
-                                        if(unit != null) {
-                                                unit.SendMessage("OnUnselected", SendMessageOptions.DontRequireReceiver);
-                                        }
-                                }
-                                selectedUnits.Clear();
+                                ClearSelected();
                         }
 
                         // Selectable units only.
@@ -70,11 +85,9 @@ public class PlayerInterface : MonoBehaviour {
                         if(Physics.Raycast(ray, out hit, Mathf.Infinity, 1<<8)) {
                                 var unit = hit.transform.gameObject;
                                 if(!selectedUnits.Contains(unit)) {
-                                        unit.SendMessage("OnSelected", SendMessageOptions.DontRequireReceiver);
-                                        selectedUnits.Add(unit);
+                                        SelectUnit(unit);
                                 } else if(addToSelection) {
-                                        unit.SendMessage("OnUnselected", SendMessageOptions.DontRequireReceiver);
-                                        selectedUnits.Remove(unit);
+                                        DeselectUnit(unit);
                                 }
                         }
                 }
@@ -86,13 +99,15 @@ public class PlayerInterface : MonoBehaviour {
                         if(Physics.Raycast(ray, out hit, Mathf.Infinity, 1<<8)) {
                                 Entity target = hit.transform.gameObject.GetComponent<Entity>();
                                 foreach(var unit in selectedUnits) {
-                                        if(unit != null) ComSat.IssueAttack(unit.GetComponent<Entity>(), target);
+                                        if(unit == null) continue;
+                                        ComSat.IssueAttack(unit.GetComponent<Entity>(), target);
                                 }
                         // Otherwise, do a move.
                         } else if(Physics.Raycast(ray, out hit, Mathf.Infinity, 1<<9)) {
                                 DVector2 point = new DVector2((DReal)hit.point.z, (DReal)hit.point.x);
                                 foreach(var unit in selectedUnits) {
-                                        if(unit != null) ComSat.IssueMove(unit.GetComponent<Entity>(), point);
+                                        if(unit == null) continue;
+                                        ComSat.IssueMove(unit.GetComponent<Entity>(), point);
                                 }
                         }
                 }
@@ -105,12 +120,7 @@ public class PlayerInterface : MonoBehaviour {
                 if(Input.GetMouseButtonUp(0)) {
                         if(marqueeRect.width != 0 && marqueeRect.height != 0) {
                                 if(!addToSelection) {
-                                        foreach(var unit in selectedUnits) {
-                                                if(unit != null) {
-                                                        unit.SendMessage("OnUnselected", SendMessageOptions.DontRequireReceiver);
-                                                }
-                                        }
-                                        selectedUnits.Clear();
+                                        ClearSelected();
                                 }
 
                                 var selectableUnits = GameObject.FindGameObjectsWithTag("MultiSelectableUnit");
@@ -126,9 +136,8 @@ public class PlayerInterface : MonoBehaviour {
                                         Vector3 screenPos = Camera.main.WorldToScreenPoint(unit.transform.position);
                                         Vector2 screenPoint = new Vector2(screenPos.x, Screen.height - screenPos.y);
 
-                                        if(!selectedUnits.Contains(unit) && marqueeRect.Contains(screenPoint)) {
-                                                unit.SendMessage("OnSelected", SendMessageOptions.DontRequireReceiver);
-                                                selectedUnits.Add(unit);
+                                        if(marqueeRect.Contains(screenPoint)) {
+                                                SelectUnit(unit);
                                         }
                                 }
                         }
@@ -199,25 +208,14 @@ public class PlayerInterface : MonoBehaviour {
                         // Merge group with current.
                         foreach(var unit in unitGroups[groupID]) {
                                 if(unit == null) continue;
-                                if(selectedUnits.Contains(unit)) continue;
-                                unit.SendMessage("OnSelected", SendMessageOptions.DontRequireReceiver);
-                                selectedUnits.Add(unit);
+                                SelectUnit(unit);
                         }
                 } else {
                         // Load group.
-                        foreach(var unit in selectedUnits) {
-                                if(unit != null) {
-                                        unit.SendMessage("OnUnselected", SendMessageOptions.DontRequireReceiver);
-                                }
-                        }
-                        if(unitGroups[groupID] == null) {
-                                selectedUnits.Clear();
-                        } else {
-                                selectedUnits = new List<GameObject>(unitGroups[groupID]);
-                                foreach(var unit in selectedUnits) {
-                                        if(unit != null) {
-                                                unit.SendMessage("OnSelected", SendMessageOptions.DontRequireReceiver);
-                                        }
+                        ClearSelected();
+                        if(unitGroups[groupID] != null) {
+                                foreach(var unit in unitGroups[groupID]) {
+                                        SelectUnit(unit);
                                 }
                         }
                 }
