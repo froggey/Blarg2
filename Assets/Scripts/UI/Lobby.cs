@@ -187,6 +187,11 @@ public class Lobby : MonoBehaviour {
                 }
 
                 ComSat.SaveReplay("Replays/" + System.DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ss") + ".replay");
+
+                foreach (NetworkPlayer player in Network.connections) {
+                        Network.SetReceivingEnabled(player, 0, false);
+                }
+
                 Application.LoadLevel(levelName);
         }
 
