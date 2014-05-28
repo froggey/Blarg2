@@ -17,21 +17,25 @@ public class NetworkMessage {
                 PlayerLeave = 3,
                 // Bidirectional, sends player ID, name and teamID.
                 PlayerUpdate = 4,
+                // Client->server, sends player ID.
+                KickPlayer = 5,
                 // Bidirectional, sends levelName.
-                StartGame = 5,
+                StartGame = 6,
                 // Command.
-                SpawnEntity = 6,
+                SpawnEntity = 7,
                 // Command.
-                Move = 7,
+                Move = 8,
                 // Command.
-                Attack = 8,
+                Attack = 9,
                 // Command.
-                UIAction = 9,
+                UIAction = 10,
                 // Client->server.
-                Ready = 10,
+                Ready = 11,
                 // Server->client.
-                NextTurn = 11,
+                NextTurn = 12,
         }
+
+        public NetworkMessage() {}
 
         public NetworkMessage(Type type) {
                 this.type = type;
@@ -43,9 +47,10 @@ public class NetworkMessage {
                 stream.WriteByte(0);
                 Serializer.Serialize(stream, this);
                 var buffer = stream.ToArray();
-                buffer[0] = (byte)(buffer.Length & 0xFF);
-                buffer[1] = (byte)(buffer.Length >> 8);
-                return stream.ToArray();
+                var len = buffer.Length - 2;
+                buffer[0] = (byte)(len & 0xFF);
+                buffer[1] = (byte)(len >> 8);
+                return buffer;
         }
 
         static public NetworkMessage Deserialize(byte[] buffer) {
@@ -103,16 +108,24 @@ public class NetworkMessage {
 public class NetworkClient {}
 
 public interface IServer {
+        // Called when the server starts accepting connections.
         void OnServerActive(LSNet net);
+        // Called when a client connects.
         void OnClientConnect(NetworkClient client);
+        // Called when a client is disconnected.
         void OnClientDisconnect(NetworkClient client);
+        // Called when a message is received from the client.
         void OnClientMessage(NetworkClient client, NetworkMessage message);
 }
 
 public interface IClient {
+        // Called when connected to the server.
         void OnConnected(LSNet net);
+        // Called when disconnected from the server.
         void OnDisconnected();
+        // Called when unable to connect to the server.
         void OnFailedToConnect();
+        // Called when a message is received from the server.
         void OnServerMessage(NetworkMessage message);
 }
 
@@ -152,6 +165,9 @@ public class LSNet : UnityEngine.MonoBehaviour {
         private Dictionary<NetworkClient, ClientData> clientSockets;
 
         private IClient localClient;
+        private Socket clientSocket;
+        private int clientMessageLength;
+        private byte[] clientBuffer = new byte[0x10000 + 2];
 
         private List<Action> pendingUnityActions = new List<Action>();
 
@@ -178,16 +194,23 @@ public class LSNet : UnityEngine.MonoBehaviour {
         // If server, disconnect all clients and close the listening socket.
         // If client, disconnect from the server.
         public void Disconnect() {
-                /*
                 if(server != null) {
+                        // Hosting a server.
                         foreach(var data in clientSockets.Values) {
-                                if(data.disconnected) continue;
-                                data.disconnected = true;
-
+                                //if(data.disconnected) continue;
+                                //data.disconnected = true;
+                                data.socket.Close();
                         }
-                } else if(localClient) {
+                        listenSocket.Close();
+
+                        listenSocket = null;
+                        server = null;
+                        serverClient = null;
+                        clientSockets.Clear();
+                        localClient = null;
+                } else if(localClient != null) {
+                        // Connected somewhere.
                 }
-                */
         }
 
         public void InitializeServer(int port, IServer server, IClient localClient) {
@@ -195,16 +218,17 @@ public class LSNet : UnityEngine.MonoBehaviour {
                         throw new Exception("Networking already initialized.");
                 }
 
-                var ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
-                var localEP = new IPEndPoint(ipHostInfo.AddressList[0], port);
+                var localEP = new IPEndPoint(IPAddress.Any, port);
                 listenSocket = new Socket(localEP.Address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                UnityEngine.Debug.Log("Listening on " + localEP);
 
                 try {
                         listenSocket.Bind(localEP);
                         listenSocket.Listen(10);
                         listenSocket.BeginAccept(new AsyncCallback(OnClientConnect), listenSocket);
                 } catch(Exception e) {
-                        UnityEngine.Debug.LogError("Failed to start server on port " + port + ": " + e);
+                        UnityEngine.Debug.LogError("Failed to start server on " + localEP);
+                        UnityEngine.Debug.LogException(e, this);
                         listenSocket = null;
                         throw;
                 }
@@ -221,10 +245,18 @@ public class LSNet : UnityEngine.MonoBehaviour {
         }
 
         public void Connect(string host, int port, IClient client) {
-        //        if(server != null) {
-        //                throw new Exception("Already hosting a server. If you want to connect to the local server, use the localClient parameter to InitializeServer.");
-        //        }
-        //        ???;
+                if(isServer || isClient) {
+                        throw new Exception("Networking already initialized.");
+                }
+
+                clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                localClient = client;
+                try {
+                        clientSocket.BeginConnect(host, port, OnConnect, clientSocket);
+                } catch(Exception) {
+                        localClient = null;
+                        throw;
+                }
         }
 
         public void CloseConnection(NetworkClient client) {
@@ -269,6 +301,10 @@ public class LSNet : UnityEngine.MonoBehaviour {
                         AddUnityAction(() => { server.OnClientMessage(serverClient, message); });
                         return;
                 }
+
+                var buffer = message.Serialize();
+
+                clientSocket.BeginSend(buffer, 0, buffer.Length, SocketFlags.None, OnSendServerComplete, clientSocket);
         }
 
         private void AddUnityAction(Action action) {
@@ -286,24 +322,39 @@ public class LSNet : UnityEngine.MonoBehaviour {
         private void OnReceiveClientHeader(IAsyncResult info) {
                 var client = info.AsyncState as NetworkClient;
                 var data = clientSockets[client];
-                data.messageLength = (int)data.buffer[0] | ((int)data.buffer[1] << 8);
 
-                data.activeReceive = data.socket.BeginReceive(data.buffer, 2, data.messageLength, SocketFlags.None, OnReceiveClientMessage, client);
+                try {
+                        data.socket.EndReceive(info);
+
+                        data.messageLength = (int)data.buffer[0] | ((int)data.buffer[1] << 8);
+
+                        data.activeReceive = data.socket.BeginReceive(data.buffer, 2, data.messageLength, SocketFlags.None, OnReceiveClientMessage, client);
+                } catch(Exception e) {
+                        AddUnityAction(() => { UnityEngine.Debug.LogException(e, this); });
+                }
         }
 
         private void OnReceiveClientMessage(IAsyncResult info) {
                 var client = info.AsyncState as NetworkClient;
                 var data = clientSockets[client];
 
-                var message = NetworkMessage.Deserialize(data.buffer);
-                AddUnityAction(() => { server.OnClientMessage(client, message); });
+                try {
+                        data.socket.EndReceive(info);
 
-                data.activeReceive = data.socket.BeginReceive(data.buffer, 0, 2, SocketFlags.None, OnReceiveClientHeader, client);
+                        var message = NetworkMessage.Deserialize(data.buffer);
+                        AddUnityAction(() => { server.OnClientMessage(client, message); });
+
+                        data.activeReceive = data.socket.BeginReceive(data.buffer, 0, 2, SocketFlags.None, OnReceiveClientHeader, client);
+                } catch(Exception e) {
+                        AddUnityAction(() => { UnityEngine.Debug.LogException(e, this); });
+                }
         }
 
         private void OnClientConnect(IAsyncResult result) {
+                // listener may have been closed and listenSocket nulled out.
+                var serverSocket = result.AsyncState as Socket;
                 try {
-                        var socket = listenSocket.EndAccept(result);
+                        var socket = serverSocket.EndAccept(result);
                         AddUnityAction(() => {
                                         var client = new NetworkClient();
                                         var data = new ClientData(client, socket);
@@ -311,16 +362,61 @@ public class LSNet : UnityEngine.MonoBehaviour {
                                         server.OnClientConnect(client);
                                         data.activeReceive = socket.BeginReceive(data.buffer, 0, 2, SocketFlags.None, OnReceiveClientHeader, client);
                                 });
+                } catch(ObjectDisposedException) {
+                        // Connection closed, don't care no more.
+                        return;
                 } catch(Exception e) {
                         AddUnityAction(() => { UnityEngine.Debug.LogError("Failed to accept incoming connection: " + e); });
                 }
 
                 try {
-                        listenSocket.BeginAccept(new AsyncCallback(OnClientConnect), listenSocket);
+                        serverSocket.BeginAccept(new AsyncCallback(OnClientConnect), serverSocket);
                 } catch(Exception e) {
                         AddUnityAction(() => { UnityEngine.Debug.LogError("Failed when starting new accept process: " + e); });
                 }
         }
 
         // Client async callbacks.
+        private void OnSendServerComplete(IAsyncResult info) {
+                clientSocket.EndSend(info);
+        }
+
+        private void OnReceiveServerHeader(IAsyncResult info) {
+                try {
+                        clientSocket.EndReceive(info);
+
+                        clientMessageLength = (int)clientBuffer[0] | ((int)clientBuffer[1] << 8);
+
+                        clientSocket.BeginReceive(clientBuffer, 2, clientMessageLength, SocketFlags.None, OnReceiveServerMessage, clientSocket);
+                } catch(Exception e) {
+                        AddUnityAction(() => { UnityEngine.Debug.LogException(e, this); });
+                }
+        }
+
+        private void OnReceiveServerMessage(IAsyncResult info) {
+                try {
+                        clientSocket.EndReceive(info);
+
+                        var message = NetworkMessage.Deserialize(clientBuffer);
+                        AddUnityAction(() => { localClient.OnServerMessage(message); });
+
+                        clientSocket.BeginReceive(clientBuffer, 0, 2, SocketFlags.None, OnReceiveServerHeader, clientSocket);
+                } catch(Exception e) {
+                        AddUnityAction(() => { UnityEngine.Debug.LogException(e, this); });
+                }
+        }
+
+        private void OnConnect(IAsyncResult info) {
+                try {
+                        clientSocket.EndConnect(info);
+                        AddUnityAction(() => {
+                                        localClient.OnConnected(this);
+                                        clientSocket.BeginReceive(clientBuffer, 0, 2, SocketFlags.None, OnReceiveServerHeader, clientSocket);
+                                });
+                } catch(Exception e) {
+                        clientSocket = null;
+                        localClient = null;
+                        AddUnityAction(() => { UnityEngine.Debug.LogException(e, this); });
+                }
+        }
 }

@@ -58,10 +58,20 @@ class Server : IServer {
                 NetworkMessage drop = new NetworkMessage(NetworkMessage.Type.PlayerLeave);
                 drop.playerID = id;
                 net.SendMessageToAll(drop);
+                clientIDMap.Remove(client);
         }
         public void OnClientMessage(NetworkClient client, NetworkMessage message) {
                 Debug.Log("Client " + client + " set message " + message);
                 comSat.OnClientMessage(clientIDMap[client], message);
+        }
+
+        public void DisconnectPlayer(int id) {
+                foreach(var p in clientIDMap) {
+                        if(p.Value == id) {
+                                net.CloseConnection(p.Key);
+                                OnClientDisconnect(p.Key);
+                        }
+                }
         }
 }
 
@@ -140,9 +150,7 @@ public class ComSat : MonoBehaviour, IClient {
 
                 GUILayout.BeginArea(new Rect (Screen.width-200, 0, 200, 100));
                 if(GUILayout.Button("Disconnect")) {
-                        Network.Disconnect();
-                        Destroy(gameObject);
-                        Application.LoadLevel("Lobby");
+                        Disconnect();
                 }
                 if(GUILayout.Button("Check Sync")) {
                         syncCheckRequested = true;
@@ -798,6 +806,11 @@ public class ComSat : MonoBehaviour, IClient {
                                 net.SendMessageToAll(message);
                         }
                         break;
+                case NetworkMessage.Type.KickPlayer:
+                        if(PlayerIsAdmin(playerID) && !PlayerIsAdmin(message.playerID)) {
+                                server.DisconnectPlayer(message.playerID);
+                        }
+                        break;
                 case NetworkMessage.Type.StartGame:
                         if(PlayerIsAdmin(playerID)) {
                                 net.SendMessageToAll(message);
@@ -846,9 +859,11 @@ public class ComSat : MonoBehaviour, IClient {
 
         public ConnectionState connectionState {
                 get {
-                        if(localPlayerID != -1) {
+                        if(worldRunning) {
+                                return ConnectionState.InGame;
+                        } else if(localPlayerID != -1) {
                                 return ConnectionState.Lobby;
-                        } else if(server != null) {
+                        } else if(net.isServer || net.isClient) {
                                 return ConnectionState.Connecting;
                         } else {
                                 return ConnectionState.Disconnected;
@@ -859,8 +874,14 @@ public class ComSat : MonoBehaviour, IClient {
         // UI commands.
 
         public void Connect(string address, int port) {
+                if(connectionState != ConnectionState.Disconnected) {
+                        Debug.LogError("Bad state to connect in.");
+                        return;
+                }
                 localPlayerID = -1;
+                net.Connect(address, port, this);
         }
+
         public void Host(int port) {
                 if(connectionState != ConnectionState.Disconnected) {
                         Debug.LogError("Bad state to start a server in.");
@@ -871,7 +892,14 @@ public class ComSat : MonoBehaviour, IClient {
                 net.InitializeServer(port, server, this);
         }
 
-        public void Disconnect() {}
+        public void Disconnect() {
+                // Fuck it, just blow everything away.
+                // Would be nice to return to the lobby and stay connected to the server
+                // when leaving the game.
+                net.Disconnect();
+                Destroy(gameObject);
+                Application.LoadLevel("Lobby");
+        }
         public void StartGame() {
                 var m = new NetworkMessage(NetworkMessage.Type.StartGame);
                 m.levelName = "main";
@@ -889,5 +917,9 @@ public class ComSat : MonoBehaviour, IClient {
                 m.teamID = team;
                 net.SendMessageToServer(m);
         }
-        public void Kick(Player player) {}
+        public void Kick(Player player) {
+                var m = new NetworkMessage(NetworkMessage.Type.KickPlayer);
+                m.playerID = player.id;
+                net.SendMessageToServer(m);
+        }
 }
