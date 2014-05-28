@@ -94,6 +94,7 @@ public class ComSat : MonoBehaviour, IClient {
         private float timeSlop;
         private int ticksRemaining; // Ticks remaining in this turn.
         private bool goForNextTurn;
+        private bool serverNextTurn;
         private int tickID;
         private int turnID;
         private int serverCommandID;
@@ -382,7 +383,7 @@ public class ComSat : MonoBehaviour, IClient {
                 }
                 if(goForNextTurn) {
                         if(onTurn != turnID+1) {
-                                Debug.LogError("Future command on turn " + turnID+1 + " is for turn " + onTurn + "???");
+                                Debug.LogError("Future command on turn " + (turnID+1) + " is for turn " + onTurn + "???");
                         }
                         futureQueuedCommands.Add(command);
                 } else {
@@ -525,6 +526,7 @@ public class ComSat : MonoBehaviour, IClient {
                                         var m = new NetworkMessage(NetworkMessage.Type.NextTurn);
                                         net.SendMessageToAll(m);
                                         ClearReady();
+                                        serverNextTurn = true;
                                 }
 
                                 if(goForNextTurn) {
@@ -554,6 +556,7 @@ public class ComSat : MonoBehaviour, IClient {
                                         }
                                         futureQueuedCommands = tmp;
                                         goForNextTurn = false;
+                                        serverNextTurn = false;
                                         ReadyUp();
                                         ticksRemaining = ticksPerTurn;
                                         turnID += 1;
@@ -829,7 +832,7 @@ public class ComSat : MonoBehaviour, IClient {
                 case NetworkMessage.Type.UIAction:
                         serverCommandID += 1;
                         message.commandID = serverCommandID;
-                        message.turnID = goForNextTurn ? turnID + 1 : turnID;
+                        message.turnID = serverNextTurn ? turnID + 1 : turnID;
                         message.teamID = PlayerFromID(playerID).team;
                         net.SendMessageToAll(message);
                         break;
