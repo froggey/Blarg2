@@ -4,13 +4,14 @@ using UnityEngine;
 
 // Fixed point numbers.
 
-[System.Serializable]
+[ProtoBuf.ProtoContract]
 public struct DReal {
         public static DReal PI = Create(205887); // 3.14... * 2**16. Change this if fixedShift changes.
         public static DReal HalfPI = Create(102943); // 1.57... * 2**16. Change this if fixedShift changes.
         public static DReal TwoPI = Create(411774); // 1.57... * 2**16. Change this if fixedShift changes.
         private static int fixedShift = 16;
-        [SerializeField]
+
+        [ProtoBuf.ProtoMember(1)]
         private long value;
 
         //public DReal(float value) {
@@ -233,19 +234,14 @@ public struct DReal {
         public static DReal Max(DReal a, DReal b) {
                 return (a > b) ? a : b;
         }
-
-        public static string Serialize(DReal n) {
-                return n.value.ToString();
-        }
-
-        public static DReal Deserialize(string n) {
-                return Create(System.Convert.ToInt64(n));
-        }
 }
 
-[System.Serializable]
+[ProtoBuf.ProtoContract]
 public struct DVector2 {
-        public DReal x,y;
+        [ProtoBuf.ProtoMember(1)]
+        public DReal x;
+        [ProtoBuf.ProtoMember(2)]
+        public DReal y;
 
         public DVector2(DReal x, DReal y) {
                 this.x = x;
