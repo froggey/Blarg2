@@ -133,4 +133,22 @@ static public class Utility {
 
                 return targetPosition + targetVelocity * t;
         }
+
+        public static T GetThingAt<T>(DVector2 position) where T : MonoBehaviour {
+                return GetThingAt<T>(position, 8);
+        }
+
+        public static T GetThingAt<T>(DVector2 position, DReal maxOffset) where T : MonoBehaviour {
+                T rv = null;
+                DReal nearestSourceDistance = DReal.MaxValue;
+
+                foreach (var thing in GameObject.FindObjectsOfType<T>()) {
+                        var d = (position - thing.GetComponent<Entity>().position).sqrMagnitude;
+                        if (d < nearestSourceDistance && d < maxOffset * maxOffset) {
+                                rv = thing;
+                                nearestSourceDistance = d;
+                        }
+                }
+                return rv;
+        }
 }

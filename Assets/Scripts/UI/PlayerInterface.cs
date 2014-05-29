@@ -29,6 +29,10 @@ public class PlayerInterface : MonoBehaviour {
                                 GUI.Label(new Rect(screenPos.x, Screen.height - screenPos.y, 64, 24), i.ToString());
                         }
                 }
+                GUI.BeginGroup(new Rect(0, 0, Camera.main.pixelWidth, 24));
+                GUI.Label(new Rect(0, 0, 192, 24), "Metal: " + ComSat.localTeamResources.Metal);
+                GUI.Label(new Rect(192, 0, 192, 24), "Magic Smoke: " + ComSat.localTeamResources.MagicSmoke);
+                GUI.EndGroup();
         }
 
         Vector2 MousePosition() {

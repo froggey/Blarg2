@@ -186,7 +186,7 @@ public class Lobby : MonoBehaviour {
                         System.IO.Directory.CreateDirectory("Replays");
                 }
 
-                ComSat.SaveReplay("Replays/" + System.DateTime.UtcNow.ToString("o") + ".replay");
+                ComSat.SaveReplay("Replays/" + System.DateTime.UtcNow.ToString("o").Replace(":", "") + ".replay");
                 Application.LoadLevel(levelName);
         }
 

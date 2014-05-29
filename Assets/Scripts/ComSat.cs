@@ -39,6 +39,8 @@ public class ComSat : MonoBehaviour {
         private static ComSat currentInstance;
 
         private List<Player> players;
+        private ResourceSet[] teamResources;
+        public static ResourceSet localTeamResources { get { return currentInstance.teamResources[localTeam]; } }
 
         private bool worldRunning;
 
@@ -129,6 +131,7 @@ public class ComSat : MonoBehaviour {
 
                 if(Network.isServer) {
                         players = new List<Player>();
+                        teamResources = new ResourceSet[7];
                 }
         }
 
@@ -179,26 +182,27 @@ public class ComSat : MonoBehaviour {
                         });
         }
 
+        public static void AddResource(int team, ResourceType resource, int amount) {
+                currentInstance.deferredActions.Add(() => {
+                                switch (resource) {
+                                        case ResourceType.MagicSmoke:
+                                                currentInstance.teamResources[team].MagicSmoke += amount;
+                                                break;
+                                        case ResourceType.Metal:
+                                                currentInstance.teamResources[team].Metal += amount;
+                                                break;
+                                }
+                        });
+        }
+
         // Create a new entity at whereever.
         // Called by all, but ignored everywhere but the server.
         public static void Spawn(string entityName, int team, DVector2 position, DReal rotation) {
                 if(!Network.isServer) return;
 
-                if(team != 0) {
-                        // Only spawn if the team exists.
-                        bool ok = false;
-
-                        // Only spa
-                        foreach(var p in currentInstance.players) {
-                                if(p.team == team) {
-                                        ok = true;
-                                        break;
-                                }
-                        }
-
-                        if(!ok) return;
-                }
-
+                if(team != 0 && !currentInstance.players.Any(p => p.team == team))
+                        return;
+                
                 currentInstance.networkView.RPC("SpawnCommand", RPCMode.All, currentInstance.turnID,
                                                 entityName,
                                                 team,

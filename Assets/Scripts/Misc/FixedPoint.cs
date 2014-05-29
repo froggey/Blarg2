@@ -9,6 +9,8 @@ public struct DReal {
         public static DReal PI = Create(205887); // 3.14... * 2**16. Change this if fixedShift changes.
         public static DReal HalfPI = Create(102943); // 1.57... * 2**16. Change this if fixedShift changes.
         public static DReal TwoPI = Create(411774); // 1.57... * 2**16. Change this if fixedShift changes.
+        public static DReal MaxValue = Create(long.MaxValue);
+        public static DReal MinValue = Create(long.MinValue);
         private static int fixedShift = 16;
         [SerializeField]
         private long value;

@@ -32,9 +32,10 @@ public class SimpleMovable : MonoBehaviour {
                 }
         }
 
-        void Move(DVector2 location) {
+        public void Move(DVector2 location) {
                 Debug.Log(this + " moving to " + location);
                 moving = true;
                 destination = location;
+                SendMessage("MoveDestinationChanged");
         }
 }
