@@ -210,6 +210,7 @@ public class LSNet : UnityEngine.MonoBehaviour {
                         localClient = null;
                 } else if(localClient != null) {
                         // Connected somewhere.
+                        clientSocket.Close();
                 }
         }
 
@@ -260,7 +261,7 @@ public class LSNet : UnityEngine.MonoBehaviour {
         }
 
         public void CloseConnection(NetworkClient client) {
-
+                clientSockets[client].socket.Close();
         }
 
         private void SendMessageToClient(ClientData data, byte[] buffer) {
@@ -313,10 +314,34 @@ public class LSNet : UnityEngine.MonoBehaviour {
                 }
         }
 
+        // Called Unity-side when the client stops receiving stuff.
+        private void ClientDisconnected(NetworkClient client) {
+                clientSockets[client].socket.Close();
+                clientSockets.Remove(client);
+                server.OnClientDisconnect(client);
+        }
+
+        // Called Unity-side when the server stops receiving stuff.
+        private void ServerDisconnected() {
+                try {
+                        clientSocket.Close();
+                } catch(Exception e) {
+                        UnityEngine.Debug.LogException(e, this);
+                }
+                var c = localClient;
+                localClient = null;
+                clientSocket = null;
+                c.OnDisconnected();
+        }
+
         // Server async callbacks.
         private void OnSendClientComplete(IAsyncResult info) {
-                var data = info.AsyncState as ClientData;
-                data.socket.EndSend(info);
+                try {
+                        var data = info.AsyncState as ClientData;
+                        data.socket.EndSend(info);
+                } catch(Exception e) {
+                        AddUnityAction(() => { UnityEngine.Debug.LogException(e, this); });
+                }
         }
 
         private void OnReceiveClientHeader(IAsyncResult info) {
@@ -324,13 +349,21 @@ public class LSNet : UnityEngine.MonoBehaviour {
                 var data = clientSockets[client];
 
                 try {
-                        data.socket.EndReceive(info);
+                        var bytesRead = data.socket.EndReceive(info);
+                        if(bytesRead == 0) {
+                                // Connection closed.
+                                AddUnityAction(() => { ClientDisconnected(client); });
+                                return;
+                        }
 
                         data.messageLength = (int)data.buffer[0] | ((int)data.buffer[1] << 8);
 
                         data.activeReceive = data.socket.BeginReceive(data.buffer, 2, data.messageLength, SocketFlags.None, OnReceiveClientMessage, client);
                 } catch(Exception e) {
-                        AddUnityAction(() => { UnityEngine.Debug.LogException(e, this); });
+                        AddUnityAction(() => {
+                                        UnityEngine.Debug.LogException(e, this);
+                                        ClientDisconnected(client);
+                                });
                 }
         }
 
@@ -339,14 +372,22 @@ public class LSNet : UnityEngine.MonoBehaviour {
                 var data = clientSockets[client];
 
                 try {
-                        data.socket.EndReceive(info);
+                        var bytesRead = data.socket.EndReceive(info);
+                        if(bytesRead == 0) {
+                                // Connection closed.
+                                AddUnityAction(() => { ClientDisconnected(client); });
+                                return;
+                        }
 
                         var message = NetworkMessage.Deserialize(data.buffer);
                         AddUnityAction(() => { server.OnClientMessage(client, message); });
 
                         data.activeReceive = data.socket.BeginReceive(data.buffer, 0, 2, SocketFlags.None, OnReceiveClientHeader, client);
                 } catch(Exception e) {
-                        AddUnityAction(() => { UnityEngine.Debug.LogException(e, this); });
+                        AddUnityAction(() => {
+                                        UnityEngine.Debug.LogException(e, this);
+                                        ClientDisconnected(client);
+                                });
                 }
         }
 
@@ -378,31 +419,52 @@ public class LSNet : UnityEngine.MonoBehaviour {
 
         // Client async callbacks.
         private void OnSendServerComplete(IAsyncResult info) {
-                clientSocket.EndSend(info);
+                try {
+                        clientSocket.EndSend(info);
+                } catch(Exception e) {
+                        AddUnityAction(() => {
+                                        UnityEngine.Debug.LogException(e, this);
+                                        ServerDisconnected();
+                                });
+                }
         }
 
         private void OnReceiveServerHeader(IAsyncResult info) {
                 try {
-                        clientSocket.EndReceive(info);
+                        var bytesRead = clientSocket.EndReceive(info);
+                        if(bytesRead == 0) {
+                                AddUnityAction(() => ServerDisconnected());
+                                return;
+                        }
 
                         clientMessageLength = (int)clientBuffer[0] | ((int)clientBuffer[1] << 8);
 
                         clientSocket.BeginReceive(clientBuffer, 2, clientMessageLength, SocketFlags.None, OnReceiveServerMessage, clientSocket);
                 } catch(Exception e) {
-                        AddUnityAction(() => { UnityEngine.Debug.LogException(e, this); });
+                        AddUnityAction(() => {
+                                        UnityEngine.Debug.LogException(e, this);
+                                        ServerDisconnected();
+                                });
                 }
         }
 
         private void OnReceiveServerMessage(IAsyncResult info) {
                 try {
-                        clientSocket.EndReceive(info);
+                        var bytesRead = clientSocket.EndReceive(info);
+                        if(bytesRead == 0) {
+                                AddUnityAction(() => { ServerDisconnected(); });
+                                return;
+                        }
 
                         var message = NetworkMessage.Deserialize(clientBuffer);
                         AddUnityAction(() => { localClient.OnServerMessage(message); });
 
                         clientSocket.BeginReceive(clientBuffer, 0, 2, SocketFlags.None, OnReceiveServerHeader, clientSocket);
                 } catch(Exception e) {
-                        AddUnityAction(() => { UnityEngine.Debug.LogException(e, this); });
+                        AddUnityAction(() => {
+                                        UnityEngine.Debug.LogException(e, this);
+                                        ServerDisconnected();
+                                });
                 }
         }
 
@@ -414,9 +476,10 @@ public class LSNet : UnityEngine.MonoBehaviour {
                                         clientSocket.BeginReceive(clientBuffer, 0, 2, SocketFlags.None, OnReceiveServerHeader, clientSocket);
                                 });
                 } catch(Exception e) {
+                        var blah = localClient;
+                        AddUnityAction(() => { UnityEngine.Debug.LogException(e, this); blah.OnFailedToConnect(); });
                         clientSocket = null;
                         localClient = null;
-                        AddUnityAction(() => { UnityEngine.Debug.LogException(e, this); });
                 }
         }
 }

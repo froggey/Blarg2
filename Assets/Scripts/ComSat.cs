@@ -54,6 +54,9 @@ class Server : IServer {
         }
         public void OnClientDisconnect(NetworkClient client) {
                 Debug.Log("Client " + client + " disconnected");
+                if(!clientIDMap.ContainsKey(client)) {
+                        return;
+                }
                 int id = clientIDMap[client];
                 NetworkMessage drop = new NetworkMessage(NetworkMessage.Type.PlayerLeave);
                 drop.playerID = id;
@@ -69,7 +72,7 @@ class Server : IServer {
                 foreach(var p in clientIDMap) {
                         if(p.Value == id) {
                                 net.CloseConnection(p.Key);
-                                OnClientDisconnect(p.Key);
+                                break;
                         }
                 }
         }
@@ -210,12 +213,14 @@ public class ComSat : MonoBehaviour, IClient {
 
                 net = GetComponent<LSNet>();
                 currentInstance = this;
+
+                NetworkInit();
+        }
+
+        void NetworkInit() {
                 gameOver = false;
                 localPlayerID = -1;
-
-                if(Network.isServer) {
-                        players = new List<Player>();
-                }
+                players.Clear();
         }
 
         void Victory(int winner) {
@@ -702,6 +707,7 @@ public class ComSat : MonoBehaviour, IClient {
         }
         public void OnDisconnected() {
                 Debug.Log("Disconnected from server.");
+                NetworkInit();
                 if(connectionState == ConnectionState.InGame) {
                         Application.LoadLevel("Lobby");
                 }
@@ -881,7 +887,7 @@ public class ComSat : MonoBehaviour, IClient {
                         Debug.LogError("Bad state to connect in.");
                         return;
                 }
-                localPlayerID = -1;
+                NetworkInit();
                 net.Connect(address, port, this);
         }
 
@@ -890,7 +896,7 @@ public class ComSat : MonoBehaviour, IClient {
                         Debug.LogError("Bad state to start a server in.");
                         return;
                 }
-                localPlayerID = -1;
+                NetworkInit();
                 server = new Server(this);
                 net.InitializeServer(port, server, this);
         }
