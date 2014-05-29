@@ -33,6 +33,8 @@ public class NetworkMessage {
                 Ready = 11,
                 // Server->client.
                 NextTurn = 12,
+                // Client->server. Sends gameState.
+                SyncCheck = 13,
         }
 
         public NetworkMessage() {}
@@ -103,6 +105,10 @@ public class NetworkMessage {
 
         [ProtoMember(13)]
         public int UIwhat;
+
+        // Serialized game state.
+        [ProtoMember(14)]
+        public string gameState;
 }
 
 public class NetworkClient {}
