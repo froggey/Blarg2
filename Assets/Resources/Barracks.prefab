@@ -49,6 +49,7 @@ Transform:
   m_Children:
   - {fileID: 400002}
   m_Father: {fileID: 0}
+  m_RootOrder: 0
 --- !u!4 &400002
 Transform:
   m_ObjectHideFlags: 1
@@ -60,6 +61,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400000}
+  m_RootOrder: 0
 --- !u!23 &2300000
 Renderer:
   m_ObjectHideFlags: 1
@@ -78,9 +80,8 @@ Renderer:
   m_UseLightProbes: 0
   m_LightProbeAnchor: {fileID: 0}
   m_ScaleInLightmap: 1
-  m_SortingLayer: 0
-  m_SortingOrder: 0
   m_SortingLayerID: 0
+  m_SortingOrder: 0
 --- !u!33 &3300000
 MeshFilter:
   m_ObjectHideFlags: 1
@@ -138,7 +139,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   team: 0
   origin: {fileID: 0}
-  maxHealth: 200
+  maxHealth: 500
   health: 0
   collisionRadiusNumerator: 3
   collisionRadiusDenominator: 1
@@ -171,6 +172,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: fe70a1df14ad0ed43bf4736092c725aa, type: 2}
   sabotageRepairTime: 60
   sabotageTimeMultiplier: 3
+  buildRadius: 0
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1
