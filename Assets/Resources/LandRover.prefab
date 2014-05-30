@@ -798,6 +798,9 @@ MonoBehaviour:
   hpBarTexture: {fileID: 2800000, guid: fe5e9061a9af5c24ab18c18b3c0f7857, type: 3}
   hitOnlyIfTargetted: 0
   teamColourRenderer: {fileID: 2300010}
+  buildCost:
+    Metal: 6000
+    MagicSmoke: 0
 --- !u!114 &11400008
 MonoBehaviour:
   m_ObjectHideFlags: 1

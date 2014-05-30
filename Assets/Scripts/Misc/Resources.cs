@@ -8,7 +8,12 @@ public enum ResourceType {
         MagicSmoke
 }
 
-public struct ResourceSet {
+[Serializable]
+public class ResourceSet {
         public int Metal;
         public int MagicSmoke;
+
+        public bool ContainsAtLeast(ResourceSet required) {
+                return Metal >= required.Metal && MagicSmoke >= required.MagicSmoke;
+        }
 }

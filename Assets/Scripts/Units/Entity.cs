@@ -35,6 +35,8 @@ public class Entity : MonoBehaviour {
 
         public Renderer teamColourRenderer;
 
+        public ResourceSet buildCost;
+
         private Dictionary<int, System.Action> updateActions = new Dictionary<int, System.Action>();
 
         void Awake() {

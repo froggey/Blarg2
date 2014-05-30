@@ -36,10 +36,10 @@ public class ComSat : MonoBehaviour {
         private List<System.Action> queuedCommands;
         private List<System.Action> futureQueuedCommands;
 
-        private static ComSat currentInstance;
+        public static ComSat currentInstance { get; private set; }
 
         private List<Player> players;
-        private ResourceSet[] teamResources;
+        public ResourceSet[] teamResources;
         public static ResourceSet localTeamResources { get { return currentInstance.teamResources[localTeam]; } }
 
         private bool worldRunning;
@@ -131,8 +131,10 @@ public class ComSat : MonoBehaviour {
 
                 if(Network.isServer) {
                         players = new List<Player>();
-                        teamResources = new ResourceSet[7];
                 }
+                teamResources = Enumerable.Range(0, 7)
+                        .Select(_ => new ResourceSet { Metal = 2000 })
+                        .ToArray();
         }
 
         [RPC]
@@ -141,7 +143,7 @@ public class ComSat : MonoBehaviour {
                 winningTeam = winner;
         }
 
-        // Instantiate a new prefab, defering to the end of TickUpdate.
+        // Instantiate a new prefab, deferring to the end of TickUpdate.
         // Prefab must be an Entity.
         public static void SpawnEntity(GameObject prefab, int team, DVector2 position, DReal rotation) {
                 currentInstance.deferredActions.Add(() => {

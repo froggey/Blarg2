@@ -36,6 +36,6 @@ public class SimpleMovable : MonoBehaviour {
                 Debug.Log(this + " moving to " + location);
                 moving = true;
                 destination = location;
-                SendMessage("MoveDestinationChanged");
+                SendMessage("MoveDestinationChanged", SendMessageOptions.DontRequireReceiver);
         }
 }
