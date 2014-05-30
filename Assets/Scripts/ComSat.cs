@@ -546,6 +546,7 @@ public class ComSat : MonoBehaviour, IClient {
         }
 
         void ReadyUp() {
+                if(replayInput != null) return;
                 var m = new NetworkMessage(NetworkMessage.Type.Ready);
                 net.SendMessageToServer(m);
         }
