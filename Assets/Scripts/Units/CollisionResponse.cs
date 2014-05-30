@@ -1,0 +1,34 @@
+using UnityEngine;
+
+// When colliding with another entity on the same plane, forcefully move away.
+[RequireComponent (typeof(Entity))]
+public class CollisionResponse : MonoBehaviour {
+        private Entity entity;
+
+        public enum Layer {
+                GROUND, AIR
+        }
+
+        public Layer layer;
+        public bool fixedPosition;
+
+        void Awake() {
+                entity = GetComponent<Entity>();
+                entity.AddUpdateAction(9, TickUpdate);
+        }
+
+        void TickUpdate() {
+                foreach(var ent in ComSat.FindEntitiesWithinRadius(entity.position, entity.collisionRadius)) {
+                        if(ent == entity) continue;
+                        var cr = ent.GetComponent<CollisionResponse>();
+                        if(cr != null && cr.layer == this.layer && !cr.fixedPosition) {
+                                var maxDist = entity.collisionRadius + ent.collisionRadius;
+                                var sqrMaxDist = maxDist * maxDist;
+                                var sqrDist = (ent.position - entity.position).sqrMagnitude;
+                                var puntPower = sqrMaxDist / (sqrMaxDist - sqrDist) / 4;
+                                var dir = (ent.position - entity.position).normalized;
+                                ent.position += dir * puntPower;
+                        }
+                }
+        }
+}

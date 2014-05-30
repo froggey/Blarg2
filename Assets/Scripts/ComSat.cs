@@ -603,6 +603,23 @@ public class ComSat : MonoBehaviour, IClient {
                 return null;
         }
 
+        // Locate an entity within the given circle, not on the given team.
+        public static List<Entity> FindEntitiesWithinRadius(DVector2 origin, DReal radius, int ignoreTeam = -1) {
+                var result = new List<Entity>();
+
+                foreach(Entity e in currentInstance.worldEntityCache) {
+                        if(e == null) continue;
+                        if(e.team == ignoreTeam) continue;
+                        if(e.collisionRadius == 0) continue;
+
+                        if((e.position - origin).sqrMagnitude < radius*radius) {
+                                result.Add(e);
+                        }
+                }
+
+                return result;
+        }
+
         public static DReal RandomValue() {
                 randomValue = 22695477 * randomValue + 1;
                 return randomValue;
