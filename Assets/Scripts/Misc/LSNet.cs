@@ -181,6 +181,10 @@ public class LSNet : UnityEngine.MonoBehaviour {
                 Disconnect();
         }
 
+        void OnApplicationQuit() {
+                Disconnect();
+        }
+
         // Call Unity-side to push events through properly.
         void Update() {
                 List<Action> actions;
@@ -205,6 +209,7 @@ public class LSNet : UnityEngine.MonoBehaviour {
                         foreach(var data in clientSockets.Values) {
                                 //if(data.disconnected) continue;
                                 //data.disconnected = true;
+                                data.socket.Shutdown(SocketShutdown.Both);
                                 data.socket.Close();
                         }
                         listenSocket.Close();
@@ -216,6 +221,7 @@ public class LSNet : UnityEngine.MonoBehaviour {
                         localClient = null;
                 } else if(localClient != null) {
                         // Connected somewhere.
+                        clientSocket.Shutdown(SocketShutdown.Both);
                         clientSocket.Close();
                 }
         }
