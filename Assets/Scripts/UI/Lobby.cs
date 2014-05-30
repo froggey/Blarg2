@@ -58,6 +58,14 @@ public class Lobby : MonoBehaviour {
                         comSat.Host(System.Convert.ToInt32(hostPort));
                 }
 
+                if(System.IO.Directory.Exists("Replays")) {
+                        foreach(var replay in System.IO.Directory.GetFiles("Replays", "*.replay")) {
+                                if(GUILayout.Button(replay)) {
+                                        comSat.PlayReplay(replay);
+                                }
+                        }
+                }
+
                 GUILayout.EndVertical();
 		GUILayout.EndArea();
         }

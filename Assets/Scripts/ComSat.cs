@@ -131,10 +131,12 @@ public class ComSat : MonoBehaviour, IClient {
         }
 
         private System.IO.FileStream replayOutput;
-        private int lastReplayCommandTurn;
+        private System.IO.FileStream replayInput;
 
         private LSNet net;
         private Server server;
+
+        public float timeAccel = 1.0f;
 
         void Log(string s) {
                 if(debugVomit) {
@@ -172,6 +174,9 @@ public class ComSat : MonoBehaviour, IClient {
                 currentInstance = null;
                 if(replayOutput != null) {
                         replayOutput.Close();
+                }
+                if(replayInput != null) {
+                        replayInput.Close();
                 }
         }
 
@@ -244,6 +249,8 @@ public class ComSat : MonoBehaviour, IClient {
         // Create a new entity at whereever.
         // Called by all, but ignored everywhere but the server.
         public static void Spawn(string entityName, int team, DVector2 position, DReal rotation) {
+                if(currentInstance.replayInput != null) return;
+
                 if(team != 0) {
                         // Only spawn if the team exists.
                         bool ok = false;
@@ -450,9 +457,22 @@ public class ComSat : MonoBehaviour, IClient {
         void Update() {
                 if(!worldRunning) return;
 
+                if(replayInput != null && !goForNextTurn) {
+                        // Play back commands until the next turn or the end of the replay.
+                        try {
+                                while(true) {
+                                        var m = ProtoBuf.Serializer.DeserializeWithLengthPrefix<NetworkMessage>(replayInput, ProtoBuf.PrefixStyle.Base128);
+                                        OnServerMessage(m);
+                                        if(m.type == NetworkMessage.Type.NextTurn) break;
+                                }
+                        } catch(System.Exception e) {
+                                Debug.LogException(e, this);
+                        }
+                }
+
                 // FixedUpdate has an indeterminate update order, TickUpdate fixes this.
                 // First the world is updated, then entities are updated in creation (id) order.
-                timeSlop += Time.deltaTime;
+                timeSlop += Time.deltaTime * timeAccel;
                 while(timeSlop >= (float)tickRate) {
                         timeSlop -= (float)tickRate;
                         if(ticksRemaining != 0) {
@@ -595,6 +615,7 @@ public class ComSat : MonoBehaviour, IClient {
 
         // Game UI commands.
         public static void IssueMove(Entity unit, DVector2 position) {
+                if(currentInstance.replayInput != null) return;
                 if(unit == null) return;
 
                 var m = new NetworkMessage(NetworkMessage.Type.Move);
@@ -604,6 +625,7 @@ public class ComSat : MonoBehaviour, IClient {
         }
 
         public static void IssueAttack(Entity unit, Entity target) {
+                if(currentInstance.replayInput != null) return;
                 if(unit == null || target == null) return;
 
                 var m = new NetworkMessage(NetworkMessage.Type.Attack);
@@ -613,6 +635,7 @@ public class ComSat : MonoBehaviour, IClient {
         }
 
         public static void IssueUIAction(Entity unit, int what) {
+                if(currentInstance.replayInput != null) return;
                 if(unit == null) return;
 
                 var m = new NetworkMessage(NetworkMessage.Type.UIAction);
@@ -880,5 +903,13 @@ public class ComSat : MonoBehaviour, IClient {
                 var m = new NetworkMessage(NetworkMessage.Type.KickPlayer);
                 m.playerID = player.id;
                 net.SendMessageToServer(m);
+        }
+
+        public void PlayReplay(string path) {
+                if(worldRunning) {
+                        throw new System.Exception("Got start game while world running?");
+                }
+                replayInput = new System.IO.FileStream(path, System.IO.FileMode.Open);
+                Application.LoadLevel("main"); // FIXME: Should bake this into the replay.
         }
 }
