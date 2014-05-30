@@ -708,7 +708,15 @@ public class ComSat : MonoBehaviour, IClient {
                         if(worldRunning) {
                                 throw new System.Exception("Got start game while world running?");
                         }
-                        replayOutput = new System.IO.FileStream("Replays/" + System.DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ss") + ".replay", System.IO.FileMode.CreateNew);
+                        try {
+                                if(!System.IO.Directory.Exists("Replays")) {
+                                        System.IO.Directory.CreateDirectory("Replays");
+                                }
+                                replayOutput = new System.IO.FileStream("Replays/" + System.DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ss") + ".replay", System.IO.FileMode.CreateNew);
+                        } catch(System.Exception e) {
+                                Debug.LogError("Unable to record replay.");
+                                Debug.LogException(e, this);
+                        }
                         Application.LoadLevel(message.levelName);
                         break;
                 case NetworkMessage.Type.SpawnEntity:
