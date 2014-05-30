@@ -434,7 +434,7 @@ GameObject:
   - 4: {fileID: 439102908}
   - 114: {fileID: 439102907}
   m_Layer: 0
-  m_Name: SmokeMine
+  m_Name: SmokeSource
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -775,7 +775,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 100000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
       propertyPath: m_Name
-      value: SmokeMine
+      value: SmokeSource
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
@@ -819,11 +819,11 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 11400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
       propertyPath: entityName
-      value: IronSource
+      value: OreSource
       objectReference: {fileID: 0}
     - target: {fileID: 100000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
       propertyPath: m_Name
-      value: IronMine
+      value: OreSource
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
@@ -840,7 +840,7 @@ GameObject:
   - 4: {fileID: 1282575467}
   - 114: {fileID: 1282575466}
   m_Layer: 0
-  m_Name: IronMine
+  m_Name: OreSource
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -858,7 +858,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4714cd0fa92e44f82a66987e37ad1e45, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  entityName: IronSource
+  entityName: OreSource
   team: 0
   action: 0
   point: {x: 0, y: 0}
