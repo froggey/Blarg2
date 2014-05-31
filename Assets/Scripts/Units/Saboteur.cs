@@ -15,6 +15,7 @@ public class Saboteur : MonoBehaviour {
         Entity entity;
 
         void Awake() {
+                ComSat.Trace(this, "Awake");
                 moving = false;
                 motor = GetComponent<Vehicle>();
                 entity = GetComponent<Entity>();
@@ -22,6 +23,7 @@ public class Saboteur : MonoBehaviour {
         }
 
         void TickUpdate() {
+                ComSat.Trace(this, "TickUpdate");
                 if(target != null) {
                         destination = target.position;
 
@@ -42,11 +44,13 @@ public class Saboteur : MonoBehaviour {
         }
 
         void Move(DVector2 location) {
+                ComSat.Trace(this, "Move");
                 moving = true;
                 destination = location;
         }
 
         void Attack(Entity target) {
+                ComSat.Trace(this, "Attack");
                 if(target == entity) {
                         return;
                 }

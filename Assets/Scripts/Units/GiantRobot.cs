@@ -20,6 +20,7 @@ public class GiantRobot : MonoBehaviour {
         private Vehicle vehicle;
 
         void Awake() {
+                ComSat.Trace(this, "Awake");
                 entity = GetComponent<Entity>();
                 entity.AddUpdateAction(TickUpdate);
                 vehicle = GetComponent<Vehicle>();
@@ -82,6 +83,7 @@ public class GiantRobot : MonoBehaviour {
         }
 
         void TickUpdate() {
+                ComSat.Trace(this, "TickUpdate");
                 if(mode == Mode.ATTACK && target == null) {
                         target = null;
                         mode = Mode.IDLE;
@@ -135,6 +137,7 @@ public class GiantRobot : MonoBehaviour {
         }
 
         void Attack(Entity target) {
+                ComSat.Trace(this, "Attack");
                 if(target == entity) {
                         return;
                 }
@@ -144,6 +147,7 @@ public class GiantRobot : MonoBehaviour {
         }
 
         void Move(DVector2 location) {
+                ComSat.Trace(this, "Move");
                 mode = Mode.MOVE;
                 target = null;
                 destination = location;

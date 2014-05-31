@@ -14,6 +14,7 @@ public class SimpleMovable : MonoBehaviour {
         Entity entity;
 
         void Awake() {
+                ComSat.Trace(this, "Awake");
                 moving = false;
                 motor = GetComponent<Vehicle>();
                 entity = GetComponent<Entity>();
@@ -21,6 +22,7 @@ public class SimpleMovable : MonoBehaviour {
         }
 
         void TickUpdate() {
+                ComSat.Trace(this, "TickUpdate");
                 if(moving) {
                         if((destination - entity.position).sqrMagnitude < sqrPositioningAccuracy) {
                                 // Close enough.
@@ -33,7 +35,7 @@ public class SimpleMovable : MonoBehaviour {
         }
 
         void Move(DVector2 location) {
-                Debug.Log(this + " moving to " + location);
+                ComSat.Trace(this, "Move");
                 moving = true;
                 destination = location;
         }

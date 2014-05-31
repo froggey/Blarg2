@@ -14,11 +14,13 @@ public class Projectile : MonoBehaviour {
         Entity entity;
 
         void Awake() {
+                ComSat.Trace(this, "Awake");
                 entity = gameObject.GetComponent<Entity>();
                 entity.AddUpdateAction(TickUpdate);
         }
 
         void TickUpdate() {
+                ComSat.Trace(this, "TickUpdate");
                 if(target != null) {
                         var dir = target.position - entity.position; // also vector to dest.
                         var targetAngle = DVector2.ToAngle(dir);

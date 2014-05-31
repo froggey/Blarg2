@@ -48,6 +48,18 @@ public class Lobby : MonoBehaviour {
                 }
         }
 
+        void TraceButton() {
+                if(comSat.enableActionTracing) {
+                        if(GUILayout.Button("Action Tracing Enabled (very verbose!)")) {
+                                comSat.enableActionTracing = false;
+                        }
+                } else {
+                        if(GUILayout.Button("Action Tracing Disabled")) {
+                                comSat.enableActionTracing = true;
+                        }
+                }
+        }
+
         void ConnectGUI() {
 		GUILayout.BeginArea(new Rect (100, 50, Screen.width-200, Screen.height-100));
                 GUILayout.BeginVertical();
@@ -79,6 +91,7 @@ public class Lobby : MonoBehaviour {
                 }
 
                 StateDumpButton();
+                TraceButton();
                 if(System.IO.Directory.Exists("Replays")) {
                         replayListScrollPosition = GUILayout.BeginScrollView(replayListScrollPosition);
                         foreach(var replay in System.IO.Directory.GetFiles("Replays", "*.replay")) {
@@ -141,7 +154,13 @@ public class Lobby : MonoBehaviour {
 		if(GUILayout.Button(comSat.isHost ? "Close Server" : "Disconnect")) {
                         comSat.Disconnect();
                 }
+
+                if(GUILayout.Button(comSat.enableContinuousSyncCheck ? "Continuous Sync Checking Enabled (slow)" : "Continuous Sync Checking Disabled")) {
+                        comSat.enableContinuousSyncCheck = !comSat.enableContinuousSyncCheck;
+                }
+
                 StateDumpButton();
+                TraceButton();
 
                 GUILayout.EndVertical();
 		GUILayout.EndArea();

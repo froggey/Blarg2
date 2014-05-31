@@ -8,10 +8,12 @@ public class Constructor : MonoBehaviour {
         public Entity constructionPrefab;
 
         void Awake() {
+                ComSat.Trace(this, "Awake");
                 entity = GetComponent<Entity>();
         }
 
         void UIAction(int what) {
+                ComSat.Trace(this, "UIAction");
                 ComSat.SpawnEntity(constructionPrefab.gameObject, entity.team, entity.position, entity.rotation);
                 ComSat.DestroyEntity(entity);
         }

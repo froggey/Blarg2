@@ -140,6 +140,10 @@ public class ComSat : MonoBehaviour, IClient {
 
         // Dump the entire gamestate every turn.
         public bool fullDump;
+        // Trace actions and stuff.
+        public bool enableActionTracing;
+        // Sync check every tick.
+        public bool enableContinuousSyncCheck;
 
         void Log(string s) {
                 if(debugVomit) {
@@ -511,7 +515,7 @@ public class ComSat : MonoBehaviour, IClient {
                                                 currentGameState = DumpGameState();
                                                 Log(currentGameState);
                                         }
-                                        if(syncCheckRequested) {
+                                        if(syncCheckRequested || enableContinuousSyncCheck) {
                                                 string state = DumpGameState();
                                                 Debug.Log(state);
                                                 // Make sure it doesn't exceed the maximum packet length.
@@ -945,5 +949,19 @@ public class ComSat : MonoBehaviour, IClient {
                 }
                 replayInput = new System.IO.FileStream(path, System.IO.FileMode.Open);
                 Application.LoadLevel("main"); // FIXME: Should bake this into the replay.
+        }
+
+        public static void Trace(MonoBehaviour what, string msg) {
+                if(currentInstance == null || !currentInstance.enableActionTracing) {
+                        return;
+                }
+                var ent = what.GetComponent<Entity>();
+                if(ent == null) {
+                        Debug.Log("Non-entity " + what + ": " + msg);
+                } else if(currentInstance.reverseWorldEntities.ContainsKey(ent)) {
+                        Debug.Log("[" + currentInstance.reverseWorldEntities[ent] + "] " + what + ": " + msg);
+                } else {
+                        Debug.Log("Unknown entity " + what + ": " + msg);
+                }
         }
 }
