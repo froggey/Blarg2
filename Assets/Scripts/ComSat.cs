@@ -127,7 +127,7 @@ public class ComSat : MonoBehaviour, IClient {
         private int winningTeam;
 
         public static int localTeam {
-                get { return currentInstance.localPlayer.team; }
+                get { return currentInstance.localPlayer == null ? -1 : currentInstance.localPlayer.team; }
         }
 
         private System.IO.FileStream replayOutput;
