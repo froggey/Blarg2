@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System;
 
 public class Lobby : MonoBehaviour {
         public static string localPlayerName = "";
@@ -13,6 +14,9 @@ public class Lobby : MonoBehaviour {
 
         void Start() {
                 comSat = FindObjectOfType<ComSat>();
+                localPlayerName = PlayerPrefs.GetString("localPlayerName", Environment.UserName);
+                hostAddress = PlayerPrefs.GetString("hostAddress", "");
+                hostPort = PlayerPrefs.GetString("hostPort", "11235");
         }
 
         void OnGUI() {
@@ -54,10 +58,12 @@ public class Lobby : MonoBehaviour {
 		if(GUILayout.Button("Connect")) {
                         sentPlayerName = false;
                         comSat.Connect(hostAddress, System.Convert.ToInt32(hostPort));
+                        SaveSettngs();
                 }
 		if(GUILayout.Button("Host")) {
                         sentPlayerName = false;
                         comSat.Host(System.Convert.ToInt32(hostPort));
+                        SaveSettngs();
                 }
 
                 if(System.IO.Directory.Exists("Replays")) {
@@ -72,6 +78,13 @@ public class Lobby : MonoBehaviour {
 
                 GUILayout.EndVertical();
 		GUILayout.EndArea();
+        }
+
+        private void SaveSettngs() {
+                PlayerPrefs.SetString("localPlayerName", localPlayerName);
+                PlayerPrefs.SetString("hostAddress", hostAddress);
+                PlayerPrefs.SetString("hostPort", hostPort);
+                PlayerPrefs.Save();
         }
 
         void ConnectingGUI() {
