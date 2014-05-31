@@ -17,7 +17,7 @@ public class Constructor : MonoBehaviour {
                 entity = GetComponent<Entity>();
                 movable = GetComponent<SimpleMovable>();
                 buildIndex = -1;
-                entity.AddUpdateAction(9, TickUpdate);
+                entity.AddUpdateAction(10, TickUpdate);
         }
 
         void UIAction(int what) {

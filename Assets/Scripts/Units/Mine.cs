@@ -13,7 +13,7 @@ public class Mine : MonoBehaviour {
 
         void Start() {
                 entity = GetComponent<Entity>();
-                entity.AddUpdateAction(10, TickUpdate);
+                entity.AddUpdateAction(11, TickUpdate);
                 source = Utility.GetThingAt<ResourceSource>(entity.position);
                 source.hasMine = true;
         }

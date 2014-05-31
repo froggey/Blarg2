@@ -71,7 +71,9 @@ public class Entity : MonoBehaviour {
 
         public void AddUpdateAction(int priority, System.Action action) {
                 if(updateActions.ContainsKey(priority)) {
-                        Debug.LogError("Action with conflicting priority " + priority);
+                        Debug.LogError(string.Format(
+                                "Action with conflicting priority {0} ({1}, {2})",
+                                priority, action.Method.DeclaringType, updateActions[priority].Method.DeclaringType));
                         AddUpdateAction(priority+1, action);
                         return;
                 }

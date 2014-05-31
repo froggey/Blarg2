@@ -3,28 +3,105 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-public class ComSat : MonoBehaviour {
-        private class Player {
+class Server : IServer {
+        ComSat comSat;
+        LSNet net;
+        int nextPlayerID = 0;
+
+        Dictionary<NetworkClient, int> clientIDMap = new Dictionary<NetworkClient, int>();
+
+        public Server(ComSat cs) {
+                this.comSat = cs;
+        }
+
+        public void OnServerActive(LSNet net) {
+                Debug.Log("Server active.");
+                this.net = net;
+        }
+        public void OnClientConnect(NetworkClient client) {
+                if(comSat.connectionState == ComSat.ConnectionState.InGame) {
+                        // Nope, out you go.
+                        Debug.Log("Client " + client + " attempted to join during game.");
+                        net.CloseConnection(client);
+                        return;
+                }
+
+                Debug.Log("Client " + client + " connected");
+                // Give it a player id.
+                var id = nextPlayerID;
+                nextPlayerID += 1;
+                clientIDMap[client] = id;
+
+                var hello = new NetworkMessage(NetworkMessage.Type.Hello);
+                hello.playerID = id;
+                net.SendMessageToClient(client, hello);
+                // Notify all players of the client joining.
+                var newJoin = new NetworkMessage(NetworkMessage.Type.PlayerJoin);
+                newJoin.playerID = id;
+                net.SendMessageToAll(newJoin);
+
+                // Send it details of other players.
+                foreach(var p in comSat.players) {
+                        var join = new NetworkMessage(NetworkMessage.Type.PlayerJoin);
+                        join.playerID = p.id;
+                        net.SendMessageToClient(client, join);
+                        var update = new NetworkMessage(NetworkMessage.Type.PlayerUpdate);
+                        update.playerID = p.id;
+                        update.playerName = p.name;
+                        update.teamID = p.team;
+                        net.SendMessageToClient(client, update);
+                }
+        }
+        public void OnClientDisconnect(NetworkClient client) {
+                Debug.Log("Client " + client + " disconnected");
+                if(!clientIDMap.ContainsKey(client)) {
+                        return;
+                }
+                int id = clientIDMap[client];
+                NetworkMessage drop = new NetworkMessage(NetworkMessage.Type.PlayerLeave);
+                drop.playerID = id;
+                net.SendMessageToAll(drop);
+                clientIDMap.Remove(client);
+        }
+        public void OnClientMessage(NetworkClient client, NetworkMessage message) {
+                Debug.Log("Client " + client + " set message " + message);
+                comSat.OnClientMessage(clientIDMap[client], message);
+        }
+
+        public void DisconnectPlayer(int id) {
+                foreach(var p in clientIDMap) {
+                        if(p.Value == id) {
+                                net.CloseConnection(p.Key);
+                                break;
+                        }
+                }
+        }
+}
+
+[RequireComponent (typeof(LSNet))]
+public class ComSat : MonoBehaviour, IClient {
+        public class Player {
                 public int id;
                 public string name;
                 public int team;
                 public bool ready;
                 public int unreadyTime;
-
-                public NetworkPlayer client;
         }
 
         // Game runs at this rate.
         public static DReal tickRate = (DReal)1 / (DReal)25;
         // This many ticks per communication turn.
         // Max input lag = ticksPerTurn * tickRate.
-        public static int ticksPerTurn = 5; // set this to 5 for release, 1 for locally debugging desyncs
+        public static int ticksPerTurn = 10; // set this to 5 for release, 1 for locally debugging desyncs
 
         private float timeSlop;
         private int ticksRemaining; // Ticks remaining in this turn.
         private bool goForNextTurn;
+        private bool serverNextTurn;
         private int tickID;
         private int turnID;
+        private int serverCommandID;
+        private int clientCommandID;
 
         private int nextEntityId;
         private Dictionary<int, Entity> worldEntities;
@@ -38,9 +115,8 @@ public class ComSat : MonoBehaviour {
 
         public static ComSat currentInstance { get; private set; }
 
-        private List<Player> players;
-        public ResourceSet[] teamResources;
-        public static ResourceSet localTeamResources { get { return currentInstance.teamResources[localTeam]; } }
+        public int localPlayerID;
+        public List<Player> players = new List<Player>();
 
         private bool worldRunning;
 
@@ -50,10 +126,17 @@ public class ComSat : MonoBehaviour {
         private bool gameOver;
         private int winningTeam;
 
-        public static int localTeam;
+        public static int localTeam {
+                get { return currentInstance.localPlayer == null ? -1 : currentInstance.localPlayer.team; }
+        }
 
-        private System.IO.StreamWriter replayOutput;
-        private int lastReplayCommandTurn;
+        private System.IO.FileStream replayOutput;
+        private System.IO.FileStream replayInput;
+
+        private LSNet net;
+        private Server server;
+
+        public float timeAccel = 1.0f;
 
         void Log(string s) {
                 if(debugVomit) {
@@ -61,21 +144,12 @@ public class ComSat : MonoBehaviour {
                 }
         }
 
-        static public void SaveReplay(string path) {
-                if(currentInstance.worldRunning) {
-                        throw new System.Exception("Tried to start a replay after the world began!");
-                }
-                currentInstance.replayOutput = new System.IO.StreamWriter(path);
-        }
-
         void OnGUI() {
                 if(!worldRunning) return;
 
                 GUILayout.BeginArea(new Rect (Screen.width-200, 0, 200, 100));
                 if(GUILayout.Button("Disconnect")) {
-                        Network.Disconnect();
-                        Destroy(gameObject);
-                        Application.LoadLevel("Lobby");
+                        Disconnect();
                 }
                 if(GUILayout.Button("Check Sync")) {
                         syncCheckRequested = true;
@@ -93,57 +167,45 @@ public class ComSat : MonoBehaviour {
                 GUILayout.EndArea();
         }
 
-        void OnPlayerDisconnected(NetworkPlayer player) {
-                var p = SenderToPlayer(player);
-                // Should kill all their units or something.
-                if(p != null) {
-                        networkView.RPC("PlayerDrop", RPCMode.All, p.name);
-                        players.Remove(p);
-                }
-        }
-
-        [RPC]
-        void PlayerDrop(string name) {
-                Debug.LogError("Player " + name + " has dropped!");
-        }
-
-        void OnDisconnectedFromServer() {
-                Destroy(gameObject);
-                Application.LoadLevel("Lobby");
-        }
-
         void OnDestroy() {
+                if(currentInstance != this) {
+                        return;
+                }
                 currentInstance = null;
                 if(replayOutput != null) {
                         replayOutput.Close();
+                }
+                if(replayInput != null) {
+                        replayInput.Close();
                 }
         }
 
         void Awake() {
                 if(currentInstance != null) {
-                        throw new System.Exception("Multiple ComSat instances!");
+                        Destroy(gameObject);
+                        return;
                 }
 
                 DontDestroyOnLoad(gameObject);
 
+                net = GetComponent<LSNet>();
                 currentInstance = this;
-                gameOver = false;
 
-                if(Network.isServer) {
-                        players = new List<Player>();
-                }
-                teamResources = Enumerable.Range(0, 7)
-                        .Select(_ => new ResourceSet { Metal = 2000 })
-                        .ToArray();
+                NetworkInit();
         }
 
-        [RPC]
+        void NetworkInit() {
+                gameOver = false;
+                localPlayerID = -1;
+                players.Clear();
+        }
+
         void Victory(int winner) {
                 gameOver = true;
                 winningTeam = winner;
         }
 
-        // Instantiate a new prefab, deferring to the end of TickUpdate.
+        // Instantiate a new prefab, defering to the end of TickUpdate.
         // Prefab must be an Entity.
         public static void SpawnEntity(GameObject prefab, int team, DVector2 position, DReal rotation) {
                 currentInstance.deferredActions.Add(() => {
@@ -183,6 +245,9 @@ public class ComSat : MonoBehaviour {
                                 onSpawn(thing);
                         });
         }
+        
+        public ResourceSet[] teamResources;
+        public static ResourceSet localTeamResources { get { return currentInstance.teamResources[localTeam]; } }
 
         public static void AddResource(int team, ResourceType resource, int amount) {
                 currentInstance.deferredActions.Add(() => {
@@ -200,36 +265,42 @@ public class ComSat : MonoBehaviour {
         // Create a new entity at whereever.
         // Called by all, but ignored everywhere but the server.
         public static void Spawn(string entityName, int team, DVector2 position, DReal rotation) {
-                if(!Network.isServer) return;
+                if(currentInstance.replayInput != null) return;
 
-                if(team != 0 && !currentInstance.players.Any(p => p.team == team))
-                        return;
-                
-                currentInstance.networkView.RPC("SpawnCommand", RPCMode.All, currentInstance.turnID,
-                                                entityName,
-                                                team,
-                                                DReal.Serialize(position.x), DReal.Serialize(position.y),
-                                                DReal.Serialize(rotation));
+                if(team != 0) {
+                        // Only spawn if the team exists.
+                        bool ok = false;
+
+                        foreach(var p in currentInstance.players) {
+                                if(p.team == team) {
+                                        ok = true;
+                                        break;
+                                }
+                        }
+
+                        if(!ok) return;
+                }
+
+                var m = new NetworkMessage(NetworkMessage.Type.SpawnEntity);
+                m.entityName = entityName;
+                m.teamID = team;
+                m.position = position;
+                m.rotation = rotation;
+                currentInstance.net.SendMessageToServer(m);
         }
 
         // (Client)
-        [RPC]
-        void SpawnCommand(int onTurn, string entityName, int team, string positionX, string positionY, string rotation_) {
-                SaveReplayCommand(onTurn, "S " + entityName + " " + team + " " + positionX + " " + positionY + " " + rotation_);
-                var position = new DVector2(DReal.Deserialize(positionX), DReal.Deserialize(positionY));
-                var rotation = DReal.Deserialize(rotation_);
+        void SpawnCommand(string entityName, int team, DVector2 position, DReal rotation) {
                 GameObject go = Resources.Load<GameObject>(entityName);
                 Vector3 worldPosition = new Vector3((float)position.y, 0, (float)position.x);
                 Quaternion worldRotation = Quaternion.AngleAxis((float)rotation, Vector3.up);
 
-                QueueCommand(onTurn, () => {
-                                Log("{" + tickID + "} Spawn " + entityName + " on team " + team + " at " + position + ":" + rotation);
-                                Entity thing = (Object.Instantiate(go, worldPosition, worldRotation) as GameObject).GetComponent<Entity>();
-                                thing.position = position;
-                                thing.rotation = rotation;
-                                thing.team = team;
-                                EntityCreated(thing);
-                        });
+                Log("{" + tickID + "} Spawn " + entityName + " on team " + team + " at " + position + ":" + rotation);
+                Entity thing = (Object.Instantiate(go, worldPosition, worldRotation) as GameObject).GetComponent<Entity>();
+                thing.position = position;
+                thing.rotation = rotation;
+                thing.team = team;
+                EntityCreated(thing);
         }
 
         void EntityCreated(Entity ent) {
@@ -256,60 +327,48 @@ public class ComSat : MonoBehaviour {
                         });
         }
 
-        // (Client)
-        [RPC]
-        void MoveCommand(int onTurn, int entityID, string positionX, string positionY) {
-                var position = new DVector2(DReal.Deserialize(positionX), DReal.Deserialize(positionY));
-                var entity = worldEntities[entityID];
-                Log("Got move action on " + turnID + "@" + tickID + " for turn " + onTurn);
-                SaveReplayCommand(onTurn, "M " + entityID + " " + positionX + " " + positionY);
-                QueueCommand(onTurn, () => {
-                                if(entity != null) {
-                                        Log("{" + tickID + "} Move " + entity + "[" + entityID + "] to " + position);
-                                        entity.gameObject.SendMessage("Move", position, SendMessageOptions.DontRequireReceiver);
-                                }
-                        });
+        Entity EntityFromID(int entityID) {
+                if(!worldEntities.ContainsKey(entityID)) return null;
+                return worldEntities[entityID];
         }
 
         // (Client)
-        [RPC]
-        void AttackCommand(int onTurn, int entityID, int targetID) {
-                var entity = worldEntities[entityID];
-                var target = worldEntities[targetID];
-                SaveReplayCommand(onTurn, "A " + entityID + " " + targetID);
-                QueueCommand(onTurn, () => {
-                                if(entity != null && target != null) {
-                                        Log("{" + tickID + "} " + entity + "[" + entityID + "] attack " + target + "[" + targetID + "]");
-                                        entity.gameObject.SendMessage("Attack", target, SendMessageOptions.DontRequireReceiver);
-                                }
-                        });
-        }
-
-        // (Client)
-        [RPC]
-        void UIActionCommand(int onTurn, int entityID, int what) {
-                var entity = worldEntities[entityID];
-                SaveReplayCommand(onTurn, "U " + entityID + " " + what);
-                QueueCommand(onTurn, () => {
-                                if(entity != null) {
-                                        Log("{" + tickID + "} " + entity + "[" + entityID + "] UI action " + what);
-                                        entity.gameObject.SendMessage("UIAction", what, SendMessageOptions.DontRequireReceiver);
-                                }
-                        });
-        }
-
-        void SaveReplayCommand(int onTurn, string command) {
-                lastReplayCommandTurn = onTurn;
-                if(replayOutput != null) {
-                        replayOutput.WriteLine(onTurn + " " + command);
+        void MoveCommand(int team, int entityID, DVector2 position) {
+                var entity = EntityFromID(entityID);
+                if(entity != null && entity.team == team) {
+                        Log("{" + tickID + "} Move " + entity + "[" + entityID + "] to " + position);
+                        entity.gameObject.SendMessage("Move", position, SendMessageOptions.DontRequireReceiver);
                 }
         }
 
         // (Client)
-        void QueueCommand(int onTurn, System.Action command) {
+        void AttackCommand(int team, int entityID, int targetID) {
+                var entity = EntityFromID(entityID);
+                var target = EntityFromID(targetID);
+                if(entity != null && target != null && entity.team == team) {
+                        Log("{" + tickID + "} " + entity + "[" + entityID + "] attack " + target + "[" + targetID + "]");
+                        entity.gameObject.SendMessage("Attack", target, SendMessageOptions.DontRequireReceiver);
+                }
+        }
+
+        // (Client)
+        void UIActionCommand(int team, int entityID, int what) {
+                var entity = EntityFromID(entityID);
+                if(entity != null && entity.team == team) {
+                        Log("{" + tickID + "} " + entity + "[" + entityID + "] UI action " + what);
+                        entity.gameObject.SendMessage("UIAction", what, SendMessageOptions.DontRequireReceiver);
+                }
+        }
+
+        // (Client)
+        void QueueCommand(int onTurn, int commandID, System.Action command) {
+                clientCommandID += 1;
+                if(commandID != clientCommandID) {
+                        Debug.LogError("Command out of order.");
+                }
                 if(goForNextTurn) {
                         if(onTurn != turnID+1) {
-                                Debug.LogError("Future command on turn " + turnID+1 + " is for turn " + onTurn + "???");
+                                Debug.LogError("Future command on turn " + (turnID+1) + " is for turn " + onTurn + "???");
                         }
                         futureQueuedCommands.Add(command);
                 } else {
@@ -323,6 +382,18 @@ public class ComSat : MonoBehaviour {
         private static uint randomValue;
 
         void OnLevelWasLoaded(int level) {
+                if(level == 0) { // lobby.
+                        if(replayOutput != null) {
+                                replayOutput.Close();
+                                replayOutput = null;
+                        }
+                        if(replayInput != null) {
+                                replayInput.Close();
+                                replayInput = null;
+                        }
+                        worldRunning = false;
+                        return;
+                }
                 worldRunning = true;
 
                 timeSlop = 0.0f;
@@ -340,7 +411,7 @@ public class ComSat : MonoBehaviour {
                 queuedCommands = new List<System.Action>();
                 futureQueuedCommands = new List<System.Action>();
 
-                if(Network.isServer) {
+                if(isHost) {
                         ClearReady();
                 }
 
@@ -372,18 +443,13 @@ public class ComSat : MonoBehaviour {
                 foreach(var p in players) {
                         if(!p.ready) {
                                 if(p.unreadyTime > 1) {
-                                        networkView.RPC("LagWarning", RPCMode.All, p.name);
+                                        Debug.LogWarning("Player " + p.name + " is lagging.");
                                 }
                                 p.unreadyTime += 1;
                                 result = false;
                         }
                 }
                 return result;
-        }
-
-        [RPC]
-        void LagWarning(string name) {
-                Debug.LogError("Player " + name + " is lagging.");
         }
 
         // Called every tickRate seconds when the world is live.
@@ -404,34 +470,34 @@ public class ComSat : MonoBehaviour {
 
         string currentGameState;
 
-        [RPC]
-        void VerifyGameState(string state, NetworkMessageInfo info) {
-                if(!Network.isServer) return; // ????
-                if(state.Length != 4096 && currentGameState != state) {
-                        Debug.LogError("Client " + SenderToPlayer(info.sender) + " out of sync!");
+        void VerifyClientGameState(int playerID, string state) {
+                if(state != currentGameState) {
+                        Debug.LogError("Player " + playerID + " out of sync!");
                         Debug.LogError(state);
                         Debug.LogError(currentGameState);
-                        networkView.RPC("SyncStateNotify", RPCMode.All, false, SenderToPlayer(info.sender).team);
-                } else {
-                        networkView.RPC("SyncStateNotify", RPCMode.All, true, SenderToPlayer(info.sender).team);
-                }
-        }
-
-        [RPC]
-        void SyncStateNotify(bool ok, int player) {
-                if(ok) {
-                        Debug.LogError("Player " + player + " has good sync.");
-                } else {
-                        Debug.LogError("Player " + player + " desynced!");
                 }
         }
 
         void Update() {
                 if(!worldRunning) return;
 
+                if(replayInput != null && !goForNextTurn) {
+                        // Play back commands until the next turn or the end of the replay.
+                        try {
+                                while(true) {
+                                        var m = ProtoBuf.Serializer.DeserializeWithLengthPrefix<NetworkMessage>(replayInput, ProtoBuf.PrefixStyle.Base128);
+                                        if(m == null) break;
+                                        OnServerMessage(m);
+                                        if(m.type == NetworkMessage.Type.NextTurn) break;
+                                }
+                        } catch(System.Exception e) {
+                                Debug.LogException(e, this);
+                        }
+                }
+
                 // FixedUpdate has an indeterminate update order, TickUpdate fixes this.
                 // First the world is updated, then entities are updated in creation (id) order.
-                timeSlop += Time.deltaTime;
+                timeSlop += Time.deltaTime * timeAccel;
                 while(timeSlop >= (float)tickRate) {
                         timeSlop -= (float)tickRate;
                         if(ticksRemaining != 0) {
@@ -441,24 +507,28 @@ public class ComSat : MonoBehaviour {
                                 ticksRemaining -= 1;
                         }
                         if(ticksRemaining == 0) {
-                                if(Network.isServer && EveryoneIsReady()) {
+                                if(isHost && EveryoneIsReady()) {
                                         // Advance the game turn.
-                                        networkView.RPC("NextTurn", RPCMode.All);
+                                        var m = new NetworkMessage(NetworkMessage.Type.NextTurn);
+                                        net.SendMessageToAll(m);
                                         ClearReady();
+                                        serverNextTurn = true;
                                 }
 
                                 if(goForNextTurn) {
-                                        if(replayOutput != null && lastReplayCommandTurn == turnID) {
-                                                replayOutput.WriteLine(turnID + " T");
-                                        }
-                                        if(Network.isServer) {
+                                        if(isHost) {
                                                 currentGameState = DumpGameState();
                                                 Log(currentGameState);
                                         }
                                         if(syncCheckRequested) {
                                                 string state = DumpGameState();
                                                 Debug.Log(state);
-                                                networkView.RPC("VerifyGameState", RPCMode.Server, state);
+                                                // Make sure it doesn't exceed the maximum packet length.
+                                                if(state.Length < 0xFF00) {
+                                                        var m = new NetworkMessage(NetworkMessage.Type.SyncCheck);
+                                                        m.gameState = state;
+                                                        net.SendMessageToServer(m);
+                                                }
                                                 syncCheckRequested = false;
                                         }
 
@@ -472,6 +542,7 @@ public class ComSat : MonoBehaviour {
                                         queuedCommands = futureQueuedCommands;
                                         futureQueuedCommands = tmp;
                                         goForNextTurn = false;
+                                        serverNextTurn = false;
                                         ReadyUp();
                                         ticksRemaining = ticksPerTurn;
                                         turnID += 1;
@@ -494,39 +565,18 @@ public class ComSat : MonoBehaviour {
                         // Magic bit hackery to check if exactly one bit is set (power of two).
                         // No bits is also a possiblilty.
                         if(teamMask == 0 || (teamMask & (teamMask - 1)) == 0) {
-                                networkView.RPC("Victory", RPCMode.All, winningTeam);
+                                Victory(winningTeam);
                         }
                 }
         }
 
         void ReadyUp() {
-                if(Network.isServer) {
-                        foreach(var p in players) {
-                                if(p.id == 0) {
-                                        p.ready = true;
-                                        return;
-                                }
-                        }
-                } else {
-                        networkView.RPC("DoReadyUp", RPCMode.Server);
-                }
-        }
-
-        // Mark a client as ready. (Server)
-        [RPC]
-        void DoReadyUp(NetworkMessageInfo info) {
-                foreach(var p in players) {
-                        if(p.client == info.sender) {
-                                Log("Player " + p.id + " readyup  " + turnID + " " + tickID);
-                                p.ready = true;
-                                return;
-                        }
-                }
-                Debug.LogWarning("ReadyUp from unknown client " + info);
+                if(replayInput != null) return;
+                var m = new NetworkMessage(NetworkMessage.Type.Ready);
+                net.SendMessageToServer(m);
         }
 
         // Advance to the next communication turn. (Client)
-        [RPC]
         void NextTurn() {
                 Log("Next turn.  " + turnID + " " + tickID);
                 if(goForNextTurn) {
@@ -535,108 +585,13 @@ public class ComSat : MonoBehaviour {
                 goForNextTurn = true;
         }
 
-        Player SenderToPlayer(NetworkPlayer net) {
+        Player PlayerFromID(int id) {
                 foreach(var p in players) {
-                        if(p.client == net) {
+                        if(p.id == id) {
                                 return p;
                         }
                 }
                 return null;
-        }
-
-        public static void IssueMove(Entity unit, DVector2 position) {
-                if(unit == null) return;
-
-                if(Network.isServer) {
-                        currentInstance.IssueMoveServer(currentInstance.players[0], unit, position);
-                } else {
-                        currentInstance.networkView.RPC("IssueMoveNet", RPCMode.Server,
-                                                        currentInstance.reverseWorldEntities[unit],
-                                                        DReal.Serialize(position.x), DReal.Serialize(position.y));
-                }
-        }
-
-        void IssueMoveServer(Player player, Entity unit, DVector2 position) {
-                if(unit == null || player.team != unit.team) {
-                        return;
-                }
-
-                networkView.RPC("MoveCommand", RPCMode.All, turnID,
-                                reverseWorldEntities[unit],
-                                DReal.Serialize(position.x), DReal.Serialize(position.y));
-        }
-
-        [RPC]
-        void IssueMoveNet(int entityID, string positionX, string positionY, NetworkMessageInfo info) {
-                Entity e = worldEntities[entityID];
-                if(e == null) {
-                        return;
-                }
-                var position = new DVector2(DReal.Deserialize(positionX), DReal.Deserialize(positionY));
-                IssueMoveServer(SenderToPlayer(info.sender), e, position);
-        }
-
-        public static void IssueAttack(Entity unit, Entity target) {
-                if(unit == null || target == null) return;
-
-                if(Network.isServer) {
-                        currentInstance.IssueAttackServer(currentInstance.players[0], unit, target);
-                } else {
-                        currentInstance.networkView.RPC("IssueAttackNet", RPCMode.Server,
-                                                        currentInstance.reverseWorldEntities[unit],
-                                                        currentInstance.reverseWorldEntities[target]);
-                }
-        }
-
-        void IssueAttackServer(Player player, Entity unit, Entity target) {
-                if(unit == null || target == null || player.team != unit.team) {
-                        return;
-                }
-
-                networkView.RPC("AttackCommand", RPCMode.All, turnID,
-                                reverseWorldEntities[unit],
-                                reverseWorldEntities[target]);
-        }
-
-        [RPC]
-        void IssueAttackNet(int entityID, int targetID, NetworkMessageInfo info) {
-                Entity e = worldEntities[entityID];
-                Entity t = worldEntities[targetID];
-                if(e == null || t == null) {
-                        return;
-                }
-                IssueAttackServer(SenderToPlayer(info.sender), e, t);
-        }
-
-        public static void IssueUIAction(Entity unit, int what) {
-                if(unit == null) return;
-
-                if(Network.isServer) {
-                        currentInstance.IssueUIActionServer(currentInstance.players[0], unit, what);
-                } else {
-                        currentInstance.networkView.RPC("IssueUIActionNet", RPCMode.Server,
-                                                        currentInstance.reverseWorldEntities[unit],
-                                                        what);
-                }
-        }
-
-        void IssueUIActionServer(Player player, Entity unit, int what) {
-                if(unit == null || player.team != unit.team) {
-                        return;
-                }
-
-                networkView.RPC("UIActionCommand", RPCMode.All, turnID,
-                                reverseWorldEntities[unit],
-                                what);
-        }
-
-        [RPC]
-        void IssueUIActionNet(int entityID, int what, NetworkMessageInfo info) {
-                Entity e = worldEntities[entityID];
-                if(e == null) {
-                        return;
-                }
-                IssueUIActionServer(SenderToPlayer(info.sender), e, what);
         }
 
         // Cast a line from A to B, checking for collisions with other entities.
@@ -673,6 +628,23 @@ public class ComSat : MonoBehaviour {
                 return null;
         }
 
+        // Locate an entity within the given circle, not on the given team.
+        public static List<Entity> FindEntitiesWithinRadius(DVector2 origin, DReal radius, int ignoreTeam = -1) {
+                var result = new List<Entity>();
+
+                foreach(Entity e in currentInstance.worldEntityCache) {
+                        if(e == null) continue;
+                        if(e.team == ignoreTeam) continue;
+                        if(e.collisionRadius == 0) continue;
+
+                        if((e.position - origin).sqrMagnitude < radius*radius) {
+                                result.Add(e);
+                        }
+                }
+
+                return result;
+        }
+
         public static DReal RandomValue() {
                 randomValue = 22695477 * randomValue + 1;
                 return randomValue;
@@ -684,12 +656,309 @@ public class ComSat : MonoBehaviour {
                 return n * range + min;
         }
 
-        public void ServerAddPlayer(int id, NetworkPlayer client, string name, int team) {
+        // Game UI commands.
+        public static void IssueMove(Entity unit, DVector2 position) {
+                if(currentInstance.replayInput != null) return;
+                if(unit == null) return;
+
+                var m = new NetworkMessage(NetworkMessage.Type.Move);
+                m.entityID = currentInstance.reverseWorldEntities[unit];
+                m.position = position;
+                currentInstance.net.SendMessageToServer(m);
+        }
+
+        public static void IssueAttack(Entity unit, Entity target) {
+                if(currentInstance.replayInput != null) return;
+                if(unit == null || target == null) return;
+
+                var m = new NetworkMessage(NetworkMessage.Type.Attack);
+                m.entityID = currentInstance.reverseWorldEntities[unit];
+                m.targetID = currentInstance.reverseWorldEntities[target];
+                currentInstance.net.SendMessageToServer(m);
+        }
+
+        public static void IssueUIAction(Entity unit, int what) {
+                if(currentInstance.replayInput != null) return;
+                if(unit == null) return;
+
+                var m = new NetworkMessage(NetworkMessage.Type.UIAction);
+                m.entityID = currentInstance.reverseWorldEntities[unit];
+                m.UIwhat = what;
+                currentInstance.net.SendMessageToServer(m);
+        }
+
+        // Network stuff.
+
+        public void OnConnected(LSNet net) {
+                Debug.Log("Connected to server.");
+        }
+        public void OnDisconnected() {
+                Debug.Log("Disconnected from server.");
+                NetworkInit();
+                if(connectionState == ConnectionState.InGame) {
+                        Application.LoadLevel("Lobby");
+                }
+        }
+        public void OnFailedToConnect() {
+                Debug.Log("Unabled to connect to server.");
+        }
+
+        void PlayerJoin(int id) {
+                if(connectionState == ConnectionState.InGame) {
+                        Debug.LogWarning("Player joining while in game?");
+                }
                 var p = new Player();
                 p.id = id;
-                p.client = client;
-                p.name = name;
-                p.team = team;
+                p.name = "<Player " + p.id + ">";
+                p.team = 0;
+                if(isHost) {
+                        // Automatically assign a team.
+                        var teams = new List<int>{ 1,2,3,4,5,6,7 };
+                        foreach(var player in players) {
+                                teams.Remove(player.team);
+                        }
+                        if(teams.Count != 0) {
+                                p.team = teams[0];
+                        }
+                        // Blah blah.
+                        var update = new NetworkMessage(NetworkMessage.Type.PlayerUpdate);
+                        update.playerID = p.id;
+                        update.teamID = p.team;
+                        net.SendMessageToAll(update);
+                }
                 players.Add(p);
+        }
+
+        void PlayerLeave(int id) {
+                if(id == localPlayerID) {
+                        Debug.LogWarning("Saw myself leave?");
+                }
+                if(connectionState == ConnectionState.InGame) {
+                        Debug.LogError("Player " + id + " dropped.");
+                }
+                players.RemoveAll(p => p.id == id);
+        }
+
+        void PlayerUpdate(int id, string name, int team) {
+                var p = PlayerFromID(id);
+                if(name.Length != 0) {
+                        p.name = name;
+                }
+                if(team != -1) {
+                        p.team = team;
+                }
+        }
+
+        void SaveReplayCommand(NetworkMessage message) {
+                if(replayOutput != null) {
+                        ProtoBuf.Serializer.SerializeWithLengthPrefix<NetworkMessage>(replayOutput, message, ProtoBuf.PrefixStyle.Base128);
+                }
+        }
+
+        public void OnServerMessage(NetworkMessage message) {
+                Debug.Log("Server sent message " + message + " " + message.type);
+                switch(message.type) {
+                case NetworkMessage.Type.Hello:
+                        localPlayerID = message.playerID;
+                        break;
+                case NetworkMessage.Type.PlayerJoin:
+                        PlayerJoin(message.playerID);
+                        break;
+                case NetworkMessage.Type.PlayerLeave:
+                        PlayerLeave(message.playerID);
+                        break;
+                case NetworkMessage.Type.PlayerUpdate:
+                        PlayerUpdate(message.playerID, message.playerName, message.teamID);
+                        break;
+                case NetworkMessage.Type.StartGame:
+                        if(worldRunning) {
+                                throw new System.Exception("Got start game while world running?");
+                        }
+                        StartGame(message.levelName);
+                        break;
+                case NetworkMessage.Type.SpawnEntity:
+                        SaveReplayCommand(message);
+                        QueueCommand(message.turnID, message.commandID,
+                                     () => { SpawnCommand(message.entityName, message.teamID,
+                                                          message.position, message.rotation); });
+                        break;
+                case NetworkMessage.Type.Move:
+                        SaveReplayCommand(message);
+                        QueueCommand(message.turnID, message.commandID,
+                                     () => { MoveCommand(message.teamID, message.entityID, message.position); });
+                        break;
+                case NetworkMessage.Type.Attack:
+                        SaveReplayCommand(message);
+                        QueueCommand(message.turnID, message.commandID,
+                                     () => { AttackCommand(message.teamID, message.entityID, message.targetID); });
+                        break;
+                case NetworkMessage.Type.UIAction:
+                        SaveReplayCommand(message);
+                        QueueCommand(message.turnID, message.commandID,
+                                     () => { UIActionCommand(message.teamID, message.entityID, message.UIwhat); });
+                        break;
+                case NetworkMessage.Type.NextTurn:
+                        SaveReplayCommand(message);
+                        NextTurn();
+                        break;
+                default:
+                        Debug.Log("Bad server message " + message.type);
+                        break;
+                }
+        }
+
+        private void StartGame(string levelName) {
+                try {
+                        if (!System.IO.Directory.Exists("Replays")) {
+                                System.IO.Directory.CreateDirectory("Replays");
+                        }
+                        replayOutput = new System.IO.FileStream("Replays/" + System.DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ss") + ".replay", System.IO.FileMode.CreateNew);
+                }
+                catch (System.Exception e) {
+                        Debug.LogError("Unable to record replay.");
+                        Debug.LogException(e, this);
+                }
+                Application.LoadLevel(levelName);
+                teamResources = Enumerable.Range(0, 7).Select(_ => new ResourceSet { Metal = 2000 }).ToArray();
+        }
+
+        bool PlayerIsAdmin(int id) {
+                return id == localPlayerID;
+        }
+
+        public void OnClientMessage(int playerID, NetworkMessage message) {
+                Debug.Log("Player " + playerID + " sent message " + message + " " + message.type);
+                switch(message.type) {
+                case NetworkMessage.Type.PlayerUpdate:
+                        if(PlayerIsAdmin(playerID) || playerID == message.playerID) {
+                                net.SendMessageToAll(message);
+                        }
+                        break;
+                case NetworkMessage.Type.KickPlayer:
+                        if(PlayerIsAdmin(playerID) && !PlayerIsAdmin(message.playerID)) {
+                                server.DisconnectPlayer(message.playerID);
+                        }
+                        break;
+                case NetworkMessage.Type.StartGame:
+                        if(PlayerIsAdmin(playerID)) {
+                                net.SendMessageToAll(message);
+                        }
+                        break;
+                case NetworkMessage.Type.SpawnEntity:
+                        if(PlayerIsAdmin(playerID)) {
+                                serverCommandID += 1;
+                                message.commandID = serverCommandID;
+                                message.turnID = goForNextTurn ? turnID + 1 : turnID;
+                                net.SendMessageToAll(message);
+                        }
+                        break;
+                case NetworkMessage.Type.Move:
+                case NetworkMessage.Type.Attack:
+                case NetworkMessage.Type.UIAction:
+                        serverCommandID += 1;
+                        message.commandID = serverCommandID;
+                        message.turnID = serverNextTurn ? turnID + 1 : turnID;
+                        message.teamID = PlayerFromID(playerID).team;
+                        net.SendMessageToAll(message);
+                        break;
+                case NetworkMessage.Type.Ready:
+                        Log("Player " + playerID + " readyup  " + turnID + " " + tickID);
+                        PlayerFromID(playerID).ready = true;
+                        break;
+                case NetworkMessage.Type.SyncCheck:
+                        VerifyClientGameState(playerID, message.gameState);
+                        break;
+                default:
+                        Debug.Log("Bad client message " + message.type);
+                        break;
+                }
+        }
+
+        public enum ConnectionState {
+                Disconnected, Connecting, Lobby, InGame
+        }
+        public bool isHost {
+                get {
+                        return server != null;
+                }
+        }
+        public Player localPlayer {
+                get {
+                        return PlayerFromID(localPlayerID);
+                }
+        }
+
+        public ConnectionState connectionState {
+                get {
+                        if(worldRunning) {
+                                return ConnectionState.InGame;
+                        } else if(localPlayerID != -1) {
+                                return ConnectionState.Lobby;
+                        } else if(net.isServer || net.isClient) {
+                                return ConnectionState.Connecting;
+                        } else {
+                                return ConnectionState.Disconnected;
+                        }
+                }
+        }
+
+        // UI commands.
+
+        public void Connect(string address, int port) {
+                if(connectionState != ConnectionState.Disconnected) {
+                        Debug.LogError("Bad state to connect in.");
+                        return;
+                }
+                NetworkInit();
+                net.Connect(address, port, this);
+        }
+
+        public void Host(int port) {
+                if(connectionState != ConnectionState.Disconnected) {
+                        Debug.LogError("Bad state to start a server in.");
+                        return;
+                }
+                NetworkInit();
+                server = new Server(this);
+                net.InitializeServer(port, server, this);
+        }
+
+        public void Disconnect() {
+                // Fuck it, just blow everything away.
+                // Would be nice to return to the lobby and stay connected to the server
+                // when leaving the game.
+                net.Disconnect();
+                Destroy(gameObject);
+                Application.LoadLevel("Lobby");
+        }
+        public void StartGame() {
+                var m = new NetworkMessage(NetworkMessage.Type.StartGame);
+                m.levelName = "main";
+                net.SendMessageToServer(m);
+        }
+        public void SetPlayerName(Player player, string name) {
+                var m = new NetworkMessage(NetworkMessage.Type.PlayerUpdate);
+                m.playerID = player.id;
+                m.playerName = name;
+                net.SendMessageToServer(m);
+        }
+        public void SetPlayerTeam(Player player, int team) {
+                var m = new NetworkMessage(NetworkMessage.Type.PlayerUpdate);
+                m.playerID = player.id;
+                m.teamID = team;
+                net.SendMessageToServer(m);
+        }
+        public void Kick(Player player) {
+                var m = new NetworkMessage(NetworkMessage.Type.KickPlayer);
+                m.playerID = player.id;
+                net.SendMessageToServer(m);
+        }
+
+        public void PlayReplay(string path) {
+                if(worldRunning) {
+                        throw new System.Exception("Got start game while world running?");
+                }
+                replayInput = new System.IO.FileStream(path, System.IO.FileMode.Open);
+                Application.LoadLevel("main"); // FIXME: Should bake this into the replay.
         }
 }

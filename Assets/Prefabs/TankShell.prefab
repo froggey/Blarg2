@@ -59,12 +59,13 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100000}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 17.8175697, y: 5.39569283, z: 9.39586639}
+  m_LocalPosition: {x: 247.527161, y: 1548.11157, z: -128.116043}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 400004}
   - {fileID: 400002}
   m_Father: {fileID: 0}
+  m_RootOrder: 0
 --- !u!4 &400002
 Transform:
   m_ObjectHideFlags: 1
@@ -76,6 +77,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400000}
+  m_RootOrder: 1
 --- !u!4 &400004
 Transform:
   m_ObjectHideFlags: 1
@@ -83,10 +85,11 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100004}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: -.699325562}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400000}
+  m_RootOrder: 0
 --- !u!23 &2300000
 Renderer:
   m_ObjectHideFlags: 1
@@ -105,9 +108,8 @@ Renderer:
   m_UseLightProbes: 0
   m_LightProbeAnchor: {fileID: 0}
   m_ScaleInLightmap: 1
-  m_SortingLayer: 0
-  m_SortingOrder: 0
   m_SortingLayerID: 0
+  m_SortingOrder: 0
 --- !u!33 &3300000
 MeshFilter:
   m_ObjectHideFlags: 1
@@ -133,11 +135,10 @@ TrailRenderer:
   m_UseLightProbes: 0
   m_LightProbeAnchor: {fileID: 0}
   m_ScaleInLightmap: 1
-  m_SortingLayer: 0
-  m_SortingOrder: 0
   m_SortingLayerID: 0
-  m_Time: 5
-  m_StartWidth: 1
+  m_SortingOrder: 0
+  m_Time: 1
+  m_StartWidth: .280000001
   m_EndWidth: 1
   m_Colors:
     m_Color[0]:
@@ -170,6 +171,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   damage: 10
   initialSpeed: 100
+  turnSpeed: 0
+  target: {fileID: 0}
   impactPrefab: {fileID: 100012, guid: d9d02c0a3ffc84ca1b5dfdccebb87c66, type: 2}
   trail: {fileID: 9600000}
 --- !u!114 &11400002
@@ -183,6 +186,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da86a9e91ba8347b4bace47fca8e731a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  offset: 1
 --- !u!114 &11400004
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -201,8 +205,12 @@ MonoBehaviour:
   collisionRadiusNumerator: 0
   collisionRadiusDenominator: 1
   baseMesh: {fileID: 0}
+  ghostPrefab: {fileID: 0}
   buildTime: 0
   buildIcon: {fileID: 0}
+  hpBarTexture: {fileID: 0}
+  hitOnlyIfTargetted: 0
+  teamColourRenderer: {fileID: 0}
 --- !u!114 &11400006
 MonoBehaviour:
   m_ObjectHideFlags: 1
