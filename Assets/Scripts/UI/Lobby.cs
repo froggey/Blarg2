@@ -9,6 +9,8 @@ public class Lobby : MonoBehaviour {
         ComSat comSat;
         bool sentPlayerName;
 
+        private Vector2 replayListScrollPosition;
+
         void Start() {
                 comSat = FindObjectOfType<ComSat>();
         }
@@ -59,11 +61,13 @@ public class Lobby : MonoBehaviour {
                 }
 
                 if(System.IO.Directory.Exists("Replays")) {
+                        replayListScrollPosition = GUILayout.BeginScrollView(replayListScrollPosition);
                         foreach(var replay in System.IO.Directory.GetFiles("Replays", "*.replay")) {
                                 if(GUILayout.Button(replay)) {
                                         comSat.PlayReplay(replay);
                                 }
                         }
+                        GUILayout.EndScrollView();
                 }
 
                 GUILayout.EndVertical();
