@@ -8,9 +8,11 @@ public class Lobby : MonoBehaviour {
 
         ComSat comSat;
         bool sentPlayerName;
+        int scrollMode;
 
         void Start() {
                 comSat = FindObjectOfType<ComSat>();
+                scrollMode = PlayerPrefs.GetInt("Scroll Mode");
         }
 
         void OnGUI() {
@@ -57,6 +59,10 @@ public class Lobby : MonoBehaviour {
                         sentPlayerName = false;
                         comSat.Host(System.Convert.ToInt32(hostPort));
                 }
+
+                // Game options.
+                scrollMode = GUILayout.Toggle(scrollMode == 1 ? true : false, "Camera Scroll Mode") ? 1 : 0;
+                PlayerPrefs.SetInt("Scroll Mode", scrollMode);
 
                 if(System.IO.Directory.Exists("Replays")) {
                         foreach(var replay in System.IO.Directory.GetFiles("Replays", "*.replay")) {

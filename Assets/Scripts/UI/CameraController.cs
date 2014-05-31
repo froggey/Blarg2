@@ -7,9 +7,31 @@ public class CameraController : MonoBehaviour {
         public int maxZoom = 15;
         public int minZoom = 200;
 
+        bool isScrolling;
+        Vector3 scrollOrigin;
+
         void Update() {
+                int scrollMode = PlayerPrefs.GetInt("Scroll Mode");
+
+                if(Input.GetButtonDown("Scroll")) {
+                        isScrolling = true;
+                        scrollOrigin = Input.mousePosition;
+                } else if(!Input.GetButton("Scroll")) {
+                        isScrolling = false;
+                }
+
                 transform.Translate(Input.GetAxis("Horizontal") * 2, 0, Input.GetAxis("Vertical") * 2);
                 transform.localRotation *= Quaternion.AngleAxis(Input.GetAxis("Rotation"), Vector3.up);
+                if(scrollMode == 0) {
+                        if(isScrolling) {
+                                Vector3 pos = Camera.main.ScreenToViewportPoint(Input.mousePosition - scrollOrigin);
+                                transform.Translate(pos.x * 6, 0, pos.y * 6);
+                        }
+                } else {
+                        if(Input.GetButton("Scroll")) {
+                                transform.Translate(Input.GetAxis("Mouse X") * 2, 0, Input.GetAxis("Mouse Y") * 2);
+                        }
+                }
 
                 cameraTransform.localRotation = Quaternion.AngleAxis(45, new Vector3(1,0,0));
                 cameraTransform.Translate(0, 0, Input.GetAxis("Zoom") * 50);
