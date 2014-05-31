@@ -9,6 +9,7 @@ public class Lobby : MonoBehaviour {
 
         ComSat comSat;
         bool sentPlayerName;
+        int scrollMode;
 
         private Vector2 replayListScrollPosition;
 
@@ -17,6 +18,7 @@ public class Lobby : MonoBehaviour {
                 localPlayerName = PlayerPrefs.GetString("localPlayerName", Environment.UserName);
                 hostAddress = PlayerPrefs.GetString("hostAddress", "");
                 hostPort = PlayerPrefs.GetString("hostPort", "11235");
+                scrollMode = PlayerPrefs.GetInt("Scroll Mode");
         }
 
         void OnGUI() {
@@ -92,6 +94,11 @@ public class Lobby : MonoBehaviour {
 
                 StateDumpButton();
                 TraceButton();
+
+                // Game options.
+                scrollMode = GUILayout.Toggle(scrollMode == 1 ? true : false, "Camera Scroll Mode") ? 1 : 0;
+                PlayerPrefs.SetInt("Scroll Mode", scrollMode);
+
                 if(System.IO.Directory.Exists("Replays")) {
                         replayListScrollPosition = GUILayout.BeginScrollView(replayListScrollPosition);
                         foreach(var replay in System.IO.Directory.GetFiles("Replays", "*.replay")) {
