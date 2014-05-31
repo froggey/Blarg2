@@ -10,7 +10,7 @@ public class Lifetime : MonoBehaviour {
 
         void Awake() {
                 entity = gameObject.GetComponent<Entity>();
-                entity.AddUpdateAction(0, TickUpdate);
+                entity.AddUpdateAction(TickUpdate);
                 age = 0;
         }
 

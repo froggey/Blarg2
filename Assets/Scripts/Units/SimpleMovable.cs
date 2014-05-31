@@ -17,7 +17,7 @@ public class SimpleMovable : MonoBehaviour {
                 moving = false;
                 motor = GetComponent<Vehicle>();
                 entity = GetComponent<Entity>();
-                entity.AddUpdateAction(3, TickUpdate);
+                entity.AddUpdateAction(TickUpdate);
         }
 
         void TickUpdate() {

@@ -12,13 +12,10 @@ public class Plane : MonoBehaviour {
 
         void Awake() {
                 entity = GetComponent<Entity>();
-                entity.AddUpdateAction(7, TickUpdate);
+                entity.AddUpdateAction(TickUpdate);
                 vehicle = GetComponent<Vehicle>();
 
                 missilesLoaded = maxMissiles;
-        }
-
-        void Start() {
                 destination = entity.position;
         }
 

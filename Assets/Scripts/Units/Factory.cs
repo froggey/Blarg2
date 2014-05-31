@@ -25,7 +25,7 @@ public class Factory : MonoBehaviour {
 
         void Awake() {
                 entity = GetComponent<Entity>();
-                entity.AddUpdateAction(2, TickUpdate);
+                entity.AddUpdateAction(TickUpdate);
                 buildQueue = new Queue<int>();
         }
 

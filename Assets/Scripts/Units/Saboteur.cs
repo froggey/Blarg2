@@ -18,7 +18,7 @@ public class Saboteur : MonoBehaviour {
                 moving = false;
                 motor = GetComponent<Vehicle>();
                 entity = GetComponent<Entity>();
-                entity.AddUpdateAction(8, TickUpdate);
+                entity.AddUpdateAction(TickUpdate);
         }
 
         void TickUpdate() {

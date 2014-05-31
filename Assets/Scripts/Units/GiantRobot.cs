@@ -21,7 +21,7 @@ public class GiantRobot : MonoBehaviour {
 
         void Awake() {
                 entity = GetComponent<Entity>();
-                entity.AddUpdateAction(6, TickUpdate);
+                entity.AddUpdateAction(TickUpdate);
                 vehicle = GetComponent<Vehicle>();
 
                 mode = Mode.IDLE;

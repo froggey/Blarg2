@@ -35,7 +35,7 @@ public class Entity : MonoBehaviour {
 
         public Renderer teamColourRenderer;
 
-        private Dictionary<int, System.Action> updateActions = new Dictionary<int, System.Action>();
+        private List<System.Action> updateActions = new List<System.Action>();
 
         void Awake() {
                 collisionRadius = (DReal)collisionRadiusNumerator / collisionRadiusDenominator;
@@ -61,20 +61,15 @@ public class Entity : MonoBehaviour {
         }
 
         public void TickUpdate() {
-                foreach(var a in updateActions.Values) {
+                ComSat.Trace(this, "TickUpdate");
+                foreach(var a in updateActions) {
                         a();
                 }
                 position += velocity * ComSat.tickRate;
         }
 
-        public void AddUpdateAction(int priority, System.Action action) {
-                if(updateActions.ContainsKey(priority)) {
-                        Debug.LogError("Action with conflicting priority " + priority);
-                        AddUpdateAction(priority+1, action);
-                        return;
-                }
-
-                updateActions[priority] = action;
+        public void AddUpdateAction(System.Action action) {
+                updateActions.Add(action);
         }
 
         public void Damage(int damage) {
