@@ -138,6 +138,9 @@ public class ComSat : MonoBehaviour, IClient {
 
         public float timeAccel = 1.0f;
 
+        // Dump the entire gamestate every turn.
+        public bool fullDump;
+
         void Log(string s) {
                 if(debugVomit) {
                         Debug.Log(s);
@@ -489,6 +492,10 @@ public class ComSat : MonoBehaviour, IClient {
                                 tickID += 1;
                                 TickUpdate();
                                 ticksRemaining -= 1;
+
+                                if(fullDump) {
+                                        Debug.Log(DumpGameState());
+                                }
                         }
                         if(ticksRemaining == 0) {
                                 if(isHost && EveryoneIsReady()) {
@@ -718,7 +725,7 @@ public class ComSat : MonoBehaviour, IClient {
                         Debug.LogWarning("Saw myself leave?");
                 }
                 if(connectionState == ConnectionState.InGame) {
-                        Debug.LogError("Player " + id + " dropped.");
+                        Debug.LogError("Player " + id + " " + PlayerFromID(id).name + " dropped.");
                 }
                 players.RemoveAll(p => p.id == id);
         }

@@ -36,6 +36,18 @@ public class Lobby : MonoBehaviour {
                 }
         }
 
+        void StateDumpButton() {
+                if(comSat.fullDump) {
+                        if(GUILayout.Button("Full State Dump Enabled")) {
+                                comSat.fullDump = false;
+                        }
+                } else {
+                        if(GUILayout.Button("Full State Dump Disabled")) {
+                                comSat.fullDump = true;
+                        }
+                }
+        }
+
         void ConnectGUI() {
 		GUILayout.BeginArea(new Rect (100, 50, Screen.width-200, Screen.height-100));
                 GUILayout.BeginVertical();
@@ -66,6 +78,7 @@ public class Lobby : MonoBehaviour {
                         SaveSettngs();
                 }
 
+                StateDumpButton();
                 if(System.IO.Directory.Exists("Replays")) {
                         replayListScrollPosition = GUILayout.BeginScrollView(replayListScrollPosition);
                         foreach(var replay in System.IO.Directory.GetFiles("Replays", "*.replay")) {
@@ -128,6 +141,7 @@ public class Lobby : MonoBehaviour {
 		if(GUILayout.Button(comSat.isHost ? "Close Server" : "Disconnect")) {
                         comSat.Disconnect();
                 }
+                StateDumpButton();
 
                 GUILayout.EndVertical();
 		GUILayout.EndArea();
