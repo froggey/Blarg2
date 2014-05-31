@@ -1,7 +1,7 @@
 Shader "Custom/Team Diffuse" {
 	Properties {
 		_MainTex ("Base Texture", 2D) = "white" {}
-		_AuxTex ("Auxiliary map", 2D) = "white" {}
+		_AuxTex ("Auxiliary map", 2D) = "black" {}
 		_Color ("Highlight Color", Color) = (1,1,1,0)
 		_TeamColor ("Team Color", Color) = (1,1,1,1)
 		_SpecColor ("Specular Color", Color) = (0.5, 0.5, 0.5, 1)
