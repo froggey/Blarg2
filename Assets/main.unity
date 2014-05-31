@@ -232,6 +232,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
+  m_RootOrder: 1
 --- !u!1 &119531389
 GameObject:
   m_ObjectHideFlags: 0
@@ -275,6 +276,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
+  m_RootOrder: 6
 --- !u!1 &179462616
 GameObject:
   m_ObjectHideFlags: 0
@@ -318,6 +320,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
+  m_RootOrder: 7
 --- !u!1 &377710305
 GameObject:
   m_ObjectHideFlags: 0
@@ -387,8 +390,11 @@ Camera:
     m_Bits: 4294967295
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
+  m_TargetDisplay: 0
   m_HDR: 0
   m_OcclusionCulling: 1
+  m_StereoConvergence: 10
+  m_StereoSeparation: .0219999999
 --- !u!4 &377710310
 Transform:
   m_ObjectHideFlags: 0
@@ -400,6 +406,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1836108030}
+  m_RootOrder: 0
 --- !u!114 &377710312
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -467,6 +474,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
+  m_RootOrder: 4
 --- !u!1001 &715444600
 Prefab:
   m_ObjectHideFlags: 0
@@ -558,6 +566,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
+  m_RootOrder: 3
 --- !u!1 &783589171
 GameObject:
   m_ObjectHideFlags: 0
@@ -601,6 +610,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
+  m_RootOrder: 2
 --- !u!1001 &857445100
 Prefab:
   m_ObjectHideFlags: 0
@@ -691,6 +701,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
+  m_RootOrder: 8
 --- !u!1001 &1452970292
 Prefab:
   m_ObjectHideFlags: 0
@@ -779,6 +790,7 @@ Transform:
   m_Children:
   - {fileID: 377710310}
   m_Father: {fileID: 0}
+  m_RootOrder: 0
 --- !u!114 &1836108031
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -861,6 +873,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
+  m_RootOrder: 5
 --- !u!1001 &1955548106
 Prefab:
   m_ObjectHideFlags: 0
@@ -973,3 +986,4 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
+  m_RootOrder: 9
