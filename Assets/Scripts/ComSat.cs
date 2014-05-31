@@ -367,6 +367,14 @@ public class ComSat : MonoBehaviour, IClient {
 
         void OnLevelWasLoaded(int level) {
                 if(level == 0) { // lobby.
+                        if(replayOutput != null) {
+                                replayOutput.Close();
+                                replayOutput = null;
+                        }
+                        if(replayInput != null) {
+                                replayInput.Close();
+                                replayInput = null;
+                        }
                         worldRunning = false;
                         return;
                 }
