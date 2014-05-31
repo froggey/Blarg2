@@ -462,6 +462,7 @@ public class ComSat : MonoBehaviour, IClient {
                         try {
                                 while(true) {
                                         var m = ProtoBuf.Serializer.DeserializeWithLengthPrefix<NetworkMessage>(replayInput, ProtoBuf.PrefixStyle.Base128);
+                                        if(m == null) break;
                                         OnServerMessage(m);
                                         if(m.type == NetworkMessage.Type.NextTurn) break;
                                 }
