@@ -50,6 +50,9 @@ public class NetworkMessage {
                 Serializer.Serialize(stream, this);
                 var buffer = stream.ToArray();
                 var len = buffer.Length - 2;
+                if(len >= 0x10000) {
+                        throw new Exception("Message exceeds maximum packet length!");
+                }
                 buffer[0] = (byte)(len & 0xFF);
                 buffer[1] = (byte)(len >> 8);
                 return buffer;

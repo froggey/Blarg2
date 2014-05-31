@@ -518,8 +518,7 @@ public class ComSat : MonoBehaviour, IClient {
                                         if(syncCheckRequested || enableContinuousSyncCheck) {
                                                 string state = DumpGameState();
                                                 Debug.Log(state);
-                                                // Make sure it doesn't exceed the maximum packet length.
-                                                if(state.Length < 0xFF00) {
+                                                if(state.Length < 0xF000) { // Keep within max packet length.
                                                         var m = new NetworkMessage(NetworkMessage.Type.SyncCheck);
                                                         m.gameState = state;
                                                         net.SendMessageToServer(m);
