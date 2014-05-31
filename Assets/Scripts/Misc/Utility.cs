@@ -117,7 +117,12 @@ static public class Utility {
                         return targetPosition;
                 }
 
-                var q = DReal.Sqrt(discriminant) / (2 * a);
+                DReal q;
+                try {
+                        q = DReal.Sqrt(discriminant) / (2 * a);
+                } catch(System.ArithmeticException e) {
+                        return targetPosition;
+                }
 
                 var t1 = p - q;
                 var t2 = p + q;
