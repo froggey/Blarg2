@@ -104,6 +104,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   localPlayerID: 0
+  timeAccel: 1
+  teamResources: []
 --- !u!4 &903961526
 Transform:
   m_ObjectHideFlags: 0

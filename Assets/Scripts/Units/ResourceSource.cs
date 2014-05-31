@@ -8,7 +8,6 @@ using UnityEngine;
 public class ResourceSource : MonoBehaviour {
         public ResourceType resource;
         public int amount;
-        public int mineRate;
         public bool hasMine;
 
         private Entity entity;

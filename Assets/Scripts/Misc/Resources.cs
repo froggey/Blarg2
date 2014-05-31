@@ -16,4 +16,8 @@ public class ResourceSet {
         public bool ContainsAtLeast(ResourceSet required) {
                 return Metal >= required.Metal && MagicSmoke >= required.MagicSmoke;
         }
+
+        public override string ToString() {
+                return string.Format("{{ Metal: {0}, MagicSmoke: {1} }}", Metal, MagicSmoke);
+        }
 }

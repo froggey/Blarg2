@@ -250,16 +250,14 @@ public class ComSat : MonoBehaviour, IClient {
         public static ResourceSet localTeamResources { get { return currentInstance.teamResources[localTeam]; } }
 
         public static void AddResource(int team, ResourceType resource, int amount) {
-                currentInstance.deferredActions.Add(() => {
-                                switch (resource) {
-                                        case ResourceType.MagicSmoke:
-                                                currentInstance.teamResources[team].MagicSmoke += amount;
-                                                break;
-                                        case ResourceType.Metal:
-                                                currentInstance.teamResources[team].Metal += amount;
-                                                break;
-                                }
-                        });
+                switch (resource) {
+                        case ResourceType.MagicSmoke:
+                                currentInstance.teamResources[team].MagicSmoke += amount;
+                                break;
+                        case ResourceType.Metal:
+                                currentInstance.teamResources[team].Metal += amount;
+                                break;
+                }
         }
 
         // Create a new entity at whereever.

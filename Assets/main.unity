@@ -232,7 +232,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 1
 --- !u!1 &119531389
 GameObject:
   m_ObjectHideFlags: 0
@@ -276,7 +275,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 6
 --- !u!1 &179462616
 GameObject:
   m_ObjectHideFlags: 0
@@ -320,7 +318,196 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 7
+--- !u!1 &201305830
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 100000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+  m_PrefabInternal: {fileID: 1792478010}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 201305832}
+  - 114: {fileID: 201305831}
+  m_Layer: 0
+  m_Name: OreSource
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &201305831
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 11400000, guid: 2d367342811064e0ebbe04d554cdbf68,
+    type: 2}
+  m_PrefabInternal: {fileID: 1792478010}
+  m_GameObject: {fileID: 201305830}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4714cd0fa92e44f82a66987e37ad1e45, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  entityName: OreSource
+  team: 0
+  action: 0
+  point: {x: 0, y: 0}
+--- !u!4 &201305832
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+  m_PrefabInternal: {fileID: 1792478010}
+  m_GameObject: {fileID: 201305830}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 236.332336, y: 0, z: 16.0263672}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+--- !u!1001 &328174026
+Prefab:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalPosition.x
+      value: 461.533813
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalPosition.y
+      value: 34.0419006
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalPosition.z
+      value: 29.5853882
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: entityName
+      value: OreSource
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: team
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_Name
+      value: OreSource
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_ParentPrefab: {fileID: 100100000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+  m_RootGameObject: {fileID: 349861846}
+  m_IsPrefabParent: 0
+  m_IsExploded: 1
+--- !u!1001 &338187331
+Prefab:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalPosition.x
+      value: 46.3252258
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalPosition.z
+      value: 270.30188
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: entityName
+      value: OreSource
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: team
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_Name
+      value: OreSource
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_ParentPrefab: {fileID: 100100000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+  m_RootGameObject: {fileID: 602924082}
+  m_IsPrefabParent: 0
+  m_IsExploded: 1
+--- !u!1 &349861846
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 100000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+  m_PrefabInternal: {fileID: 328174026}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 349861848}
+  - 114: {fileID: 349861847}
+  m_Layer: 0
+  m_Name: OreSource
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &349861847
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 11400000, guid: 2d367342811064e0ebbe04d554cdbf68,
+    type: 2}
+  m_PrefabInternal: {fileID: 328174026}
+  m_GameObject: {fileID: 349861846}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4714cd0fa92e44f82a66987e37ad1e45, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  entityName: OreSource
+  team: 0
+  action: 0
+  point: {x: 0, y: 0}
+--- !u!4 &349861848
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+  m_PrefabInternal: {fileID: 328174026}
+  m_GameObject: {fileID: 349861846}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 461.533813, y: 34.0419006, z: 29.5853882}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
 --- !u!1 &377710305
 GameObject:
   m_ObjectHideFlags: 0
@@ -390,23 +577,19 @@ Camera:
     m_Bits: 4294967295
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
-  m_TargetDisplay: 0
   m_HDR: 0
   m_OcclusionCulling: 1
-  m_StereoConvergence: 10
-  m_StereoSeparation: .0219999999
 --- !u!4 &377710310
 Transform:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 377710305}
-  m_LocalRotation: {x: .382683456, y: 0, z: 0, w: .923879504}
+  m_LocalRotation: {x: .382683486, y: 0, z: 0, w: .923879564}
   m_LocalPosition: {x: 2.86102295e-06, y: 90.5478363, z: -90.5478668}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1836108030}
-  m_RootOrder: 0
 --- !u!114 &377710312
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -474,7 +657,49 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+--- !u!1 &602924082
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 100000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+  m_PrefabInternal: {fileID: 338187331}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 602924084}
+  - 114: {fileID: 602924083}
+  m_Layer: 0
+  m_Name: OreSource
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &602924083
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 11400000, guid: 2d367342811064e0ebbe04d554cdbf68,
+    type: 2}
+  m_PrefabInternal: {fileID: 338187331}
+  m_GameObject: {fileID: 602924082}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4714cd0fa92e44f82a66987e37ad1e45, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  entityName: OreSource
+  team: 0
+  action: 0
+  point: {x: 0, y: 0}
+--- !u!4 &602924084
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+  m_PrefabInternal: {fileID: 338187331}
+  m_GameObject: {fileID: 602924082}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 46.3252258, y: 0, z: 270.30188}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
 --- !u!1001 &715444600
 Prefab:
   m_ObjectHideFlags: 0
@@ -523,6 +748,49 @@ Prefab:
   m_RootGameObject: {fileID: 1942658944}
   m_IsPrefabParent: 0
   m_IsExploded: 1
+--- !u!1 &737811702
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 100000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+  m_PrefabInternal: {fileID: 1899212789}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 737811704}
+  - 114: {fileID: 737811703}
+  m_Layer: 0
+  m_Name: OreSource
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &737811703
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 11400000, guid: 2d367342811064e0ebbe04d554cdbf68,
+    type: 2}
+  m_PrefabInternal: {fileID: 1899212789}
+  m_GameObject: {fileID: 737811702}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4714cd0fa92e44f82a66987e37ad1e45, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  entityName: OreSource
+  team: 0
+  action: 0
+  point: {x: 0, y: 0}
+--- !u!4 &737811704
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+  m_PrefabInternal: {fileID: 1899212789}
+  m_GameObject: {fileID: 737811702}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 236.332336, y: 0, z: 470.616302}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
 --- !u!1 &740665522
 GameObject:
   m_ObjectHideFlags: 0
@@ -566,7 +834,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 3
 --- !u!1 &783589171
 GameObject:
   m_ObjectHideFlags: 0
@@ -610,7 +877,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 2
 --- !u!1001 &857445100
 Prefab:
   m_ObjectHideFlags: 0
@@ -701,7 +967,239 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 8
+--- !u!1 &1003311830
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 100000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+  m_PrefabInternal: {fileID: 1859189497}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 1003311832}
+  - 114: {fileID: 1003311831}
+  m_Layer: 0
+  m_Name: OreSource
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1003311831
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 11400000, guid: 2d367342811064e0ebbe04d554cdbf68,
+    type: 2}
+  m_PrefabInternal: {fileID: 1859189497}
+  m_GameObject: {fileID: 1003311830}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4714cd0fa92e44f82a66987e37ad1e45, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  entityName: OreSource
+  team: 0
+  action: 0
+  point: {x: 0, y: 0}
+--- !u!4 &1003311832
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+  m_PrefabInternal: {fileID: 1859189497}
+  m_GameObject: {fileID: 1003311830}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 12.3161316, y: 35.8230591, z: 470.616302}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+--- !u!1001 &1015794340
+Prefab:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalPosition.x
+      value: 461.533813
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalPosition.y
+      value: 37.604248
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalPosition.z
+      value: 470.616302
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: entityName
+      value: OreSource
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: team
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_Name
+      value: OreSource
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_ParentPrefab: {fileID: 100100000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+  m_RootGameObject: {fileID: 1475153501}
+  m_IsPrefabParent: 0
+  m_IsExploded: 1
+--- !u!1 &1162921544
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 100000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+  m_PrefabInternal: {fileID: 2061607773}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 1162921546}
+  - 114: {fileID: 1162921545}
+  m_Layer: 0
+  m_Name: OreSource
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1162921545
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 11400000, guid: 2d367342811064e0ebbe04d554cdbf68,
+    type: 2}
+  m_PrefabInternal: {fileID: 2061607773}
+  m_GameObject: {fileID: 1162921544}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4714cd0fa92e44f82a66987e37ad1e45, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  entityName: OreSource
+  team: 0
+  action: 0
+  point: {x: 0, y: 0}
+--- !u!4 &1162921546
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+  m_PrefabInternal: {fileID: 2061607773}
+  m_GameObject: {fileID: 1162921544}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 12.3161316, y: 32.2607727, z: 29.5853882}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+--- !u!1001 &1329324974
+Prefab:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalPosition.x
+      value: 461.533813
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalPosition.z
+      value: 270.30188
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: entityName
+      value: OreSource
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: team
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_Name
+      value: OreSource
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_ParentPrefab: {fileID: 100100000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+  m_RootGameObject: {fileID: 1424179289}
+  m_IsPrefabParent: 0
+  m_IsExploded: 1
+--- !u!1 &1424179289
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 100000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+  m_PrefabInternal: {fileID: 1329324974}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 1424179291}
+  - 114: {fileID: 1424179290}
+  m_Layer: 0
+  m_Name: OreSource
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1424179290
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 11400000, guid: 2d367342811064e0ebbe04d554cdbf68,
+    type: 2}
+  m_PrefabInternal: {fileID: 1329324974}
+  m_GameObject: {fileID: 1424179289}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4714cd0fa92e44f82a66987e37ad1e45, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  entityName: OreSource
+  team: 0
+  action: 0
+  point: {x: 0, y: 0}
+--- !u!4 &1424179291
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+  m_PrefabInternal: {fileID: 1329324974}
+  m_GameObject: {fileID: 1424179289}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 461.533813, y: 0, z: 270.30188}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
 --- !u!1001 &1452970292
 Prefab:
   m_ObjectHideFlags: 0
@@ -750,6 +1248,101 @@ Prefab:
   m_RootGameObject: {fileID: 740665522}
   m_IsPrefabParent: 0
   m_IsExploded: 1
+--- !u!1 &1475153501
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 100000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+  m_PrefabInternal: {fileID: 1015794340}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 1475153503}
+  - 114: {fileID: 1475153502}
+  m_Layer: 0
+  m_Name: OreSource
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1475153502
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 11400000, guid: 2d367342811064e0ebbe04d554cdbf68,
+    type: 2}
+  m_PrefabInternal: {fileID: 1015794340}
+  m_GameObject: {fileID: 1475153501}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4714cd0fa92e44f82a66987e37ad1e45, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  entityName: OreSource
+  team: 0
+  action: 0
+  point: {x: 0, y: 0}
+--- !u!4 &1475153503
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+  m_PrefabInternal: {fileID: 1015794340}
+  m_GameObject: {fileID: 1475153501}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 461.533813, y: 37.604248, z: 470.616302}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+--- !u!1001 &1792478010
+Prefab:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalPosition.x
+      value: 236.332336
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalPosition.z
+      value: 16.0263672
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: entityName
+      value: OreSource
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: team
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_Name
+      value: OreSource
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_ParentPrefab: {fileID: 100100000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+  m_RootGameObject: {fileID: 201305830}
+  m_IsPrefabParent: 0
+  m_IsExploded: 1
 --- !u!1 &1836108028
 GameObject:
   m_ObjectHideFlags: 0
@@ -778,6 +1371,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da86a9e91ba8347b4bace47fca8e731a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  offset: 0
 --- !u!4 &1836108030
 Transform:
   m_ObjectHideFlags: 0
@@ -790,7 +1384,6 @@ Transform:
   m_Children:
   - {fileID: 377710310}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
 --- !u!114 &1836108031
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -830,6 +1423,110 @@ MonoBehaviour:
     m_PostInfinity: 2
   maxZoom: 5
   minZoom: 400
+--- !u!1001 &1859189497
+Prefab:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalPosition.x
+      value: 12.3161316
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalPosition.y
+      value: 35.8230591
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalPosition.z
+      value: 470.616302
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: entityName
+      value: OreSource
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: team
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_Name
+      value: OreSource
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_ParentPrefab: {fileID: 100100000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+  m_RootGameObject: {fileID: 1003311830}
+  m_IsPrefabParent: 0
+  m_IsExploded: 1
+--- !u!1001 &1899212789
+Prefab:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalPosition.x
+      value: 236.332336
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalPosition.z
+      value: 470.616302
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: entityName
+      value: OreSource
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: team
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_Name
+      value: OreSource
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_ParentPrefab: {fileID: 100100000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+  m_RootGameObject: {fileID: 737811702}
+  m_IsPrefabParent: 0
+  m_IsExploded: 1
 --- !u!1 &1942658944
 GameObject:
   m_ObjectHideFlags: 0
@@ -873,7 +1570,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 5
 --- !u!1001 &1955548106
 Prefab:
   m_ObjectHideFlags: 0
@@ -920,6 +1616,58 @@ Prefab:
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
   m_RootGameObject: {fileID: 783589171}
+  m_IsPrefabParent: 0
+  m_IsExploded: 1
+--- !u!1001 &2061607773
+Prefab:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalPosition.x
+      value: 12.3161316
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalPosition.y
+      value: 32.2607727
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalPosition.z
+      value: 29.5853882
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: entityName
+      value: OreSource
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: team
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+      propertyPath: m_Name
+      value: OreSource
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_ParentPrefab: {fileID: 100100000, guid: 2d367342811064e0ebbe04d554cdbf68, type: 2}
+  m_RootGameObject: {fileID: 1162921544}
   m_IsPrefabParent: 0
   m_IsExploded: 1
 --- !u!1 &2087663409
@@ -986,4 +1734,3 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 9
