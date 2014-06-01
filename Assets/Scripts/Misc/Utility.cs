@@ -120,7 +120,7 @@ static public class Utility {
                 DReal q;
                 try {
                         q = DReal.Sqrt(discriminant) / (2 * a);
-                } catch(System.ArithmeticException e) {
+                } catch(System.ArithmeticException) {
                         return targetPosition;
                 }
 

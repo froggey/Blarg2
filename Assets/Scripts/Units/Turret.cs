@@ -23,8 +23,9 @@ public class Turret : MonoBehaviour {
         private DReal fireDelay;
 
         void Awake() {
+                ComSat.Trace(this, "Awake");
                 entity = GetComponent<Entity>();
-                entity.AddUpdateAction(4, TickUpdate);
+                entity.AddUpdateAction(TickUpdate);
 
                 target = null;
                 turretRotation = 0;
@@ -54,6 +55,7 @@ public class Turret : MonoBehaviour {
         }
 
         void TickUpdate() {
+                ComSat.Trace(this, "TickUpdate");
                 if(target == null) {
                         // Magic. Destroyed GameObjects compare against null.
                         // Explicitly set to null to avoid keeping it around.

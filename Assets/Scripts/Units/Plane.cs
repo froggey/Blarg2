@@ -11,14 +11,12 @@ public class Plane : MonoBehaviour {
         private Vehicle vehicle;
 
         void Awake() {
+                ComSat.Trace(this, "Awake");
                 entity = GetComponent<Entity>();
-                entity.AddUpdateAction(7, TickUpdate);
+                entity.AddUpdateAction(TickUpdate);
                 vehicle = GetComponent<Vehicle>();
 
                 missilesLoaded = maxMissiles;
-        }
-
-        void Start() {
                 destination = entity.position;
         }
 
@@ -76,6 +74,7 @@ public class Plane : MonoBehaviour {
         }
 
         void TickUpdate() {
+                ComSat.Trace(this, "TickUpdate");
                 if(target == null) {
                         target = null;
                         if(!explicitMove) {
@@ -135,6 +134,7 @@ public class Plane : MonoBehaviour {
         }
 
         void Attack(Entity target) {
+                ComSat.Trace(this, "Attack");
                 if(target == entity) {
                         return;
                 }
@@ -143,6 +143,7 @@ public class Plane : MonoBehaviour {
         }
 
         void Move(DVector2 location) {
+                ComSat.Trace(this, "Move");
                 target = null;
                 destination = location;
                 explicitMove = true;

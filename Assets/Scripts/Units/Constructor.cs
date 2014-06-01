@@ -14,13 +14,15 @@ public class Constructor : MonoBehaviour {
         private DVector2 buildPosition;
 
         void Awake() {
+                ComSat.Trace(this, "Awake");
                 entity = GetComponent<Entity>();
                 movable = GetComponent<SimpleMovable>();
                 buildIndex = -1;
-                entity.AddUpdateAction(10, TickUpdate);
+                entity.AddUpdateAction(TickUpdate);
         }
 
         void UIAction(int what) {
+                ComSat.Trace(this, "UIAction");
                 if (what < 0 || what >= constructionPrefabs.Length)
                         return;
 

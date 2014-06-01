@@ -232,6 +232,10 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
+<<<<<<< HEAD
+=======
+  m_RootOrder: 7
+>>>>>>> master
 --- !u!1 &119531389
 GameObject:
   m_ObjectHideFlags: 0
@@ -275,6 +279,10 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
+<<<<<<< HEAD
+=======
+  m_RootOrder: 5
+>>>>>>> master
 --- !u!1 &179462616
 GameObject:
   m_ObjectHideFlags: 0
@@ -318,6 +326,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
+<<<<<<< HEAD
 --- !u!1 &201305830
 GameObject:
   m_ObjectHideFlags: 0
@@ -508,6 +517,9 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
+=======
+  m_RootOrder: 6
+>>>>>>> master
 --- !u!1 &377710305
 GameObject:
   m_ObjectHideFlags: 0
@@ -657,6 +669,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
+<<<<<<< HEAD
 --- !u!1 &602924082
 GameObject:
   m_ObjectHideFlags: 0
@@ -700,6 +713,9 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
+=======
+  m_RootOrder: 3
+>>>>>>> master
 --- !u!1001 &715444600
 Prefab:
   m_ObjectHideFlags: 0
@@ -834,6 +850,10 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
+<<<<<<< HEAD
+=======
+  m_RootOrder: 2
+>>>>>>> master
 --- !u!1 &783589171
 GameObject:
   m_ObjectHideFlags: 0
@@ -877,6 +897,10 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
+<<<<<<< HEAD
+=======
+  m_RootOrder: 1
+>>>>>>> master
 --- !u!1001 &857445100
 Prefab:
   m_ObjectHideFlags: 0
@@ -1423,6 +1447,7 @@ MonoBehaviour:
     m_PostInfinity: 2
   maxZoom: 5
   minZoom: 400
+<<<<<<< HEAD
 --- !u!1001 &1859189497
 Prefab:
   m_ObjectHideFlags: 0
@@ -1527,6 +1552,9 @@ Prefab:
   m_RootGameObject: {fileID: 737811702}
   m_IsPrefabParent: 0
   m_IsExploded: 1
+=======
+  panSpeed: 4
+>>>>>>> master
 --- !u!1 &1942658944
 GameObject:
   m_ObjectHideFlags: 0
@@ -1570,6 +1598,10 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
+<<<<<<< HEAD
+=======
+  m_RootOrder: 4
+>>>>>>> master
 --- !u!1001 &1955548106
 Prefab:
   m_ObjectHideFlags: 0

@@ -15,7 +15,7 @@ public class Mine : MonoBehaviour {
 
         void Start() {
                 entity = GetComponent<Entity>();
-                entity.AddUpdateAction(11, TickUpdate);
+                entity.AddUpdateAction(TickUpdate);
                 source = Utility.GetThingAt<ResourceSource>(entity.position);
                 source.hasMine = true;
         }

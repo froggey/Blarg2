@@ -14,7 +14,7 @@ public class CollisionResponse : MonoBehaviour {
 
         void Awake() {
                 entity = GetComponent<Entity>();
-                entity.AddUpdateAction(9, TickUpdate);
+                entity.AddUpdateAction(TickUpdate);
         }
 
         void TickUpdate() {

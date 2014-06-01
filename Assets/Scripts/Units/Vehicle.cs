@@ -17,12 +17,14 @@ public class Vehicle : MonoBehaviour {
         private Entity entity;
 
         void Awake() {
+                ComSat.Trace(this, "Awake");
                 entity = GetComponent<Entity>();
         }
 
         // This could be smarter. If dest is too close & perpendicular, then the tank
         // can end up circling around.
         public void MoveTowards(DVector2 dest) {
+                ComSat.Trace(this, "MoveTowards");
                 var dir = dest - entity.position; // also vector to dest.
                 var targetAngle = DVector2.ToAngle(dir);
                 var baseAngle = Utility.CalculateNewAngle(entity.rotation, targetAngle, DReal.Radians(turnSpeed));
@@ -55,6 +57,7 @@ public class Vehicle : MonoBehaviour {
 	}
 
         public void Stop() {
+                ComSat.Trace(this, "Stop");
                 entity.velocity = DVector2.FromAngle(entity.rotation) * minSpeed;
         }
 

@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Collections.Generic;
 using ProtoBuf;
+using UnityEngine;
 
 [ProtoContract]
 public class NetworkMessage {
@@ -65,13 +66,13 @@ public class NetworkMessage {
         public Type type;
 
         [ProtoMember(2)]
-        public int playerID = -1;
+        public int playerID;
 
         [ProtoMember(3)]
-        public string playerName = "";
+        public string playerName;
 
         [ProtoMember(4)]
-        public int teamID = -1;
+        public int teamID;
 
         // Level to load.
         [ProtoMember(5)]
@@ -274,6 +275,7 @@ public class LSNet : UnityEngine.MonoBehaviour {
 
         public void CloseConnection(NetworkClient client) {
                 clientSockets[client].socket.Close();
+                clientSockets.Remove(client);
         }
 
         private void SendMessageToClient(ClientData data, byte[] buffer) {
@@ -286,7 +288,7 @@ public class LSNet : UnityEngine.MonoBehaviour {
                         AddUnityAction(() => { localClient.OnServerMessage(message); });
                         return;
                 }
-
+                
                 var buffer = message.Serialize();
 
                 SendMessageToClient(clientSockets[target], buffer);

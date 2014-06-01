@@ -18,8 +18,9 @@ public class TwinTank : MonoBehaviour {
         private Vehicle vehicle;
 
         void Awake() {
+                ComSat.Trace(this, "Awake");
                 entity = GetComponent<Entity>();
-                entity.AddUpdateAction(5, TickUpdate);
+                entity.AddUpdateAction(TickUpdate);
                 vehicle = GetComponent<Vehicle>();
 
                 mode = Mode.IDLE;
@@ -88,6 +89,7 @@ public class TwinTank : MonoBehaviour {
         }
 
         void TickUpdate() {
+                ComSat.Trace(this, "TickUpdate");
                 if(mode == Mode.ATTACK && target == null) {
                         target = null;
                         mode = Mode.IDLE;
@@ -163,6 +165,7 @@ public class TwinTank : MonoBehaviour {
         }
 
         void Attack(Entity target) {
+                ComSat.Trace(this, "Attack");
                 if(target == entity) {
                         return;
                 }
@@ -172,6 +175,7 @@ public class TwinTank : MonoBehaviour {
         }
 
         void Move(DVector2 location) {
+                ComSat.Trace(this, "Move");
                 mode = Mode.MOVE;
                 target = null;
                 destination = location;

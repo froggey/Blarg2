@@ -8,7 +8,7 @@ public class Lobby : MonoBehaviour {
         public static string hostPort = "11235";
 
         ComSat comSat;
-        bool sentPlayerName;
+        int scrollMode;
 
         private Vector2 replayListScrollPosition;
 
@@ -17,6 +17,7 @@ public class Lobby : MonoBehaviour {
                 localPlayerName = PlayerPrefs.GetString("localPlayerName", Environment.UserName);
                 hostAddress = PlayerPrefs.GetString("hostAddress", "");
                 hostPort = PlayerPrefs.GetString("hostPort", "11235");
+                scrollMode = PlayerPrefs.GetInt("Scroll Mode");
         }
 
         void OnGUI() {
@@ -29,10 +30,27 @@ public class Lobby : MonoBehaviour {
                 }
         }
 
-        void Update() {
-                if(comSat.connectionState == ComSat.ConnectionState.Lobby && !sentPlayerName) {
-                        sentPlayerName = true;
-                        comSat.SetPlayerName(comSat.localPlayer, localPlayerName);
+        void StateDumpButton() {
+                if(comSat.fullDump) {
+                        if(GUILayout.Button("Full State Dump Enabled")) {
+                                comSat.fullDump = false;
+                        }
+                } else {
+                        if(GUILayout.Button("Full State Dump Disabled")) {
+                                comSat.fullDump = true;
+                        }
+                }
+        }
+
+        void TraceButton() {
+                if(comSat.enableActionTracing) {
+                        if(GUILayout.Button("Action Tracing Enabled (very verbose!)")) {
+                                comSat.enableActionTracing = false;
+                        }
+                } else {
+                        if(GUILayout.Button("Action Tracing Disabled")) {
+                                comSat.enableActionTracing = true;
+                        }
                 }
         }
 
@@ -56,15 +74,20 @@ public class Lobby : MonoBehaviour {
                 GUILayout.EndHorizontal();
 
 		if(GUILayout.Button("Connect")) {
-                        sentPlayerName = false;
                         comSat.Connect(hostAddress, System.Convert.ToInt32(hostPort));
                         SaveSettngs();
                 }
 		if(GUILayout.Button("Host")) {
-                        sentPlayerName = false;
                         comSat.Host(System.Convert.ToInt32(hostPort));
                         SaveSettngs();
                 }
+
+                StateDumpButton();
+                TraceButton();
+
+                // Game options.
+                scrollMode = GUILayout.Toggle(scrollMode == 1 ? true : false, "Camera Scroll Mode") ? 1 : 0;
+                PlayerPrefs.SetInt("Scroll Mode", scrollMode);
 
                 if(System.IO.Directory.Exists("Replays")) {
                         replayListScrollPosition = GUILayout.BeginScrollView(replayListScrollPosition);
@@ -88,7 +111,7 @@ public class Lobby : MonoBehaviour {
         }
 
         void ConnectingGUI() {
-                GUILayout.BeginArea(new Rect (100, 50, Screen.width-200, Screen.height-100));
+                GUILayout.BeginArea(new Rect(100, 50, Screen.width-200, Screen.height-100));
                 GUILayout.Label("Connecting to " + hostAddress + ":" + hostPort);
                 if(GUILayout.Button("Abort")) {
                         comSat.Disconnect();
@@ -97,7 +120,7 @@ public class Lobby : MonoBehaviour {
         }
 
         void LobbyGUI() {
-		GUILayout.BeginArea(new Rect (100, 50, Screen.width-200, Screen.height-100));
+		GUILayout.BeginArea(new Rect(100, 50, Screen.width-200, Screen.height-100));
                 GUILayout.BeginVertical();
 
                 foreach(var player in comSat.players) {
@@ -128,6 +151,13 @@ public class Lobby : MonoBehaviour {
 		if(GUILayout.Button(comSat.isHost ? "Close Server" : "Disconnect")) {
                         comSat.Disconnect();
                 }
+
+                if(GUILayout.Button(comSat.enableContinuousSyncCheck ? "Continuous Sync Checking Enabled (slow)" : "Continuous Sync Checking Disabled")) {
+                        comSat.enableContinuousSyncCheck = !comSat.enableContinuousSyncCheck;
+                }
+
+                StateDumpButton();
+                TraceButton();
 
                 GUILayout.EndVertical();
 		GUILayout.EndArea();

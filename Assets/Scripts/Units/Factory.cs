@@ -24,12 +24,14 @@ public class Factory : MonoBehaviour {
         private const int clearQueue = -1;
 
         void Awake() {
+                ComSat.Trace(this, "Awake");
                 entity = GetComponent<Entity>();
-                entity.AddUpdateAction(2, TickUpdate);
+                entity.AddUpdateAction(TickUpdate);
                 buildQueue = new Queue<int>();
         }
 
         void TickUpdate() {
+                ComSat.Trace(this, "TickUpdate");
                 if(sabotageTime > 0) {
                         sabotageTime -= ComSat.tickRate;
                 }
@@ -61,6 +63,7 @@ public class Factory : MonoBehaviour {
         }
 
         void UIAction(int what) {
+                ComSat.Trace(this, "UIAction");
                 if(what == clearQueue) {
                         buildQueue.Clear();
                         delay = 0;
@@ -73,6 +76,7 @@ public class Factory : MonoBehaviour {
         }
 
         public void Sabotage() {
+                ComSat.Trace(this, "Sabotage");
                 sabotageTime += sabotageRepairTime;
         }
 

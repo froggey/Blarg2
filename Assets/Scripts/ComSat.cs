@@ -92,7 +92,7 @@ public class ComSat : MonoBehaviour, IClient {
         public static DReal tickRate = (DReal)1 / (DReal)25;
         // This many ticks per communication turn.
         // Max input lag = ticksPerTurn * tickRate.
-        public static int ticksPerTurn = 10; // set this to 5 for release, 1 for locally debugging desyncs
+        public static int ticksPerTurn = 1; // set this to 5 for release, 1 for locally debugging desyncs
 
         private float timeSlop;
         private int ticksRemaining; // Ticks remaining in this turn.
@@ -137,6 +137,13 @@ public class ComSat : MonoBehaviour, IClient {
         private Server server;
 
         public float timeAccel = 1.0f;
+
+        // Dump the entire gamestate every turn.
+        public bool fullDump;
+        // Trace actions and stuff.
+        public bool enableActionTracing;
+        // Sync check every tick.
+        public bool enableContinuousSyncCheck;
 
         void Log(string s) {
                 if(debugVomit) {
@@ -265,19 +272,8 @@ public class ComSat : MonoBehaviour, IClient {
         public static void Spawn(string entityName, int team, DVector2 position, DReal rotation) {
                 if(currentInstance.replayInput != null) return;
 
-                if(team != 0) {
-                        // Only spawn if the team exists.
-                        bool ok = false;
-
-                        foreach(var p in currentInstance.players) {
-                                if(p.team == team) {
-                                        ok = true;
-                                        break;
-                                }
-                        }
-
-                        if(!ok) return;
-                }
+                if (!currentInstance.players.Any(p => p.team == team))
+                        return;
 
                 var m = new NetworkMessage(NetworkMessage.Type.SpawnEntity);
                 m.entityName = entityName;
@@ -503,6 +499,10 @@ public class ComSat : MonoBehaviour, IClient {
                                 tickID += 1;
                                 TickUpdate();
                                 ticksRemaining -= 1;
+
+                                if(fullDump) {
+                                        Debug.Log(DumpGameState());
+                                }
                         }
                         if(ticksRemaining == 0) {
                                 if(isHost && EveryoneIsReady()) {
@@ -518,7 +518,7 @@ public class ComSat : MonoBehaviour, IClient {
                                                 currentGameState = DumpGameState();
                                                 Log(currentGameState);
                                         }
-                                        if(syncCheckRequested) {
+                                        if(syncCheckRequested || enableContinuousSyncCheck) {
                                                 string state = DumpGameState();
                                                 Debug.Log(state);
                                                 // Make sure it doesn't exceed the maximum packet length.
@@ -725,6 +725,9 @@ public class ComSat : MonoBehaviour, IClient {
                         net.SendMessageToAll(update);
                 }
                 players.Add(p);
+
+                if (p.id == localPlayerID)
+                        ComSat.currentInstance.SetPlayerName(p, Lobby.localPlayerName);
         }
 
         void PlayerLeave(int id) {
@@ -732,14 +735,14 @@ public class ComSat : MonoBehaviour, IClient {
                         Debug.LogWarning("Saw myself leave?");
                 }
                 if(connectionState == ConnectionState.InGame) {
-                        Debug.LogError("Player " + id + " dropped.");
+                        Debug.LogError("Player " + id + " " + PlayerFromID(id).name + " dropped.");
                 }
                 players.RemoveAll(p => p.id == id);
         }
 
         void PlayerUpdate(int id, string name, int team) {
                 var p = PlayerFromID(id);
-                if(name.Length != 0) {
+                if(name != null && name.Length != 0) {
                         p.name = name;
                 }
                 if(team != -1) {
@@ -937,6 +940,7 @@ public class ComSat : MonoBehaviour, IClient {
         public void SetPlayerName(Player player, string name) {
                 var m = new NetworkMessage(NetworkMessage.Type.PlayerUpdate);
                 m.playerID = player.id;
+                m.teamID = -1;
                 m.playerName = name;
                 net.SendMessageToServer(m);
         }
@@ -958,5 +962,19 @@ public class ComSat : MonoBehaviour, IClient {
                 }
                 replayInput = new System.IO.FileStream(path, System.IO.FileMode.Open);
                 Application.LoadLevel("main"); // FIXME: Should bake this into the replay.
+        }
+
+        public static void Trace(MonoBehaviour what, string msg) {
+                if(currentInstance == null || !currentInstance.enableActionTracing) {
+                        return;
+                }
+                var ent = what.GetComponent<Entity>();
+                if(ent == null) {
+                        Debug.Log("Non-entity " + what + ": " + msg);
+                } else if(currentInstance.reverseWorldEntities.ContainsKey(ent)) {
+                        Debug.Log("[" + currentInstance.reverseWorldEntities[ent] + "] " + what + ": " + msg);
+                } else {
+                        Debug.Log("Unknown entity " + what + ": " + msg);
+                }
         }
 }

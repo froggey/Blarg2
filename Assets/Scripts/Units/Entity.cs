@@ -37,15 +37,17 @@ public class Entity : MonoBehaviour {
 
         public ResourceSet buildCost;
 
-        private Dictionary<int, System.Action> updateActions = new Dictionary<int, System.Action>();
+        private List<System.Action> updateActions = new List<System.Action>();
 
         void Awake() {
+                ComSat.Trace(this, "Awake");
                 collisionRadius = (DReal)collisionRadiusNumerator / collisionRadiusDenominator;
 
                 health = maxHealth;
         }
 
         void Start() {
+                ComSat.Trace(this, "Start");
                 if(baseMesh && team != 0) {
                         baseMesh.renderer.material.color = Utility.TeamColour(team);
                 }
@@ -63,25 +65,20 @@ public class Entity : MonoBehaviour {
         }
 
         public void TickUpdate() {
-                foreach(var a in updateActions.Values) {
+                ComSat.Trace(this, "TickUpdate");
+                foreach(var a in updateActions) {
                         a();
                 }
                 position += velocity * ComSat.tickRate;
         }
 
-        public void AddUpdateAction(int priority, System.Action action) {
-                if(updateActions.ContainsKey(priority)) {
-                        Debug.LogError(string.Format(
-                                "Action with conflicting priority {0} ({1}, {2})",
-                                priority, action.Method.DeclaringType, updateActions[priority].Method.DeclaringType));
-                        AddUpdateAction(priority+1, action);
-                        return;
-                }
-
-                updateActions[priority] = action;
+        public void AddUpdateAction(System.Action action) {
+                ComSat.Trace(this, "AddUpdateAction");
+                updateActions.Add(action);
         }
 
         public void Damage(int damage) {
+                ComSat.Trace(this, "Damage");
                 health -= damage;
                 if(health <= 0) {
                         ComSat.DestroyEntity(this);
