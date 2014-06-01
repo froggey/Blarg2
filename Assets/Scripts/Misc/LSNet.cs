@@ -29,12 +29,10 @@ public class NetworkMessage {
                 Attack = 9,
                 // Command.
                 UIAction = 10,
-                // Client->server.
+                // Client->server. Optionally sends gameState for sync checking.
                 Ready = 11,
                 // Server->client.
                 NextTurn = 12,
-                // Client->server. Sends gameState.
-                SyncCheck = 13,
         }
 
         public NetworkMessage() {}

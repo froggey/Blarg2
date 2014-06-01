@@ -406,7 +406,7 @@ public class ComSat : MonoBehaviour, IClient {
                         ClearReady();
                 }
 
-                ReadyUp();
+                ReadyUp(null);
         }
 
         string DumpGameState() {
@@ -463,9 +463,11 @@ public class ComSat : MonoBehaviour, IClient {
 
         void VerifyClientGameState(int playerID, string state) {
                 if(state != currentGameState) {
-                        Debug.LogError("Player " + playerID + " out of sync!");
+                        Debug.LogError("Player " + playerID + " " + PlayerFromID(playerID).name + " out of sync!");
                         Debug.LogError(state);
                         Debug.LogError(currentGameState);
+                } else {
+                        Debug.Log("Player " + playerID + " " + PlayerFromID(playerID).name + " in sync.");
                 }
         }
 
@@ -515,13 +517,12 @@ public class ComSat : MonoBehaviour, IClient {
                                                 currentGameState = DumpGameState();
                                                 Log(currentGameState);
                                         }
+                                        string state = null;
                                         if(syncCheckRequested || enableContinuousSyncCheck) {
-                                                string state = DumpGameState();
+                                                state = DumpGameState();
                                                 Debug.Log(state);
-                                                if(state.Length < 0xF000) { // Keep within max packet length.
-                                                        var m = new NetworkMessage(NetworkMessage.Type.SyncCheck);
-                                                        m.gameState = state;
-                                                        net.SendMessageToServer(m);
+                                                if(state.Length > 0xF000) { // Keep within max packet length.
+                                                        state = null;
                                                 }
                                                 syncCheckRequested = false;
                                         }
@@ -537,7 +538,7 @@ public class ComSat : MonoBehaviour, IClient {
                                         futureQueuedCommands = tmp;
                                         goForNextTurn = false;
                                         serverNextTurn = false;
-                                        ReadyUp();
+                                        ReadyUp(state);
                                         ticksRemaining = ticksPerTurn;
                                         turnID += 1;
                                 }
@@ -564,9 +565,10 @@ public class ComSat : MonoBehaviour, IClient {
                 }
         }
 
-        void ReadyUp() {
+        void ReadyUp(string state) {
                 if(replayInput != null) return;
                 var m = new NetworkMessage(NetworkMessage.Type.Ready);
+                m.gameState = state;
                 net.SendMessageToServer(m);
         }
 
@@ -852,9 +854,9 @@ public class ComSat : MonoBehaviour, IClient {
                 case NetworkMessage.Type.Ready:
                         Log("Player " + playerID + " readyup  " + turnID + " " + tickID);
                         PlayerFromID(playerID).ready = true;
-                        break;
-                case NetworkMessage.Type.SyncCheck:
-                        VerifyClientGameState(playerID, message.gameState);
+                        if(message.gameState != null) {
+                                VerifyClientGameState(playerID, message.gameState);
+                        }
                         break;
                 default:
                         Debug.Log("Bad client message " + message.type);
