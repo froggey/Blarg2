@@ -735,7 +735,7 @@ public class ComSat : MonoBehaviour, IClient {
 
         void PlayerUpdate(int id, string name, int team) {
                 var p = PlayerFromID(id);
-                if(name.Length != 0) {
+                if(name != null && name.Length != 0) {
                         p.name = name;
                 }
                 if(team != -1) {
@@ -928,6 +928,7 @@ public class ComSat : MonoBehaviour, IClient {
                 var m = new NetworkMessage(NetworkMessage.Type.PlayerUpdate);
                 m.playerID = player.id;
                 m.playerName = name;
+                m.teamID = -1;
                 net.SendMessageToServer(m);
         }
         public void SetPlayerTeam(Player player, int team) {

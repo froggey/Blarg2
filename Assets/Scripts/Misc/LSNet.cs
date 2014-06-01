@@ -68,13 +68,13 @@ public class NetworkMessage {
         public Type type;
 
         [ProtoMember(2)]
-        public int playerID = -1;
+        public int playerID;
 
         [ProtoMember(3)]
-        public string playerName = "";
+        public string playerName;
 
         [ProtoMember(4)]
-        public int teamID = -1;
+        public int teamID;
 
         // Level to load.
         [ProtoMember(5)]
@@ -369,6 +369,8 @@ public class LSNet : UnityEngine.MonoBehaviour {
                                 // Connection closed.
                                 AddUnityAction(() => { ClientDisconnected(client); });
                                 return;
+                        } else if(bytesRead != 2) {
+                                AddUnityAction(() => { UnityEngine.Debug.LogError("Read short message header?"); });
                         }
 
                         data.messageLength = (int)data.buffer[0] | ((int)data.buffer[1] << 8);
@@ -392,6 +394,8 @@ public class LSNet : UnityEngine.MonoBehaviour {
                                 // Connection closed.
                                 AddUnityAction(() => { ClientDisconnected(client); });
                                 return;
+                        } else if(bytesRead != data.messageLength) {
+                                AddUnityAction(() => { UnityEngine.Debug.LogError("Read short message body? " + bytesRead); });
                         }
 
                         var message = NetworkMessage.Deserialize(data.buffer);
@@ -450,6 +454,8 @@ public class LSNet : UnityEngine.MonoBehaviour {
                         if(bytesRead == 0) {
                                 AddUnityAction(() => ServerDisconnected());
                                 return;
+                        } else if(bytesRead != 2) {
+                                AddUnityAction(() => { UnityEngine.Debug.LogError("Read short message header?"); });
                         }
 
                         clientMessageLength = (int)clientBuffer[0] | ((int)clientBuffer[1] << 8);
@@ -469,6 +475,8 @@ public class LSNet : UnityEngine.MonoBehaviour {
                         if(bytesRead == 0) {
                                 AddUnityAction(() => { ServerDisconnected(); });
                                 return;
+                        } else if(bytesRead != clientMessageLength) {
+                                AddUnityAction(() => { UnityEngine.Debug.LogError("Read short message body? " + bytesRead); });
                         }
 
                         var message = NetworkMessage.Deserialize(clientBuffer);
