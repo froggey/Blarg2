@@ -8,7 +8,6 @@ public class Lobby : MonoBehaviour {
         public static string hostPort = "11235";
 
         ComSat comSat;
-        bool sentPlayerName;
         int scrollMode;
 
         private Vector2 replayListScrollPosition;
@@ -28,13 +27,6 @@ public class Lobby : MonoBehaviour {
                         LobbyGUI();
                 } else {
                         ConnectGUI();
-                }
-        }
-
-        void Update() {
-                if(comSat.connectionState == ComSat.ConnectionState.Lobby && !sentPlayerName) {
-                        sentPlayerName = true;
-                        comSat.SetPlayerName(comSat.localPlayer, localPlayerName);
                 }
         }
 
@@ -82,12 +74,10 @@ public class Lobby : MonoBehaviour {
                 GUILayout.EndHorizontal();
 
 		if(GUILayout.Button("Connect")) {
-                        sentPlayerName = false;
                         comSat.Connect(hostAddress, System.Convert.ToInt32(hostPort));
                         SaveSettngs();
                 }
 		if(GUILayout.Button("Host")) {
-                        sentPlayerName = false;
                         comSat.Host(System.Convert.ToInt32(hostPort));
                         SaveSettngs();
                 }
@@ -121,7 +111,7 @@ public class Lobby : MonoBehaviour {
         }
 
         void ConnectingGUI() {
-                GUILayout.BeginArea(new Rect (100, 50, Screen.width-200, Screen.height-100));
+                GUILayout.BeginArea(new Rect(100, 50, Screen.width-200, Screen.height-100));
                 GUILayout.Label("Connecting to " + hostAddress + ":" + hostPort);
                 if(GUILayout.Button("Abort")) {
                         comSat.Disconnect();
@@ -130,7 +120,7 @@ public class Lobby : MonoBehaviour {
         }
 
         void LobbyGUI() {
-		GUILayout.BeginArea(new Rect (100, 50, Screen.width-200, Screen.height-100));
+		GUILayout.BeginArea(new Rect(100, 50, Screen.width-200, Screen.height-100));
                 GUILayout.BeginVertical();
 
                 foreach(var player in comSat.players) {

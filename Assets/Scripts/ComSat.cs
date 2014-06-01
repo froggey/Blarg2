@@ -92,7 +92,7 @@ public class ComSat : MonoBehaviour, IClient {
         public static DReal tickRate = (DReal)1 / (DReal)25;
         // This many ticks per communication turn.
         // Max input lag = ticksPerTurn * tickRate.
-        public static int ticksPerTurn = 10; // set this to 5 for release, 1 for locally debugging desyncs
+        public static int ticksPerTurn = 1; // set this to 5 for release, 1 for locally debugging desyncs
 
         private float timeSlop;
         private int ticksRemaining; // Ticks remaining in this turn.
@@ -258,19 +258,8 @@ public class ComSat : MonoBehaviour, IClient {
         public static void Spawn(string entityName, int team, DVector2 position, DReal rotation) {
                 if(currentInstance.replayInput != null) return;
 
-                if(team != 0) {
-                        // Only spawn if the team exists.
-                        bool ok = false;
-
-                        foreach(var p in currentInstance.players) {
-                                if(p.team == team) {
-                                        ok = true;
-                                        break;
-                                }
-                        }
-
-                        if(!ok) return;
-                }
+                if (!currentInstance.players.Any(p => p.team == team))
+                        return;
 
                 var m = new NetworkMessage(NetworkMessage.Type.SpawnEntity);
                 m.entityName = entityName;
@@ -722,6 +711,9 @@ public class ComSat : MonoBehaviour, IClient {
                         net.SendMessageToAll(update);
                 }
                 players.Add(p);
+
+                if (p.id == localPlayerID)
+                        ComSat.currentInstance.SetPlayerName(p, Lobby.localPlayerName);
         }
 
         void PlayerLeave(int id) {
@@ -736,7 +728,7 @@ public class ComSat : MonoBehaviour, IClient {
 
         void PlayerUpdate(int id, string name, int team) {
                 var p = PlayerFromID(id);
-                if(name.Length != 0) {
+                if(name != null && name.Length != 0) {
                         p.name = name;
                 }
                 if(team != -1) {
@@ -928,6 +920,7 @@ public class ComSat : MonoBehaviour, IClient {
         public void SetPlayerName(Player player, string name) {
                 var m = new NetworkMessage(NetworkMessage.Type.PlayerUpdate);
                 m.playerID = player.id;
+                m.teamID = -1;
                 m.playerName = name;
                 net.SendMessageToServer(m);
         }
