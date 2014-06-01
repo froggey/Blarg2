@@ -275,6 +275,7 @@ public class LSNet : UnityEngine.MonoBehaviour {
 
         public void CloseConnection(NetworkClient client) {
                 clientSockets[client].socket.Close();
+                clientSockets.Remove(client);
         }
 
         private void SendMessageToClient(ClientData data, byte[] buffer) {
