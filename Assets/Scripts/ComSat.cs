@@ -86,13 +86,14 @@ public class ComSat : MonoBehaviour, IClient {
                 public int team;
                 public bool ready;
                 public int unreadyTime;
+                public string state;
         }
 
         // Game runs at this rate.
         public static DReal tickRate = (DReal)1 / (DReal)25;
         // This many ticks per communication turn.
         // Max input lag = ticksPerTurn * tickRate.
-        public static int ticksPerTurn = 10; // set this to 5 for release, 1 for locally debugging desyncs
+        public static int ticksPerTurn = 10; // set this to 10(?) for release, 1 for locally debugging desyncs
 
         private float timeSlop;
         private int ticksRemaining; // Ticks remaining in this turn.
@@ -215,6 +216,7 @@ public class ComSat : MonoBehaviour, IClient {
         // Instantiate a new prefab, defering to the end of TickUpdate.
         // Prefab must be an Entity.
         public static void SpawnEntity(GameObject prefab, int team, DVector2 position, DReal rotation) {
+                currentInstance.Log("Spawn entity " + prefab + " on team " + team + " at " + position + ":" + rotation);
                 currentInstance.deferredActions.Add(() => {
                                 Vector3 worldPosition = new Vector3((float)position.y, 0, (float)position.x);
                                 Quaternion worldRotation = Quaternion.AngleAxis((float)rotation, Vector3.up);
@@ -227,6 +229,7 @@ public class ComSat : MonoBehaviour, IClient {
         }
 
         public static void SpawnEntity(Entity origin, GameObject prefab, DVector2 position, DReal rotation) {
+                currentInstance.Log("Spawn entity " + prefab + " from " + origin + " at " + position + ":" + rotation);
                 currentInstance.deferredActions.Add(() => {
                                 Vector3 worldPosition = new Vector3((float)position.y, 0, (float)position.x);
                                 Quaternion worldRotation = Quaternion.AngleAxis((float)rotation, Vector3.up);
@@ -240,6 +243,7 @@ public class ComSat : MonoBehaviour, IClient {
         }
 
         public static void SpawnEntity(Entity origin, GameObject prefab, DVector2 position, DReal rotation, System.Action<Entity> onSpawn) {
+                currentInstance.Log("Spawn entity " + prefab + " from " + origin + " at " + position + ":" + rotation);
                 currentInstance.deferredActions.Add(() => {
                                 Vector3 worldPosition = new Vector3((float)position.y, 0, (float)position.x);
                                 Quaternion worldRotation = Quaternion.AngleAxis((float)rotation, Vector3.up);
@@ -304,6 +308,7 @@ public class ComSat : MonoBehaviour, IClient {
         }
 
         public static void DestroyEntity(Entity e) {
+                currentInstance.Log("Destroy entity " + e + "[" + currentInstance.reverseWorldEntities[e] + "] at " + e.position + ":" + e.rotation);
                 currentInstance.deferredActions.Add(() => {
                                 if(!currentInstance.reverseWorldEntities.ContainsKey(e)) {
                                         // It's possible for a thing to be destroyed twice in one tick.
@@ -508,13 +513,21 @@ public class ComSat : MonoBehaviour, IClient {
                                         // Advance the game turn.
                                         var m = new NetworkMessage(NetworkMessage.Type.NextTurn);
                                         net.SendMessageToAll(m);
+
+                                        currentGameState = DumpGameState();
+                                        foreach(var p in players) {
+                                                if(p.state != null) {
+                                                        VerifyClientGameState(p.id, p.state);
+                                                        p.state = null;
+                                                }
+                                        }
+
                                         ClearReady();
                                         serverNextTurn = true;
                                 }
 
                                 if(goForNextTurn) {
                                         if(isHost) {
-                                                currentGameState = DumpGameState();
                                                 Log(currentGameState);
                                         }
                                         string state = null;
