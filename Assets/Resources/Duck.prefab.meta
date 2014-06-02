@@ -1,4 +1,7 @@
 fileFormatVersion: 2
 guid: 1deedf8488c5a4c1b9cf8d5e9096c2a2
+labels:
+- Character
+- Vehicle
 NativeFormatImporter:
   userData: 
