@@ -64,7 +64,6 @@ class Server : IServer {
                 clientIDMap.Remove(client);
         }
         public void OnClientMessage(NetworkClient client, NetworkMessage message) {
-                Debug.Log("Client " + client + " set message " + message);
                 comSat.OnClientMessage(clientIDMap[client], message);
         }
 
@@ -757,7 +756,7 @@ public class ComSat : MonoBehaviour, IClient {
         }
 
         public void OnServerMessage(NetworkMessage message) {
-                Debug.Log("Server sent message " + message + " " + message.type);
+                Log("Server sent message " + message + " " + message.type);
                 switch(message.type) {
                 case NetworkMessage.Type.Hello:
                         localPlayerID = message.playerID;
@@ -822,7 +821,7 @@ public class ComSat : MonoBehaviour, IClient {
         }
 
         public void OnClientMessage(int playerID, NetworkMessage message) {
-                Debug.Log("Player " + playerID + " sent message " + message + " " + message.type);
+                Log("Player " + playerID + " sent message " + message + " " + message.type);
                 switch(message.type) {
                 case NetworkMessage.Type.PlayerUpdate:
                         if(PlayerIsAdmin(playerID) || playerID == message.playerID) {
