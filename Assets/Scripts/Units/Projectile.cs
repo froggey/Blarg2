@@ -21,7 +21,7 @@ public class Projectile : MonoBehaviour {
 
         void TickUpdate() {
                 ComSat.Trace(this, "TickUpdate");
-                if(target != null) {
+                if(ComSat.EntityExists(target)) {
                         var dir = target.position - entity.position; // also vector to dest.
                         var targetAngle = DVector2.ToAngle(dir);
                         var baseAngle = Utility.CalculateNewAngle(entity.rotation, targetAngle, DReal.Radians(turnSpeed));

@@ -323,6 +323,10 @@ public class ComSat : MonoBehaviour, IClient {
                         });
         }
 
+        public static bool EntityExists(Entity e) {
+                return e != null && currentInstance.reverseWorldEntities.ContainsKey(e);
+        }
+
         Entity EntityFromID(int entityID) {
                 if(!worldEntities.ContainsKey(entityID)) return null;
                 return worldEntities[entityID];
@@ -417,9 +421,7 @@ public class ComSat : MonoBehaviour, IClient {
         string DumpGameState() {
                 string result = "Tick " + tickID + "; Turn " + turnID + "\n";
                 foreach(var e in worldEntityCache) {
-                        if(e != null) {
-                                result += "Ent " + e + "[" + reverseWorldEntities[e] + "] " + e.position + ":" + e.rotation + "\n";
-                        }
+                        result += "Ent " + e + "[" + reverseWorldEntities[e] + "] " + e.position + ":" + e.rotation + "\n";
                 }
 
                 return result;
@@ -453,9 +455,7 @@ public class ComSat : MonoBehaviour, IClient {
         void TickUpdate() {
                 // Must tick all objects in a consistent order across machines.
                 foreach(Entity e in worldEntityCache) {
-                        if(e != null) {
-                                e.TickUpdate();
-                        }
+                        e.TickUpdate();
                 }
 
                 foreach(var a in deferredActions) {
@@ -558,8 +558,6 @@ public class ComSat : MonoBehaviour, IClient {
                         }
                 }
 
-                worldEntityCache.RemoveAll((Entity e) => { return e == null; });
-
                 if(!gameOver && turnID > 5) {
                         // Win check.
                         int winningTeam = 0;
@@ -606,7 +604,6 @@ public class ComSat : MonoBehaviour, IClient {
         // Cast a line from A to B, checking for collisions with other entities.
         public static Entity LineCast(DVector2 start, DVector2 end, out DVector2 hitPosition, int ignoreTeam = -1) {
                 foreach(Entity e in currentInstance.worldEntityCache) {
-                        if(e == null) continue;
                         if(e.team == ignoreTeam) continue;
                         if(e.collisionRadius == 0) continue;
 
@@ -625,8 +622,7 @@ public class ComSat : MonoBehaviour, IClient {
         // Locate an entity within the given circle, not on the given team.
         public static Entity FindEntityWithinRadius(DVector2 origin, DReal radius, int ignoreTeam = -1) {
                 foreach(Entity e in currentInstance.worldEntityCache) {
-                        if(e == null) continue;
-                        if(e.team == ignoreTeam) continue;
+                       if(e.team == ignoreTeam) continue;
                         if(e.collisionRadius == 0) continue;
 
                         if((e.position - origin).sqrMagnitude < radius*radius) {
@@ -642,7 +638,6 @@ public class ComSat : MonoBehaviour, IClient {
                 var result = new List<Entity>();
 
                 foreach(Entity e in currentInstance.worldEntityCache) {
-                        if(e == null) continue;
                         if(e.team == ignoreTeam) continue;
                         if(e.collisionRadius == 0) continue;
 
@@ -668,7 +663,6 @@ public class ComSat : MonoBehaviour, IClient {
         // Game UI commands.
         public static void IssueMove(Entity unit, DVector2 position) {
                 if(currentInstance.replayInput != null) return;
-                if(unit == null) return;
 
                 var m = new NetworkMessage(NetworkMessage.Type.Move);
                 m.entityID = currentInstance.reverseWorldEntities[unit];
@@ -678,7 +672,6 @@ public class ComSat : MonoBehaviour, IClient {
 
         public static void IssueAttack(Entity unit, Entity target) {
                 if(currentInstance.replayInput != null) return;
-                if(unit == null || target == null) return;
 
                 var m = new NetworkMessage(NetworkMessage.Type.Attack);
                 m.entityID = currentInstance.reverseWorldEntities[unit];
@@ -688,7 +681,6 @@ public class ComSat : MonoBehaviour, IClient {
 
         public static void IssueUIAction(Entity unit, int what) {
                 if(currentInstance.replayInput != null) return;
-                if(unit == null) return;
 
                 var m = new NetworkMessage(NetworkMessage.Type.UIAction);
                 m.entityID = currentInstance.reverseWorldEntities[unit];

@@ -84,7 +84,7 @@ public class GiantRobot : MonoBehaviour {
 
         void TickUpdate() {
                 ComSat.Trace(this, "TickUpdate");
-                if(mode == Mode.ATTACK && target == null) {
+                if(mode == Mode.ATTACK && !ComSat.EntityExists(target)) {
                         target = null;
                         mode = Mode.IDLE;
                         vehicle.Stop();
@@ -154,7 +154,7 @@ public class GiantRobot : MonoBehaviour {
         }
 
         void Update() {
-                if(mode == Mode.ATTACK && target != null) {
+                if(mode == Mode.ATTACK && ComSat.EntityExists(target)) {
                         laser.enabled = true;
                         laser.SetPosition(0, laserOrigin.transform.position);
                         laser.SetPosition(1, target.transform.position);

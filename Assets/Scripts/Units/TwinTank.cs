@@ -72,7 +72,7 @@ public class TwinTank : MonoBehaviour {
                                    entity.position, entity.rotation + turretRotation,
                                    (Entity ent) => {
                                            var proj = ent.gameObject.GetComponent<Projectile>();
-                                           if(proj != null && target != null) {
+                                           if(proj != null && ComSat.EntityExists(target)) {
                                                    proj.target = target;
                                            }
                                    });
@@ -90,7 +90,7 @@ public class TwinTank : MonoBehaviour {
 
         void TickUpdate() {
                 ComSat.Trace(this, "TickUpdate");
-                if(mode == Mode.ATTACK && target == null) {
+                if(mode == Mode.ATTACK && !ComSat.EntityExists(target)) {
                         target = null;
                         mode = Mode.IDLE;
                         vehicle.Stop();
