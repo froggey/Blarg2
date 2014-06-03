@@ -47,7 +47,7 @@ public class Turret : MonoBehaviour {
                                    entity.position, entity.rotation + turretRotation,
                                    (Entity ent) => {
                                            var proj = ent.gameObject.GetComponent<Projectile>();
-                                           if(proj != null && target != null) {
+                                           if(proj != null && ComSat.EntityExists(target)) {
                                                    proj.target = target;
                                            }
                                    });
@@ -56,7 +56,7 @@ public class Turret : MonoBehaviour {
 
         void TickUpdate() {
                 ComSat.Trace(this, "TickUpdate");
-                if(target == null) {
+                if(!ComSat.EntityExists(target)) {
                         // Magic. Destroyed GameObjects compare against null.
                         // Explicitly set to null to avoid keeping it around.
                         target = null;

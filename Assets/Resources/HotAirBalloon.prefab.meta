@@ -1,4 +1,6 @@
 fileFormatVersion: 2
 guid: fe70a1df14ad0ed43bf4736092c725aa
+labels:
+- Vehicle
 NativeFormatImporter:
   userData: 

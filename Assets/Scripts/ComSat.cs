@@ -64,7 +64,6 @@ class Server : IServer {
                 clientIDMap.Remove(client);
         }
         public void OnClientMessage(NetworkClient client, NetworkMessage message) {
-                Debug.Log("Client " + client + " set message " + message);
                 comSat.OnClientMessage(clientIDMap[client], message);
         }
 
@@ -86,13 +85,14 @@ public class ComSat : MonoBehaviour, IClient {
                 public int team;
                 public bool ready;
                 public int unreadyTime;
+                public string state;
         }
 
         // Game runs at this rate.
         public static DReal tickRate = (DReal)1 / (DReal)25;
         // This many ticks per communication turn.
         // Max input lag = ticksPerTurn * tickRate.
-        public static int ticksPerTurn = 1; // set this to 5 for release, 1 for locally debugging desyncs
+        public static int ticksPerTurn = 10; // set this to 10(?) for release, 1 for locally debugging desyncs
 
         private float timeSlop;
         private int ticksRemaining; // Ticks remaining in this turn.
@@ -215,6 +215,7 @@ public class ComSat : MonoBehaviour, IClient {
         // Instantiate a new prefab, defering to the end of TickUpdate.
         // Prefab must be an Entity.
         public static void SpawnEntity(GameObject prefab, int team, DVector2 position, DReal rotation) {
+                currentInstance.Log("Spawn entity " + prefab + " on team " + team + " at " + position + ":" + rotation);
                 currentInstance.deferredActions.Add(() => {
                                 Vector3 worldPosition = new Vector3((float)position.y, 0, (float)position.x);
                                 Quaternion worldRotation = Quaternion.AngleAxis((float)rotation, Vector3.up);
@@ -227,6 +228,7 @@ public class ComSat : MonoBehaviour, IClient {
         }
 
         public static void SpawnEntity(Entity origin, GameObject prefab, DVector2 position, DReal rotation) {
+                currentInstance.Log("Spawn entity " + prefab + " from " + origin + " at " + position + ":" + rotation);
                 currentInstance.deferredActions.Add(() => {
                                 Vector3 worldPosition = new Vector3((float)position.y, 0, (float)position.x);
                                 Quaternion worldRotation = Quaternion.AngleAxis((float)rotation, Vector3.up);
@@ -240,6 +242,7 @@ public class ComSat : MonoBehaviour, IClient {
         }
 
         public static void SpawnEntity(Entity origin, GameObject prefab, DVector2 position, DReal rotation, System.Action<Entity> onSpawn) {
+                currentInstance.Log("Spawn entity " + prefab + " from " + origin + " at " + position + ":" + rotation);
                 currentInstance.deferredActions.Add(() => {
                                 Vector3 worldPosition = new Vector3((float)position.y, 0, (float)position.x);
                                 Quaternion worldRotation = Quaternion.AngleAxis((float)rotation, Vector3.up);
@@ -258,8 +261,19 @@ public class ComSat : MonoBehaviour, IClient {
         public static void Spawn(string entityName, int team, DVector2 position, DReal rotation) {
                 if(currentInstance.replayInput != null) return;
 
-                if (!currentInstance.players.Any(p => p.team == team))
-                        return;
+                if(team != 0) {
+                        // Only spawn if the team exists.
+                        bool ok = false;
+
+                        foreach(var p in currentInstance.players) {
+                                if(p.team == team) {
+                                        ok = true;
+                                        break;
+                                }
+                        }
+
+                        if(!ok) return;
+                }
 
                 var m = new NetworkMessage(NetworkMessage.Type.SpawnEntity);
                 m.entityName = entityName;
@@ -293,6 +307,7 @@ public class ComSat : MonoBehaviour, IClient {
         }
 
         public static void DestroyEntity(Entity e) {
+                currentInstance.Log("Destroy entity " + e + "[" + currentInstance.reverseWorldEntities[e] + "] at " + e.position + ":" + e.rotation);
                 currentInstance.deferredActions.Add(() => {
                                 if(!currentInstance.reverseWorldEntities.ContainsKey(e)) {
                                         // It's possible for a thing to be destroyed twice in one tick.
@@ -305,6 +320,10 @@ public class ComSat : MonoBehaviour, IClient {
                                 currentInstance.worldEntityCache.Remove(e);
                                 Object.Destroy(e.gameObject);
                         });
+        }
+
+        public static bool EntityExists(Entity e) {
+                return e != null && currentInstance.reverseWorldEntities.ContainsKey(e);
         }
 
         Entity EntityFromID(int entityID) {
@@ -395,15 +414,13 @@ public class ComSat : MonoBehaviour, IClient {
                         ClearReady();
                 }
 
-                ReadyUp();
+                ReadyUp(null);
         }
 
         string DumpGameState() {
                 string result = "Tick " + tickID + "; Turn " + turnID + "\n";
                 foreach(var e in worldEntityCache) {
-                        if(e != null) {
-                                result += "Ent " + e + "[" + reverseWorldEntities[e] + "] " + e.position + ":" + e.rotation + "\n";
-                        }
+                        result += "Ent " + e + "[" + reverseWorldEntities[e] + "] " + e.position + ":" + e.rotation + "\n";
                 }
 
                 return result;
@@ -437,9 +454,7 @@ public class ComSat : MonoBehaviour, IClient {
         void TickUpdate() {
                 // Must tick all objects in a consistent order across machines.
                 foreach(Entity e in worldEntityCache) {
-                        if(e != null) {
-                                e.TickUpdate();
-                        }
+                        e.TickUpdate();
                 }
 
                 foreach(var a in deferredActions) {
@@ -452,9 +467,11 @@ public class ComSat : MonoBehaviour, IClient {
 
         void VerifyClientGameState(int playerID, string state) {
                 if(state != currentGameState) {
-                        Debug.LogError("Player " + playerID + " out of sync!");
+                        Debug.LogError("Player " + playerID + " " + PlayerFromID(playerID).name + " out of sync!");
                         Debug.LogError(state);
                         Debug.LogError(currentGameState);
+                } else {
+                        Debug.Log("Player " + playerID + " " + PlayerFromID(playerID).name + " in sync.");
                 }
         }
 
@@ -495,23 +512,29 @@ public class ComSat : MonoBehaviour, IClient {
                                         // Advance the game turn.
                                         var m = new NetworkMessage(NetworkMessage.Type.NextTurn);
                                         net.SendMessageToAll(m);
+
+                                        currentGameState = DumpGameState();
+                                        foreach(var p in players) {
+                                                if(p.state != null) {
+                                                        VerifyClientGameState(p.id, p.state);
+                                                        p.state = null;
+                                                }
+                                        }
+
                                         ClearReady();
                                         serverNextTurn = true;
                                 }
 
                                 if(goForNextTurn) {
                                         if(isHost) {
-                                                currentGameState = DumpGameState();
                                                 Log(currentGameState);
                                         }
+                                        string state = null;
                                         if(syncCheckRequested || enableContinuousSyncCheck) {
-                                                string state = DumpGameState();
+                                                state = DumpGameState();
                                                 Debug.Log(state);
-                                                // Make sure it doesn't exceed the maximum packet length.
-                                                if(state.Length < 0xFF00) {
-                                                        var m = new NetworkMessage(NetworkMessage.Type.SyncCheck);
-                                                        m.gameState = state;
-                                                        net.SendMessageToServer(m);
+                                                if(state.Length > 0xF000) { // Keep within max packet length.
+                                                        state = null;
                                                 }
                                                 syncCheckRequested = false;
                                         }
@@ -527,14 +550,12 @@ public class ComSat : MonoBehaviour, IClient {
                                         futureQueuedCommands = tmp;
                                         goForNextTurn = false;
                                         serverNextTurn = false;
-                                        ReadyUp();
+                                        ReadyUp(state);
                                         ticksRemaining = ticksPerTurn;
                                         turnID += 1;
                                 }
                         }
                 }
-
-                worldEntityCache.RemoveAll((Entity e) => { return e == null; });
 
                 if(!gameOver && turnID > 5) {
                         // Win check.
@@ -554,9 +575,10 @@ public class ComSat : MonoBehaviour, IClient {
                 }
         }
 
-        void ReadyUp() {
+        void ReadyUp(string state) {
                 if(replayInput != null) return;
                 var m = new NetworkMessage(NetworkMessage.Type.Ready);
+                m.gameState = state;
                 net.SendMessageToServer(m);
         }
 
@@ -581,7 +603,6 @@ public class ComSat : MonoBehaviour, IClient {
         // Cast a line from A to B, checking for collisions with other entities.
         public static Entity LineCast(DVector2 start, DVector2 end, out DVector2 hitPosition, int ignoreTeam = -1) {
                 foreach(Entity e in currentInstance.worldEntityCache) {
-                        if(e == null) continue;
                         if(e.team == ignoreTeam) continue;
                         if(e.collisionRadius == 0) continue;
 
@@ -600,8 +621,7 @@ public class ComSat : MonoBehaviour, IClient {
         // Locate an entity within the given circle, not on the given team.
         public static Entity FindEntityWithinRadius(DVector2 origin, DReal radius, int ignoreTeam = -1) {
                 foreach(Entity e in currentInstance.worldEntityCache) {
-                        if(e == null) continue;
-                        if(e.team == ignoreTeam) continue;
+                       if(e.team == ignoreTeam) continue;
                         if(e.collisionRadius == 0) continue;
 
                         if((e.position - origin).sqrMagnitude < radius*radius) {
@@ -617,7 +637,6 @@ public class ComSat : MonoBehaviour, IClient {
                 var result = new List<Entity>();
 
                 foreach(Entity e in currentInstance.worldEntityCache) {
-                        if(e == null) continue;
                         if(e.team == ignoreTeam) continue;
                         if(e.collisionRadius == 0) continue;
 
@@ -643,7 +662,6 @@ public class ComSat : MonoBehaviour, IClient {
         // Game UI commands.
         public static void IssueMove(Entity unit, DVector2 position) {
                 if(currentInstance.replayInput != null) return;
-                if(unit == null) return;
 
                 var m = new NetworkMessage(NetworkMessage.Type.Move);
                 m.entityID = currentInstance.reverseWorldEntities[unit];
@@ -653,7 +671,6 @@ public class ComSat : MonoBehaviour, IClient {
 
         public static void IssueAttack(Entity unit, Entity target) {
                 if(currentInstance.replayInput != null) return;
-                if(unit == null || target == null) return;
 
                 var m = new NetworkMessage(NetworkMessage.Type.Attack);
                 m.entityID = currentInstance.reverseWorldEntities[unit];
@@ -663,7 +680,6 @@ public class ComSat : MonoBehaviour, IClient {
 
         public static void IssueUIAction(Entity unit, int what) {
                 if(currentInstance.replayInput != null) return;
-                if(unit == null) return;
 
                 var m = new NetworkMessage(NetworkMessage.Type.UIAction);
                 m.entityID = currentInstance.reverseWorldEntities[unit];
@@ -711,9 +727,6 @@ public class ComSat : MonoBehaviour, IClient {
                         net.SendMessageToAll(update);
                 }
                 players.Add(p);
-
-                if (p.id == localPlayerID)
-                        ComSat.currentInstance.SetPlayerName(p, Lobby.localPlayerName);
         }
 
         void PlayerLeave(int id) {
@@ -743,7 +756,7 @@ public class ComSat : MonoBehaviour, IClient {
         }
 
         public void OnServerMessage(NetworkMessage message) {
-                Debug.Log("Server sent message " + message + " " + message.type);
+                Log("Server sent message " + message + " " + message.type);
                 switch(message.type) {
                 case NetworkMessage.Type.Hello:
                         localPlayerID = message.playerID;
@@ -808,7 +821,7 @@ public class ComSat : MonoBehaviour, IClient {
         }
 
         public void OnClientMessage(int playerID, NetworkMessage message) {
-                Debug.Log("Player " + playerID + " sent message " + message + " " + message.type);
+                Log("Player " + playerID + " sent message " + message + " " + message.type);
                 switch(message.type) {
                 case NetworkMessage.Type.PlayerUpdate:
                         if(PlayerIsAdmin(playerID) || playerID == message.playerID) {
@@ -845,9 +858,9 @@ public class ComSat : MonoBehaviour, IClient {
                 case NetworkMessage.Type.Ready:
                         Log("Player " + playerID + " readyup  " + turnID + " " + tickID);
                         PlayerFromID(playerID).ready = true;
-                        break;
-                case NetworkMessage.Type.SyncCheck:
-                        VerifyClientGameState(playerID, message.gameState);
+                        if(message.gameState != null) {
+                                VerifyClientGameState(playerID, message.gameState);
+                        }
                         break;
                 default:
                         Debug.Log("Bad client message " + message.type);
@@ -920,8 +933,8 @@ public class ComSat : MonoBehaviour, IClient {
         public void SetPlayerName(Player player, string name) {
                 var m = new NetworkMessage(NetworkMessage.Type.PlayerUpdate);
                 m.playerID = player.id;
-                m.teamID = -1;
                 m.playerName = name;
+                m.teamID = -1;
                 net.SendMessageToServer(m);
         }
         public void SetPlayerTeam(Player player, int team) {

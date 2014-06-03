@@ -24,7 +24,7 @@ public class Saboteur : MonoBehaviour {
 
         void TickUpdate() {
                 ComSat.Trace(this, "TickUpdate");
-                if(target != null) {
+                if(ComSat.EntityExists(target)) {
                         destination = target.position;
 
                         if((target.position - entity.position).sqrMagnitude < target.collisionRadius * target.collisionRadius) {
