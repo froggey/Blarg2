@@ -34,8 +34,8 @@ public class GiantRobot : MonoBehaviour {
                 IDLE, MOVE, ATTACK
         }
 
-        static DReal attackDistance = 75; // Try to stay this close.
-        static DReal attackRange = 100; // Maximum firing range.
+        static DReal attackDistance = 100; // Try to stay this close.
+        static DReal attackRange = 125; // Maximum firing range.
         static DReal sqrPositioningAccuracy = (DReal)1 / 100;
 
         Mode mode;
