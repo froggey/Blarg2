@@ -149,6 +149,7 @@ class ClientData {
         public byte[] buffer;
         public int messageLength;
         public bool connected;
+        public int bytesRead;
         public IAsyncResult activeReceive;
 }
 
@@ -174,6 +175,7 @@ public class LSNet : UnityEngine.MonoBehaviour {
         private IClient localClient;
         private Socket clientSocket;
         private int clientMessageLength;
+        private int clientBytesRead;
         private byte[] clientBuffer = new byte[0x10000 + 2];
 
         private List<Action> pendingUnityActions = new List<Action>();
@@ -367,13 +369,17 @@ public class LSNet : UnityEngine.MonoBehaviour {
                                 // Connection closed.
                                 AddUnityAction(() => { ClientDisconnected(client); });
                                 return;
-                        } else if(bytesRead != 2) {
-                                AddUnityAction(() => { UnityEngine.Debug.LogError("Read short message header?"); });
                         }
-
-                        data.messageLength = (int)data.buffer[0] | ((int)data.buffer[1] << 8);
-
-                        data.activeReceive = data.socket.BeginReceive(data.buffer, 2, data.messageLength, SocketFlags.None, OnReceiveClientMessage, client);
+                        data.bytesRead += bytesRead;
+                        if(data.bytesRead == 2) {
+                                data.messageLength = (int)data.buffer[0] | ((int)data.buffer[1] << 8);
+                                data.bytesRead = 0;
+                                data.activeReceive = data.socket.BeginReceive(data.buffer, 2, data.messageLength, SocketFlags.None, OnReceiveClientMessage, client);
+                        } else {
+                                // Short read. restart.
+                                data.activeReceive = data.socket.BeginReceive(data.buffer, data.bytesRead, 2 - data.bytesRead,
+                                                                              SocketFlags.None, OnReceiveClientHeader, client);
+                        }
                 } catch(Exception e) {
                         AddUnityAction(() => {
                                         UnityEngine.Debug.LogException(e, this);
@@ -392,14 +398,18 @@ public class LSNet : UnityEngine.MonoBehaviour {
                                 // Connection closed.
                                 AddUnityAction(() => { ClientDisconnected(client); });
                                 return;
-                        } else if(bytesRead != data.messageLength) {
-                                AddUnityAction(() => { UnityEngine.Debug.LogError("Read short message body? " + bytesRead); });
                         }
-
-                        var message = NetworkMessage.Deserialize(data.buffer);
-                        AddUnityAction(() => { server.OnClientMessage(client, message); });
-
-                        data.activeReceive = data.socket.BeginReceive(data.buffer, 0, 2, SocketFlags.None, OnReceiveClientHeader, client);
+                        data.bytesRead += bytesRead;
+                        if(data.bytesRead == data.messageLength) {
+                                var message = NetworkMessage.Deserialize(data.buffer);
+                                AddUnityAction(() => { server.OnClientMessage(client, message); });
+                                data.bytesRead = 0;
+                                data.activeReceive = data.socket.BeginReceive(data.buffer, 0, 2, SocketFlags.None, OnReceiveClientHeader, client);
+                        } else {
+                                // Short read. restart.
+                                data.activeReceive = data.socket.BeginReceive(data.buffer, 2 + data.bytesRead, data.messageLength - data.bytesRead,
+                                                                              SocketFlags.None, OnReceiveClientMessage, client);
+                        }
                 } catch(Exception e) {
                         AddUnityAction(() => {
                                         UnityEngine.Debug.LogException(e, this);
@@ -418,6 +428,7 @@ public class LSNet : UnityEngine.MonoBehaviour {
                                         var data = new ClientData(client, socket);
                                         clientSockets[client] = data;
                                         server.OnClientConnect(client);
+                                        data.bytesRead = 0;
                                         data.activeReceive = socket.BeginReceive(data.buffer, 0, 2, SocketFlags.None, OnReceiveClientHeader, client);
                                 });
                 } catch(ObjectDisposedException) {
@@ -452,13 +463,16 @@ public class LSNet : UnityEngine.MonoBehaviour {
                         if(bytesRead == 0) {
                                 AddUnityAction(() => ServerDisconnected());
                                 return;
-                        } else if(bytesRead != 2) {
-                                AddUnityAction(() => { UnityEngine.Debug.LogError("Read short message header?"); });
                         }
-
-                        clientMessageLength = (int)clientBuffer[0] | ((int)clientBuffer[1] << 8);
-
-                        clientSocket.BeginReceive(clientBuffer, 2, clientMessageLength, SocketFlags.None, OnReceiveServerMessage, clientSocket);
+                        clientBytesRead += bytesRead;
+                        if(clientBytesRead == 2) {
+                                clientMessageLength = (int)clientBuffer[0] | ((int)clientBuffer[1] << 8);
+                                clientBytesRead = 0;
+                                clientSocket.BeginReceive(clientBuffer, 2, clientMessageLength, SocketFlags.None, OnReceiveServerMessage, clientSocket);
+                        } else {
+                                clientSocket.BeginReceive(clientBuffer, clientBytesRead, 2 - clientBytesRead,
+                                                          SocketFlags.None, OnReceiveServerHeader, clientSocket);
+                        }
                 } catch(Exception e) {
                         AddUnityAction(() => {
                                         UnityEngine.Debug.LogException(e, this);
@@ -473,14 +487,18 @@ public class LSNet : UnityEngine.MonoBehaviour {
                         if(bytesRead == 0) {
                                 AddUnityAction(() => { ServerDisconnected(); });
                                 return;
-                        } else if(bytesRead != clientMessageLength) {
-                                AddUnityAction(() => { UnityEngine.Debug.LogError("Read short message body? " + bytesRead); });
                         }
 
-                        var message = NetworkMessage.Deserialize(clientBuffer);
-                        AddUnityAction(() => { localClient.OnServerMessage(message); });
-
-                        clientSocket.BeginReceive(clientBuffer, 0, 2, SocketFlags.None, OnReceiveServerHeader, clientSocket);
+                        clientBytesRead += bytesRead;
+                        if(clientBytesRead == clientMessageLength) {
+                                var message = NetworkMessage.Deserialize(clientBuffer);
+                                AddUnityAction(() => { localClient.OnServerMessage(message); });
+                                clientBytesRead = 0;
+                                clientSocket.BeginReceive(clientBuffer, 0, 2, SocketFlags.None, OnReceiveServerHeader, clientSocket);
+                        } else {
+                                clientSocket.BeginReceive(clientBuffer, 2 + clientBytesRead, clientMessageLength - clientBytesRead,
+                                                          SocketFlags.None, OnReceiveServerMessage, clientSocket);
+                        }
                 } catch(Exception e) {
                         AddUnityAction(() => {
                                         UnityEngine.Debug.LogException(e, this);
@@ -494,6 +512,7 @@ public class LSNet : UnityEngine.MonoBehaviour {
                         clientSocket.EndConnect(info);
                         AddUnityAction(() => {
                                         localClient.OnConnected(this);
+                                        clientBytesRead = 0;
                                         clientSocket.BeginReceive(clientBuffer, 0, 2, SocketFlags.None, OnReceiveServerHeader, clientSocket);
                                 });
                 } catch(Exception e) {
