@@ -113,6 +113,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da86a9e91ba8347b4bace47fca8e731a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  offset: 0
 --- !u!114 &11400002
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -171,6 +172,7 @@ MonoBehaviour:
   - {fileID: 11400004, guid: 1bc94550de09f4e8d9a6a606192d4542, type: 2}
   - {fileID: 11400004, guid: 4297a2b692f0a432ab453dc809305b51, type: 2}
   - {fileID: 11400000, guid: fe70a1df14ad0ed43bf4736092c725aa, type: 2}
+  - {fileID: 11400006, guid: ce9392ef3f1ca4e9fac2d838072a99e5, type: 2}
   sabotageRepairTime: 60
   sabotageTimeMultiplier: 3
 --- !u!114 &11400008
