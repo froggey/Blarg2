@@ -32,7 +32,7 @@ public class ZMachine : MonoBehaviour {
 
         public int attackDistance = 150; // Try to stay this close.
         public int attackRange = 200; // Maximum firing range.
-        static DReal turretTurnSpeed = DReal.Radians(400); // radians per second
+        public int  turretTurnSpeed = 400; // Degrees per second
         static DReal sqrPositioningAccuracy = (DReal)1 / 100;
 
         Mode mode;
@@ -47,7 +47,7 @@ public class ZMachine : MonoBehaviour {
         public int barrelRecycleTime;
 
         void TurnTurret(DReal targetAngle) {
-                turretRotation = Utility.CalculateNewAngle(turretRotation, targetAngle, turretTurnSpeed);
+                turretRotation = Utility.CalculateNewAngle(turretRotation, targetAngle, DReal.Radians(turretTurnSpeed));
         }
 
         void Fire() {
