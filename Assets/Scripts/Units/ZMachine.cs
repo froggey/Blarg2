@@ -3,18 +3,15 @@ using System.Collections;
 
 [RequireComponent (typeof(Entity))]
 [RequireComponent (typeof(Vehicle))]
-[RequireComponent(typeof(AudioSource))]
-public class GiantRobot : MonoBehaviour {
+public class ZMachine : MonoBehaviour {
         // Can't use GameObjects to set these up because floats.
         // Unity refuses to edit these because they're structs.
         // :(
         public DReal projectileSpawnDistance = 6;
-        public DVector2 turretAttachPoint = new DVector2(0, -(DReal)597 / 2048);
-        public DReal turretSeperation = (DReal)1 / 3;
+        public DVector2 turretAttachPoint = new DVector2(0, 0);
+        public GameObject turretObject;
+        public GameObject barrelObject;
         public GameObject projectilePrefab;
-
-        public GameObject laserOrigin;
-        public LineRenderer laser;
 
         private Entity entity;
         private Vehicle vehicle;
@@ -26,16 +23,16 @@ public class GiantRobot : MonoBehaviour {
                 vehicle = GetComponent<Vehicle>();
 
                 mode = Mode.IDLE;
-
-                fireCycle = FireCycle.READY;
+                turretRotation = 0;
         }
 
         enum Mode {
                 IDLE, MOVE, ATTACK
         }
 
-        static DReal attackDistance = 100; // Try to stay this close.
-        static DReal attackRange = 125; // Maximum firing range.
+        public int attackDistance = 150; // Try to stay this close.
+        public int attackRange = 200; // Maximum firing range.
+        public int  turretTurnSpeed = 400; // Degrees per second
         static DReal sqrPositioningAccuracy = (DReal)1 / 100;
 
         Mode mode;
@@ -43,43 +40,30 @@ public class GiantRobot : MonoBehaviour {
         Entity target; // Current attack target.
         bool movingToTarget; // Cleared when attackDistance is reached.
 
-        // Firing cycle:
-        //   10 Await trigger
-        //   20 Fire left
-        //   30 delay
-        //   40 Fire right
-        //   50 delay
-        //   60 goto 10
-        enum FireCycle {
-                READY, FIREDLEFT, FIREDRIGHT
-        }
+        DReal turretRotation;
 
-        FireCycle fireCycle;
         DReal fireDelayTime;
 
-        DReal barrelDelay = (DReal)1 / 5; // Delay between firing left & right barrels.
-        DReal barrelRecycleTime = 2; // Delay before refiring one barrel.
+        public int barrelRecycleTime;
 
-        void FireOneBarrel(int sign) {
-                audio.PlayOneShot(audio.clip);
-                ComSat.SpawnEntity(entity, projectilePrefab,
-                                   entity.position, entity.rotation,
-                                   (Entity ent) => {
-                                           var proj = ent.gameObject.GetComponent<Projectile>();
-                                           if(proj != null && target != null) {
-                                                   proj.target = target;
-                                           }
-                                   });
+        void TurnTurret(DReal targetAngle) {
+                turretRotation = Utility.CalculateNewAngle(turretRotation, targetAngle, DReal.Radians(turretTurnSpeed));
         }
 
         void Fire() {
-                if(fireCycle != FireCycle.READY) {
+                if(fireDelayTime > 0) {
                         return;
                 }
-                // Fire left.
-                fireCycle = FireCycle.FIREDLEFT;
-                fireDelayTime = barrelDelay;
-                FireOneBarrel(+1);
+                fireDelayTime = barrelRecycleTime;
+                barrelObject.SendMessage("Fire");
+                ComSat.SpawnEntity(entity, projectilePrefab,
+                                   entity.position, entity.rotation + turretRotation,
+                                   (Entity ent) => {
+                                           var proj = ent.gameObject.GetComponent<Projectile>();
+                                           if(proj != null && ComSat.EntityExists(target)) {
+                                                   proj.target = target;
+                                           }
+                                   });
         }
 
         void TickUpdate() {
@@ -94,6 +78,25 @@ public class GiantRobot : MonoBehaviour {
                         var distVec = target.position - entity.position;
                         var dist = distVec.magnitude;
 
+                        DReal targetTurretAngle;
+
+                        var projectileProjectile = projectilePrefab.GetComponent<Projectile>();
+                        if(projectileProjectile != null) {
+                                var aimSpot = Utility.PredictShot(entity.position, projectileProjectile.initialSpeed,
+                                                                  target.position, target.velocity);
+
+                                targetTurretAngle = DReal.Mod(DVector2.ToAngle(aimSpot - entity.position) - entity.rotation, DReal.TwoPI);
+                        } else {
+                                targetTurretAngle = DReal.Mod(DVector2.ToAngle(distVec) - entity.rotation, DReal.TwoPI);
+                        }
+
+                        // Turn turret to point at target when close.
+                        if(dist < attackRange * 2) {
+                                TurnTurret(targetTurretAngle);
+                        } else {
+                                TurnTurret(0);
+                        }
+
                         if(dist < attackDistance) {
                                 // Close enough.
                                 movingToTarget = false;
@@ -104,8 +107,8 @@ public class GiantRobot : MonoBehaviour {
                                 vehicle.MoveTowards(target.position);
                         }
 
-                        // Fire when in range.
-                        if(dist < attackRange) {
+                        // Fire when in range and pointing the gun at the target.
+                        if(dist < attackRange && targetTurretAngle == turretRotation) {
                                 Fire();
                         }
                 } else if(mode == Mode.MOVE) {
@@ -117,22 +120,13 @@ public class GiantRobot : MonoBehaviour {
                         } else {
                                 vehicle.MoveTowards(destination);
                         }
+                        TurnTurret(0);
+                } else if(mode == Mode.IDLE) {
+                        TurnTurret(0);
                 }
 
-                if(fireCycle != FireCycle.READY) {
+                if(fireDelayTime > 0) {
                         fireDelayTime -= ComSat.tickRate;
-                        if(fireDelayTime <= 0) {
-                                if(fireCycle == FireCycle.FIREDLEFT) {
-                                        // Fire right.
-                                        fireCycle = FireCycle.FIREDRIGHT;
-                                        FireOneBarrel(-1);
-                                        // This is enough time for the left barrel to recycle.
-                                        fireDelayTime = barrelRecycleTime - barrelDelay;
-                                } else if(fireCycle == FireCycle.FIREDRIGHT) {
-                                        // cycle complete.
-                                        fireCycle = FireCycle.READY;
-                                }
-                        }
                 }
         }
 
@@ -154,13 +148,9 @@ public class GiantRobot : MonoBehaviour {
         }
 
         void Update() {
-                if(mode == Mode.ATTACK && ComSat.EntityExists(target)) {
-                        laser.enabled = true;
-                        laser.SetPosition(0, laserOrigin.transform.position);
-                        laser.SetPosition(1, target.transform.position);
-                } else {
-                        laser.enabled = false;
-                }
+                // Always update local rotation.
+                // Touching the world rotation causes fighting with Entity.
+                turretObject.transform.localRotation = Quaternion.AngleAxis((float)DReal.Degrees(turretRotation), Vector3.up);
         }
 
         void OnDrawGizmosSelected() {
@@ -170,12 +160,10 @@ public class GiantRobot : MonoBehaviour {
                                                      0,
                                                      (float)turretAttachPoint.y);
                 Matrix4x4 rotationMatrix = Matrix4x4.TRS(transform.position, transform.rotation, transform.lossyScale) *
-                        Matrix4x4.TRS(turretPosition, Quaternion.AngleAxis(0, Vector3.up), transform.lossyScale);
+                        Matrix4x4.TRS(turretPosition, Quaternion.AngleAxis((float)DReal.Degrees(turretRotation), Vector3.up), transform.lossyScale);
                 Gizmos.matrix = rotationMatrix;
                 Gizmos.DrawWireSphere(new Vector3(0,0,0), 0.5f);
-                Gizmos.DrawWireCube(new Vector3((float)turretSeperation, 0, (float)projectileSpawnDistance),
-                                    new Vector3(0.5f, 0.5f, 0.5f));
-                Gizmos.DrawWireCube(new Vector3(-(float)turretSeperation, 0, (float)projectileSpawnDistance),
+                Gizmos.DrawWireCube(new Vector3(0, 0, (float)projectileSpawnDistance),
                                     new Vector3(0.5f, 0.5f, 0.5f));
 
         }

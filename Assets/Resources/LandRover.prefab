@@ -184,8 +184,8 @@ GameObject:
   - 114: {fileID: 11400000}
   - 65: {fileID: 6500000}
   - 114: {fileID: 11400008}
-  - 114: {fileID: 11400004}
   - 114: {fileID: 11400010}
+  - 114: {fileID: 11400004}
   m_Layer: 8
   m_Name: LandRover
   m_TagString: MultiSelectableUnit
@@ -336,7 +336,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100020}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -14.1317329, y: 34.5819817, z: 30.311964}
+  m_LocalPosition: {x: 247.627136, y: 1550.56433, z: -127.874207}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 400018}
@@ -766,6 +766,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da86a9e91ba8347b4bace47fca8e731a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  offset: 0
 --- !u!114 &11400004
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -774,9 +775,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 100020}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 43e01da0899484315867a206997b461a, type: 3}
+  m_Script: {fileID: 11500000, guid: f1b4a71154e5e48cb82660f548586f2e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  impactPrefab: {fileID: 100012, guid: d9d02c0a3ffc84ca1b5dfdccebb87c66, type: 2}
+  detonateRange: 5
+  explosionRadius: 20
+  damageAtCentre: 250
 --- !u!114 &11400006
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -796,7 +801,7 @@ MonoBehaviour:
   collisionRadiusDenominator: 3
   baseMesh: {fileID: 0}
   ghostPrefab: {fileID: 100018, guid: 748505beddb424bc7a1ff7179b15516e, type: 2}
-  buildTime: 20
+  buildTime: 5
   buildIcon: {fileID: 2800000, guid: c0a0dae24052c44469686352611d4dd6, type: 3}
   hpBarTexture: {fileID: 2800000, guid: fe5e9061a9af5c24ab18c18b3c0f7857, type: 3}
   hitOnlyIfTargetted: 0

@@ -47,7 +47,7 @@ public class Plane : MonoBehaviour {
                                    entity.position, entity.rotation,
                                    (Entity ent) => {
                                            var proj = ent.gameObject.GetComponent<Projectile>();
-                                           if(proj != null && target != null) {
+                                           if(proj != null && ComSat.EntityExists(target)) {
                                                    proj.target = target;
                                            }
                                    });
@@ -64,7 +64,7 @@ public class Plane : MonoBehaviour {
                                    entity.position, entity.rotation,
                                    (Entity ent) => {
                                            var proj = ent.gameObject.GetComponent<Projectile>();
-                                           if(proj != null && target != null) {
+                                           if(proj != null && ComSat.EntityExists(target)) {
                                                    proj.target = target;
                                            }
                                    });
@@ -75,7 +75,7 @@ public class Plane : MonoBehaviour {
 
         void TickUpdate() {
                 ComSat.Trace(this, "TickUpdate");
-                if(target == null) {
+                if(!ComSat.EntityExists(target)) {
                         target = null;
                         if(!explicitMove) {
                                 // Chill out here.
