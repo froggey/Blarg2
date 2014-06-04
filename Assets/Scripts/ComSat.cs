@@ -154,7 +154,7 @@ public class ComSat : MonoBehaviour, IClient {
         void OnGUI() {
                 if(!worldRunning) return;
 
-                GUILayout.BeginArea(new Rect (Screen.width-200, 0, 200, 100));
+                GUILayout.BeginArea(new Rect (Screen.width-200, 0, 200, 200));
                 if(GUILayout.Button("Disconnect")) {
                         Disconnect();
                 }
@@ -261,18 +261,9 @@ public class ComSat : MonoBehaviour, IClient {
         public static void Spawn(string entityName, int team, DVector2 position, DReal rotation) {
                 if(currentInstance.replayInput != null) return;
 
-                if(team != 0) {
-                        // Only spawn if the team exists.
-                        bool ok = false;
-
-                        foreach(var p in currentInstance.players) {
-                                if(p.team == team) {
-                                        ok = true;
-                                        break;
-                                }
-                        }
-
-                        if(!ok) return;
+                // Only spawn if the team exists or if generating scenery.
+                if(team != 0 && !currentInstance.players.Any(p => p.team == team)) {
+                        return;
                 }
 
                 var m = new NetworkMessage(NetworkMessage.Type.SpawnEntity);
@@ -621,7 +612,7 @@ public class ComSat : MonoBehaviour, IClient {
         // Locate an entity within the given circle, not on the given team.
         public static Entity FindEntityWithinRadius(DVector2 origin, DReal radius, int ignoreTeam = -1) {
                 foreach(Entity e in currentInstance.worldEntityCache) {
-                       if(e.team == ignoreTeam) continue;
+                        if(e.team == ignoreTeam) continue;
                         if(e.collisionRadius == 0) continue;
 
                         if((e.position - origin).sqrMagnitude < radius*radius) {
