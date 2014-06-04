@@ -226,45 +226,15 @@ public class ComSat : MonoBehaviour, IClient {
         // Instantiate a new prefab, defering to the end of TickUpdate.
         // Prefab must be an Entity.
         public static void SpawnEntity(GameObject prefab, int team, DVector2 position, DReal rotation) {
-                currentInstance.Log("Spawn entity " + prefab + " on team " + team + " at " + position + ":" + rotation);
-                currentInstance.deferredActions.Add(() => {
-                                Vector3 worldPosition = new Vector3((float)position.y, 0, (float)position.x);
-                                Quaternion worldRotation = Quaternion.AngleAxis((float)rotation, Vector3.up);
-                                Entity thing = (Object.Instantiate(prefab, worldPosition, worldRotation) as GameObject).GetComponent<Entity>();
-                                thing.position = position;
-                                thing.rotation = rotation;
-                                thing.team = team;
-                                currentInstance.EntityCreated(thing);
-                        });
+                currentInstance.SpawnEntity(prefab, null, team, position, rotation, e => {});
         }
 
         public static void SpawnEntity(Entity origin, GameObject prefab, DVector2 position, DReal rotation) {
-                currentInstance.Log("Spawn entity " + prefab + " from " + origin + " at " + position + ":" + rotation);
-                currentInstance.deferredActions.Add(() => {
-                                Vector3 worldPosition = new Vector3((float)position.y, 0, (float)position.x);
-                                Quaternion worldRotation = Quaternion.AngleAxis((float)rotation, Vector3.up);
-                                Entity thing = (Object.Instantiate(prefab, worldPosition, worldRotation) as GameObject).GetComponent<Entity>();
-                                thing.position = position;
-                                thing.rotation = rotation;
-                                thing.team = origin.team;
-                                thing.origin = origin;
-                                currentInstance.EntityCreated(thing);
-                        });
+                currentInstance.SpawnEntity(prefab, origin, origin == null ? 0 : origin.team, position, rotation, e => {});
         }
 
         public static void SpawnEntity(Entity origin, GameObject prefab, DVector2 position, DReal rotation, System.Action<Entity> onSpawn) {
-                currentInstance.Log("Spawn entity " + prefab + " from " + origin + " at " + position + ":" + rotation);
-                currentInstance.deferredActions.Add(() => {
-                                Vector3 worldPosition = new Vector3((float)position.y, 0, (float)position.x);
-                                Quaternion worldRotation = Quaternion.AngleAxis((float)rotation, Vector3.up);
-                                Entity thing = (Object.Instantiate(prefab, worldPosition, worldRotation) as GameObject).GetComponent<Entity>();
-                                thing.position = position;
-                                thing.rotation = rotation;
-                                thing.team = origin.team;
-                                thing.origin = origin;
-                                currentInstance.EntityCreated(thing);
-                                onSpawn(thing);
-                        });
+                currentInstance.SpawnEntity(prefab, origin, origin == null ? 0 : origin.team, position, rotation, onSpawn);
         }
 
         // Create a new entity at whereever.
@@ -287,40 +257,56 @@ public class ComSat : MonoBehaviour, IClient {
 
         // (Client)
         void SpawnCommand(string entityName, int team, DVector2 position, DReal rotation) {
-                GameObject go = Resources.Load<GameObject>(entityName);
-                Vector3 worldPosition = new Vector3((float)position.y, 0, (float)position.x);
-                Quaternion worldRotation = Quaternion.AngleAxis((float)rotation, Vector3.up);
-
                 Log("{" + tickID + "} Spawn " + entityName + " on team " + team + " at " + position + ":" + rotation);
-                Entity thing = (Object.Instantiate(go, worldPosition, worldRotation) as GameObject).GetComponent<Entity>();
-                thing.position = position;
-                thing.rotation = rotation;
-                thing.team = team;
-                EntityCreated(thing);
+                GameObject go = Resources.Load<GameObject>(entityName);
+                SpawnEntity(go, null, team, position, rotation, e => {});
         }
 
-        void EntityCreated(Entity ent) {
-                int id = currentInstance.nextEntityId;
-                currentInstance.nextEntityId += 1;
-                currentInstance.worldEntities[id] = ent;
-                currentInstance.reverseWorldEntities[ent] = id;
-                currentInstance.worldEntityCache.Add(ent);
-                if(ent.collisionRadius != 0) {
-                        currentInstance.worldEntityCollisionCache.Add(ent);
+        void SpawnEntity(GameObject prefab, Entity origin, int team, DVector2 position, DReal rotation, System.Action<Entity> onSpawn) {
+                if(debugVomit) {
+                        Log("Spawn entity " + prefab + " from " + origin + " on team " + team + " at " + position + ":" + rotation);
                 }
-                nCreatedThisTick += 1;
-                Log("{" + tickID + "} Created entity " + ent + "[" + id + "] at " + ent.position + ":" + ent.rotation);
+                deferredActions.Add(() => {
+                                Vector3 worldPosition = new Vector3((float)position.y, 0, (float)position.x);
+                                Quaternion worldRotation = Quaternion.AngleAxis((float)rotation, Vector3.up);
+                                Entity thing = (Object.Instantiate(prefab, worldPosition, worldRotation) as GameObject).GetComponent<Entity>();
+                                int id = nextEntityId;
+                                nextEntityId += 1;
+
+                                thing.position = position;
+                                thing.rotation = rotation;
+                                thing.team = team;
+                                thing.origin = origin;
+
+                                worldEntities[id] = thing;
+                                reverseWorldEntities[thing] = id;
+                                worldEntityCache.Add(thing);
+                                if(thing.collisionRadius != 0) {
+                                        worldEntityCollisionCache.Add(thing);
+                                }
+                                thing.OnInstantiate();
+                                onSpawn(thing);
+
+                                nCreatedThisTick += 1;
+                                if(debugVomit) {
+                                        Log("{" + tickID + "} Created entity " + thing + "[" + id + "] at " + position + ":" + rotation);
+                                }
+                        });
         }
 
         public static void DestroyEntity(Entity e) {
-                currentInstance.Log("Destroy entity " + e + "[" + currentInstance.reverseWorldEntities[e] + "] at " + e.position + ":" + e.rotation);
+                if(currentInstance.debugVomit) {
+                        currentInstance.Log("Destroy entity " + e + "[" + currentInstance.reverseWorldEntities[e] + "] at " + e.position + ":" + e.rotation);
+                }
                 currentInstance.deferredActions.Add(() => {
                                 if(!currentInstance.reverseWorldEntities.ContainsKey(e)) {
                                         // It's possible for a thing to be destroyed twice in one tick.
                                         return;
                                 }
                                 int id = currentInstance.reverseWorldEntities[e];
-                                currentInstance.Log("{" + currentInstance.tickID + "} Destroy entity " + e + "[" + id + "] at " + e.position + ":" + e.rotation);
+                                if(currentInstance.debugVomit) {
+                                        currentInstance.Log("{" + currentInstance.tickID + "} Destroy entity " + e + "[" + id + "] at " + e.position + ":" + e.rotation);
+                                }
                                 currentInstance.worldEntities.Remove(id);
                                 currentInstance.reverseWorldEntities.Remove(e);
                                 currentInstance.worldEntityCache.Remove(e);
