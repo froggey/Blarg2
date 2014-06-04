@@ -107,6 +107,7 @@ public class ComSat : MonoBehaviour, IClient {
         private Dictionary<int, Entity> worldEntities;
         private Dictionary<Entity, int> reverseWorldEntities;
         private List<Entity> worldEntityCache;
+        private List<Entity> worldEntityCollisionCache;
 
         // Actions to be performed at the end of a tick.
         private List<System.Action> deferredActions;
@@ -294,6 +295,9 @@ public class ComSat : MonoBehaviour, IClient {
                 currentInstance.worldEntities[id] = ent;
                 currentInstance.reverseWorldEntities[ent] = id;
                 currentInstance.worldEntityCache.Add(ent);
+                if(ent.collisionRadius != 0) {
+                        currentInstance.worldEntityCollisionCache.Add(ent);
+                }
                 Log("{" + tickID + "} Created entity " + ent + "[" + id + "] at " + ent.position + ":" + ent.rotation);
         }
 
@@ -309,6 +313,7 @@ public class ComSat : MonoBehaviour, IClient {
                                 currentInstance.worldEntities.Remove(id);
                                 currentInstance.reverseWorldEntities.Remove(e);
                                 currentInstance.worldEntityCache.Remove(e);
+                                currentInstance.worldEntityCollisionCache.Remove(e);
                                 Object.Destroy(e.gameObject);
                         });
         }
@@ -397,6 +402,7 @@ public class ComSat : MonoBehaviour, IClient {
                 worldEntities = new Dictionary<int, Entity>();
                 reverseWorldEntities = new Dictionary<Entity, int>();
                 worldEntityCache = new List<Entity>(); // Faster to iterate through.
+                worldEntityCollisionCache = new List<Entity>(); // Faster to iterate through.
                 deferredActions = new List<System.Action>();
                 queuedCommands = new List<System.Action>();
                 futureQueuedCommands = new List<System.Action>();
@@ -593,9 +599,8 @@ public class ComSat : MonoBehaviour, IClient {
 
         // Cast a line from A to B, checking for collisions with other entities.
         public static Entity LineCast(DVector2 start, DVector2 end, out DVector2 hitPosition, int ignoreTeam = -1) {
-                foreach(Entity e in currentInstance.worldEntityCache) {
+                foreach(Entity e in currentInstance.worldEntityCollisionCache) {
                         if(e.team == ignoreTeam) continue;
-                        if(e.collisionRadius == 0) continue;
 
                         DVector2 result;
                         if(Utility.IntersectLineCircle(e.position, e.collisionRadius, start, end, out result)) {
@@ -611,9 +616,8 @@ public class ComSat : MonoBehaviour, IClient {
 
         // Locate an entity within the given circle, not on the given team.
         public static Entity FindEntityWithinRadius(DVector2 origin, DReal radius, int ignoreTeam = -1) {
-                foreach(Entity e in currentInstance.worldEntityCache) {
-                        if(e.team == ignoreTeam) continue;
-                        if(e.collisionRadius == 0) continue;
+                foreach(Entity e in currentInstance.worldEntityCollisionCache) {
+                       if(e.team == ignoreTeam) continue;
 
                         if((e.position - origin).sqrMagnitude < radius*radius) {
                                 return e;
@@ -627,9 +631,8 @@ public class ComSat : MonoBehaviour, IClient {
         public static List<Entity> FindEntitiesWithinRadius(DVector2 origin, DReal radius, int ignoreTeam = -1) {
                 var result = new List<Entity>();
 
-                foreach(Entity e in currentInstance.worldEntityCache) {
+                foreach(Entity e in currentInstance.worldEntityCollisionCache) {
                         if(e.team == ignoreTeam) continue;
-                        if(e.collisionRadius == 0) continue;
 
                         if((e.position - origin).sqrMagnitude < radius*radius) {
                                 result.Add(e);
