@@ -146,6 +146,13 @@ public class ComSat : MonoBehaviour, IClient {
         // Sync check every tick.
         public bool enableContinuousSyncCheck;
 
+        private float avgTickTime;
+        private int nCreatedThisTick;
+        private float avgCreatedPerTick;
+        private int nDestroyedThisTick;
+        private float avgDestroyedPerTick;
+
+
         void Log(string s) {
                 if(debugVomit) {
                         Debug.Log(s);
@@ -165,6 +172,9 @@ public class ComSat : MonoBehaviour, IClient {
                 if(GUILayout.Button(debugVomit ? "Disable verbose logging" : "Enable verbose logging")) {
                         debugVomit = !debugVomit;
                 }
+                GUILayout.Box("Avg tick time: " + (avgTickTime * 1000).ToString("n") + "ms");
+                GUILayout.Box("Avg instantiations: " + avgCreatedPerTick.ToString("n"));
+                GUILayout.Box("Avg destructions: " + avgDestroyedPerTick.ToString("n"));
                 if(gameOver) {
                         if(winningTeam == 0) {
                                 GUILayout.Label("DRAW!");
@@ -298,6 +308,7 @@ public class ComSat : MonoBehaviour, IClient {
                 if(ent.collisionRadius != 0) {
                         currentInstance.worldEntityCollisionCache.Add(ent);
                 }
+                nCreatedThisTick += 1;
                 Log("{" + tickID + "} Created entity " + ent + "[" + id + "] at " + ent.position + ":" + ent.rotation);
         }
 
@@ -315,6 +326,7 @@ public class ComSat : MonoBehaviour, IClient {
                                 currentInstance.worldEntityCache.Remove(e);
                                 currentInstance.worldEntityCollisionCache.Remove(e);
                                 Object.Destroy(e.gameObject);
+                                currentInstance.nDestroyedThisTick += 1;
                         });
         }
 
@@ -497,7 +509,18 @@ public class ComSat : MonoBehaviour, IClient {
                         if(ticksRemaining != 0) {
                                 Log("Tick " + tickID);
                                 tickID += 1;
+                                var sw = new System.Diagnostics.Stopwatch();
+                                sw.Start();
+                                nCreatedThisTick = 0;
+                                nDestroyedThisTick = 0;
                                 TickUpdate();
+                                sw.Stop();
+                                avgTickTime += (sw.ElapsedTicks / (float)System.Diagnostics.Stopwatch.Frequency);
+                                avgTickTime /= 2;
+                                avgCreatedPerTick += nCreatedThisTick;
+                                avgCreatedPerTick /= 2;
+                                avgDestroyedPerTick += nDestroyedThisTick;
+                                avgDestroyedPerTick /= 2;
                                 ticksRemaining -= 1;
 
                                 if(fullDump) {
