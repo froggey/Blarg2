@@ -801,11 +801,13 @@ MonoBehaviour:
   collisionRadiusDenominator: 3
   baseMesh: {fileID: 0}
   ghostPrefab: {fileID: 100018, guid: 748505beddb424bc7a1ff7179b15516e, type: 2}
-  buildTime: 5
+  buildTime: 1
   buildIcon: {fileID: 2800000, guid: c0a0dae24052c44469686352611d4dd6, type: 3}
   hpBarTexture: {fileID: 2800000, guid: fe5e9061a9af5c24ab18c18b3c0f7857, type: 3}
   hitOnlyIfTargetted: 0
   teamColourRenderer: {fileID: 2300010}
+  enablePooling: 0
+  prototype: {fileID: 0}
 --- !u!114 &11400008
 MonoBehaviour:
   m_ObjectHideFlags: 1

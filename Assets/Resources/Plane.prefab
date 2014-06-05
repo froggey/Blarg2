@@ -391,11 +391,13 @@ MonoBehaviour:
   collisionRadiusDenominator: 1
   baseMesh: {fileID: 0}
   ghostPrefab: {fileID: 100002, guid: 1bad428e844f04d26904dc651a84e852, type: 2}
-  buildTime: 5
+  buildTime: 4
   buildIcon: {fileID: 2800000, guid: b495f2818b16c4e3eb4a10c64b1e4d8f, type: 3}
   hpBarTexture: {fileID: 2800000, guid: fe5e9061a9af5c24ab18c18b3c0f7857, type: 3}
   hitOnlyIfTargetted: 1
   teamColourRenderer: {fileID: 2300002}
+  enablePooling: 0
+  prototype: {fileID: 0}
 --- !u!114 &11400006
 MonoBehaviour:
   m_ObjectHideFlags: 1

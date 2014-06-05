@@ -1304,6 +1304,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da86a9e91ba8347b4bace47fca8e731a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  offset: 0
 --- !u!114 &11400004
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1337,11 +1338,13 @@ MonoBehaviour:
   collisionRadiusDenominator: 2
   baseMesh: {fileID: 0}
   ghostPrefab: {fileID: 100000, guid: cf1c0503a040a496e8d2c1f441710538, type: 2}
-  buildTime: 4
+  buildTime: 6
   buildIcon: {fileID: 2800000, guid: e36a9dd5251d0409bbd1395fbaeda27a, type: 3}
   hpBarTexture: {fileID: 2800000, guid: fe5e9061a9af5c24ab18c18b3c0f7857, type: 3}
   hitOnlyIfTargetted: 0
   teamColourRenderer: {fileID: 2300034}
+  enablePooling: 0
+  prototype: {fileID: 0}
 --- !u!114 &11400008
 MonoBehaviour:
   m_ObjectHideFlags: 1
