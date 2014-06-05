@@ -25,7 +25,7 @@ public class CameraController : MonoBehaviour {
                 if(scrollMode == 0) {
                         if(isScrolling) {
                                 Vector3 pos = Camera.main.ScreenToViewportPoint(Input.mousePosition - scrollOrigin);
-                                transform.Translate(pos.x * 6, 0, pos.y * 6);
+                                transform.Translate(pos.x * 8, 0, pos.y * 8);
                         }
                 } else {
                         if(Input.GetButton("Scroll")) {
