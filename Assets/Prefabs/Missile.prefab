@@ -259,6 +259,8 @@ MonoBehaviour:
   hpBarTexture: {fileID: 0}
   hitOnlyIfTargetted: 1
   teamColourRenderer: {fileID: 0}
+  enablePooling: 1
+  prototype: {fileID: 0}
 --- !u!114 &11400006
 MonoBehaviour:
   m_ObjectHideFlags: 1

@@ -162,7 +162,7 @@ public class ComSat : MonoBehaviour, IClient {
         void OnGUI() {
                 if(!worldRunning) return;
 
-                GUILayout.BeginArea(new Rect (Screen.width-200, 0, 200, 200));
+                GUILayout.BeginArea(new Rect (Screen.width-200, 0, 200, 400));
                 if(GUILayout.Button("Disconnect")) {
                         Disconnect();
                 }
@@ -172,9 +172,13 @@ public class ComSat : MonoBehaviour, IClient {
                 if(GUILayout.Button(debugVomit ? "Disable verbose logging" : "Enable verbose logging")) {
                         debugVomit = !debugVomit;
                 }
-                GUILayout.Box("Avg tick time: " + (avgTickTime * 1000).ToString("n") + "ms");
-                GUILayout.Box("Avg instantiations: " + avgCreatedPerTick.ToString("n"));
-                GUILayout.Box("Avg destructions: " + avgDestroyedPerTick.ToString("n"));
+                GUILayout.Label("Avg tick time: " + (avgTickTime * 1000).ToString("n") + "ms");
+                GUILayout.Label("Avg instantiations: " + avgCreatedPerTick.ToString("n"));
+                GUILayout.Label("Avg destructions: " + avgDestroyedPerTick.ToString("n"));
+                GUILayout.Label("Object pools: ");
+                foreach(var kv in ObjectPool.Pools) {
+                        GUILayout.Label(kv.Key.name + " " + kv.Value.Count);
+                }
                 if(gameOver) {
                         if(winningTeam == 0) {
                                 GUILayout.Label("DRAW!");
@@ -269,7 +273,12 @@ public class ComSat : MonoBehaviour, IClient {
                 deferredActions.Add(() => {
                                 Vector3 worldPosition = new Vector3((float)position.y, 0, (float)position.x);
                                 Quaternion worldRotation = Quaternion.AngleAxis((float)rotation, Vector3.up);
-                                Entity thing = (Object.Instantiate(prefab, worldPosition, worldRotation) as GameObject).GetComponent<Entity>();
+
+                                var obj = prefab.GetComponent<Entity>().enablePooling
+                                          ? ObjectPool.For(prefab).Instantiate(worldPosition, worldRotation)
+                                          : Object.Instantiate(prefab, worldPosition, worldRotation) as GameObject;
+                                var thing = obj.GetComponent<Entity>();
+
                                 int id = nextEntityId;
                                 nextEntityId += 1;
 
@@ -311,7 +320,13 @@ public class ComSat : MonoBehaviour, IClient {
                                 currentInstance.reverseWorldEntities.Remove(e);
                                 currentInstance.worldEntityCache.Remove(e);
                                 currentInstance.worldEntityCollisionCache.Remove(e);
-                                Object.Destroy(e.gameObject);
+
+                                if(e.enablePooling) {
+                                        ObjectPool.For(e.prototype).Uninstantiate(e.gameObject);
+                                } else {
+                                        Object.Destroy(e.gameObject);
+                                }
+
                                 currentInstance.nDestroyedThisTick += 1;
                         });
         }
