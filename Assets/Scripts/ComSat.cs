@@ -412,6 +412,16 @@ public class ComSat : MonoBehaviour, IClient {
                 tickID = 0;
                 turnID = 0;
 
+                serverNextTurn = false;
+                serverCommandID = 0;
+                clientCommandID = 0;
+
+                gameOver = false;
+
+                avgTickTime = 0.0f;
+                avgCreatedPerTick = 0.0f;
+                avgDestroyedPerTick = 0.0f;
+
                 worldEntities = new Dictionary<int, Entity>();
                 reverseWorldEntities = new Dictionary<Entity, int>();
                 worldEntityCache = new List<Entity>(); // Faster to iterate through.
@@ -419,6 +429,8 @@ public class ComSat : MonoBehaviour, IClient {
                 deferredActions = new List<System.Action>();
                 queuedCommands = new List<System.Action>();
                 futureQueuedCommands = new List<System.Action>();
+
+                ObjectPool.FlushAll();
 
                 if(isHost) {
                         ClearReady();
