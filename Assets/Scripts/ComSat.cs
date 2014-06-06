@@ -745,6 +745,7 @@ public class ComSat : MonoBehaviour, IClient {
                         net.SendMessageToAll(update);
                 }
                 players.Add(p);
+                players.Sort((p1, p2) => p1.id - p2.id);
                 if (p.id == localPlayerID) {
                         SetPlayerName(p, Lobby.localPlayerName);
                 }
