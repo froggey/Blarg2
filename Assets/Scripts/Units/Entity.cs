@@ -35,10 +35,6 @@ public class Entity : MonoBehaviour {
 
         public Renderer teamColourRenderer;
 
-        public bool enablePooling;
-        [HideInInspector]
-        public GameObject prototype;
-
         private List<System.Action> updateActions = new List<System.Action>();
         private List<System.Action> instantiateActions = new List<System.Action>();
 

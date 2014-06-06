@@ -274,7 +274,7 @@ public class ComSat : MonoBehaviour, IClient {
                                 Vector3 worldPosition = new Vector3((float)position.y, 0, (float)position.x);
                                 Quaternion worldRotation = Quaternion.AngleAxis((float)rotation, Vector3.up);
 
-                                var obj = prefab.GetComponent<Entity>().enablePooling
+                                var obj = prefab.GetComponent<PooledObject>() != null
                                           ? ObjectPool.For(prefab).Instantiate(worldPosition, worldRotation)
                                           : Object.Instantiate(prefab, worldPosition, worldRotation) as GameObject;
                                 var thing = obj.GetComponent<Entity>();
@@ -321,8 +321,8 @@ public class ComSat : MonoBehaviour, IClient {
                                 currentInstance.worldEntityCache.Remove(e);
                                 currentInstance.worldEntityCollisionCache.Remove(e);
 
-                                if(e.enablePooling) {
-                                        ObjectPool.For(e.prototype).Uninstantiate(e.gameObject);
+                                if(e.GetComponent<PooledObject>() != null) {
+                                        ObjectPool.For(e.GetComponent<PooledObject>().prototype).Uninstantiate(e.gameObject);
                                 } else {
                                         Object.Destroy(e.gameObject);
                                 }

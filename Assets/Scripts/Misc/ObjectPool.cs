@@ -20,10 +20,7 @@ public class ObjectPool : IDisposable {
                         return obj;
                 } else {
                         var go = GameObject.Instantiate(prototype) as GameObject;
-                        var ent = go.GetComponent<Entity>();
-                        if(ent != null) {
-                                ent.prototype = prototype;
-                        }
+                        go.GetComponent<PooledObject>().prototype = prototype;
                         return go;
                 }
         }
