@@ -43,7 +43,7 @@ public class Projectile : MonoBehaviour {
 
                         var position = new Vector3((float)hitPosition.y, 0, (float)hitPosition.x);
                         var rotation = Quaternion.AngleAxis((float)entity.rotation, Vector3.up);
-                        if(impactPrefab != null) {
+                        if(impactPrefab != null && ComSat.RateLimit()) {
                                 if(impactPrefab.GetComponent<PooledObject>() != null) {
                                         ObjectPool.For(impactPrefab).Instantiate(position, rotation);
                                 } else {

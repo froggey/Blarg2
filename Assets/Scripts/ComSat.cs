@@ -497,8 +497,20 @@ public class ComSat : MonoBehaviour, IClient {
                 }
         }
 
+        int thingsDoneThisFrame;
+
+        public static bool RateLimit() {
+                if(currentInstance.thingsDoneThisFrame > 10) {
+                        return false;
+                }
+                currentInstance.thingsDoneThisFrame += 1;
+                return true;
+        }
+
         void Update() {
                 if(!worldRunning) return;
+
+                thingsDoneThisFrame = 0;
 
                 if(replayInput != null && !goForNextTurn) {
                         // Play back commands until the next turn or the end of the replay.
