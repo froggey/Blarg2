@@ -745,6 +745,9 @@ public class ComSat : MonoBehaviour, IClient {
                         net.SendMessageToAll(update);
                 }
                 players.Add(p);
+                if (p.id == localPlayerID) {
+                        SetPlayerName(p, Lobby.localPlayerName);
+                }
         }
 
         void PlayerLeave(int id) {
