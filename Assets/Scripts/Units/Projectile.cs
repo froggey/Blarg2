@@ -17,6 +17,11 @@ public class Projectile : MonoBehaviour {
                 ComSat.Trace(this, "Awake");
                 entity = gameObject.GetComponent<Entity>();
                 entity.AddUpdateAction(TickUpdate);
+                entity.AddInstantiateAction(OnInstantiate);
+        }
+
+        void OnInstantiate() {
+                target = null;
         }
 
         void TickUpdate() {
@@ -39,11 +44,11 @@ public class Projectile : MonoBehaviour {
                         Vector3 position = new Vector3((float)hitPosition.y, 0, (float)hitPosition.x);
                         Object.Instantiate(impactPrefab, position, Quaternion.AngleAxis((float)entity.rotation, Vector3.up));
 
-                        if(trail) {
-                                trail.transform.parent = null;
-                                trail.autodestruct = true;
-                                trail = null;
-                        }
+                        //if(trail) {
+                        //        trail.transform.parent = null;
+                        //        trail.autodestruct = true;
+                        //        trail = null;
+                        //}
 
                         ComSat.DestroyEntity(entity);
                         return;

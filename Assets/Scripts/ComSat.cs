@@ -107,6 +107,7 @@ public class ComSat : MonoBehaviour, IClient {
         private Dictionary<int, Entity> worldEntities;
         private Dictionary<Entity, int> reverseWorldEntities;
         private List<Entity> worldEntityCache;
+        private List<Entity> worldEntityCollisionCache;
 
         // Actions to be performed at the end of a tick.
         private List<System.Action> deferredActions;
@@ -145,6 +146,13 @@ public class ComSat : MonoBehaviour, IClient {
         // Sync check every tick.
         public bool enableContinuousSyncCheck;
 
+        private float avgTickTime;
+        private int nCreatedThisTick;
+        private float avgCreatedPerTick;
+        private int nDestroyedThisTick;
+        private float avgDestroyedPerTick;
+
+
         void Log(string s) {
                 if(debugVomit) {
                         Debug.Log(s);
@@ -154,7 +162,7 @@ public class ComSat : MonoBehaviour, IClient {
         void OnGUI() {
                 if(!worldRunning) return;
 
-                GUILayout.BeginArea(new Rect (Screen.width-200, 0, 200, 100));
+                GUILayout.BeginArea(new Rect (Screen.width-200, 0, 200, 400));
                 if(GUILayout.Button("Disconnect")) {
                         Disconnect();
                 }
@@ -163,6 +171,13 @@ public class ComSat : MonoBehaviour, IClient {
                 }
                 if(GUILayout.Button(debugVomit ? "Disable verbose logging" : "Enable verbose logging")) {
                         debugVomit = !debugVomit;
+                }
+                GUILayout.Label("Avg tick time: " + (avgTickTime * 1000).ToString("n") + "ms");
+                GUILayout.Label("Avg instantiations: " + avgCreatedPerTick.ToString("n"));
+                GUILayout.Label("Avg destructions: " + avgDestroyedPerTick.ToString("n"));
+                GUILayout.Label("Object pools: ");
+                foreach(var kv in ObjectPool.Pools) {
+                        GUILayout.Label(kv.Key.name + " " + kv.Value.Count);
                 }
                 if(gameOver) {
                         if(winningTeam == 0) {
@@ -215,45 +230,15 @@ public class ComSat : MonoBehaviour, IClient {
         // Instantiate a new prefab, defering to the end of TickUpdate.
         // Prefab must be an Entity.
         public static void SpawnEntity(GameObject prefab, int team, DVector2 position, DReal rotation) {
-                currentInstance.Log("Spawn entity " + prefab + " on team " + team + " at " + position + ":" + rotation);
-                currentInstance.deferredActions.Add(() => {
-                                Vector3 worldPosition = new Vector3((float)position.y, 0, (float)position.x);
-                                Quaternion worldRotation = Quaternion.AngleAxis((float)rotation, Vector3.up);
-                                Entity thing = (Object.Instantiate(prefab, worldPosition, worldRotation) as GameObject).GetComponent<Entity>();
-                                thing.position = position;
-                                thing.rotation = rotation;
-                                thing.team = team;
-                                currentInstance.EntityCreated(thing);
-                        });
+                currentInstance.SpawnEntity(prefab, null, team, position, rotation, e => {});
         }
 
         public static void SpawnEntity(Entity origin, GameObject prefab, DVector2 position, DReal rotation) {
-                currentInstance.Log("Spawn entity " + prefab + " from " + origin + " at " + position + ":" + rotation);
-                currentInstance.deferredActions.Add(() => {
-                                Vector3 worldPosition = new Vector3((float)position.y, 0, (float)position.x);
-                                Quaternion worldRotation = Quaternion.AngleAxis((float)rotation, Vector3.up);
-                                Entity thing = (Object.Instantiate(prefab, worldPosition, worldRotation) as GameObject).GetComponent<Entity>();
-                                thing.position = position;
-                                thing.rotation = rotation;
-                                thing.team = origin.team;
-                                thing.origin = origin;
-                                currentInstance.EntityCreated(thing);
-                        });
+                currentInstance.SpawnEntity(prefab, origin, origin == null ? 0 : origin.team, position, rotation, e => {});
         }
 
         public static void SpawnEntity(Entity origin, GameObject prefab, DVector2 position, DReal rotation, System.Action<Entity> onSpawn) {
-                currentInstance.Log("Spawn entity " + prefab + " from " + origin + " at " + position + ":" + rotation);
-                currentInstance.deferredActions.Add(() => {
-                                Vector3 worldPosition = new Vector3((float)position.y, 0, (float)position.x);
-                                Quaternion worldRotation = Quaternion.AngleAxis((float)rotation, Vector3.up);
-                                Entity thing = (Object.Instantiate(prefab, worldPosition, worldRotation) as GameObject).GetComponent<Entity>();
-                                thing.position = position;
-                                thing.rotation = rotation;
-                                thing.team = origin.team;
-                                thing.origin = origin;
-                                currentInstance.EntityCreated(thing);
-                                onSpawn(thing);
-                        });
+                currentInstance.SpawnEntity(prefab, origin, origin == null ? 0 : origin.team, position, rotation, onSpawn);
         }
         
         public ResourceSet[] teamResources;
@@ -275,8 +260,10 @@ public class ComSat : MonoBehaviour, IClient {
         public static void Spawn(string entityName, int team, DVector2 position, DReal rotation) {
                 if(currentInstance.replayInput != null) return;
 
-                if (!currentInstance.players.Any(p => p.team == team))
+                // Only spawn if the team exists or if generating scenery.
+                if(team != 0 && !currentInstance.players.Any(p => p.team == team)) {
                         return;
+                }
 
                 var m = new NetworkMessage(NetworkMessage.Type.SpawnEntity);
                 m.entityName = entityName;
@@ -288,40 +275,73 @@ public class ComSat : MonoBehaviour, IClient {
 
         // (Client)
         void SpawnCommand(string entityName, int team, DVector2 position, DReal rotation) {
-                GameObject go = Resources.Load<GameObject>(entityName);
-                Vector3 worldPosition = new Vector3((float)position.y, 0, (float)position.x);
-                Quaternion worldRotation = Quaternion.AngleAxis((float)rotation, Vector3.up);
-
                 Log("{" + tickID + "} Spawn " + entityName + " on team " + team + " at " + position + ":" + rotation);
-                Entity thing = (Object.Instantiate(go, worldPosition, worldRotation) as GameObject).GetComponent<Entity>();
-                thing.position = position;
-                thing.rotation = rotation;
-                thing.team = team;
-                EntityCreated(thing);
+                GameObject go = Resources.Load<GameObject>(entityName);
+                SpawnEntity(go, null, team, position, rotation, e => {});
         }
 
-        void EntityCreated(Entity ent) {
-                int id = currentInstance.nextEntityId;
-                currentInstance.nextEntityId += 1;
-                currentInstance.worldEntities[id] = ent;
-                currentInstance.reverseWorldEntities[ent] = id;
-                currentInstance.worldEntityCache.Add(ent);
-                Log("{" + tickID + "} Created entity " + ent + "[" + id + "] at " + ent.position + ":" + ent.rotation);
+        void SpawnEntity(GameObject prefab, Entity origin, int team, DVector2 position, DReal rotation, System.Action<Entity> onSpawn) {
+                if(debugVomit) {
+                        Log("Spawn entity " + prefab + " from " + origin + " on team " + team + " at " + position + ":" + rotation);
+                }
+                deferredActions.Add(() => {
+                                Vector3 worldPosition = new Vector3((float)position.y, 0, (float)position.x);
+                                Quaternion worldRotation = Quaternion.AngleAxis((float)rotation, Vector3.up);
+
+                                var obj = prefab.GetComponent<Entity>().enablePooling
+                                          ? ObjectPool.For(prefab).Instantiate(worldPosition, worldRotation)
+                                          : Object.Instantiate(prefab, worldPosition, worldRotation) as GameObject;
+                                var thing = obj.GetComponent<Entity>();
+
+                                int id = nextEntityId;
+                                nextEntityId += 1;
+
+                                thing.position = position;
+                                thing.rotation = rotation;
+                                thing.team = team;
+                                thing.origin = origin;
+
+                                worldEntities[id] = thing;
+                                reverseWorldEntities[thing] = id;
+                                worldEntityCache.Add(thing);
+                                if(thing.collisionRadius != 0) {
+                                        worldEntityCollisionCache.Add(thing);
+                                }
+                                thing.OnInstantiate();
+                                onSpawn(thing);
+
+                                nCreatedThisTick += 1;
+                                if(debugVomit) {
+                                        Log("{" + tickID + "} Created entity " + thing + "[" + id + "] at " + position + ":" + rotation);
+                                }
+                        });
         }
 
         public static void DestroyEntity(Entity e) {
-                currentInstance.Log("Destroy entity " + e + "[" + currentInstance.reverseWorldEntities[e] + "] at " + e.position + ":" + e.rotation);
+                if(currentInstance.debugVomit) {
+                        currentInstance.Log("Destroy entity " + e + "[" + currentInstance.reverseWorldEntities[e] + "] at " + e.position + ":" + e.rotation);
+                }
                 currentInstance.deferredActions.Add(() => {
                                 if(!currentInstance.reverseWorldEntities.ContainsKey(e)) {
                                         // It's possible for a thing to be destroyed twice in one tick.
                                         return;
                                 }
                                 int id = currentInstance.reverseWorldEntities[e];
-                                currentInstance.Log("{" + currentInstance.tickID + "} Destroy entity " + e + "[" + id + "] at " + e.position + ":" + e.rotation);
+                                if(currentInstance.debugVomit) {
+                                        currentInstance.Log("{" + currentInstance.tickID + "} Destroy entity " + e + "[" + id + "] at " + e.position + ":" + e.rotation);
+                                }
                                 currentInstance.worldEntities.Remove(id);
                                 currentInstance.reverseWorldEntities.Remove(e);
                                 currentInstance.worldEntityCache.Remove(e);
-                                Object.Destroy(e.gameObject);
+                                currentInstance.worldEntityCollisionCache.Remove(e);
+
+                                if(e.enablePooling) {
+                                        ObjectPool.For(e.prototype).Uninstantiate(e.gameObject);
+                                } else {
+                                        Object.Destroy(e.gameObject);
+                                }
+
+                                currentInstance.nDestroyedThisTick += 1;
                         });
         }
 
@@ -409,6 +429,7 @@ public class ComSat : MonoBehaviour, IClient {
                 worldEntities = new Dictionary<int, Entity>();
                 reverseWorldEntities = new Dictionary<Entity, int>();
                 worldEntityCache = new List<Entity>(); // Faster to iterate through.
+                worldEntityCollisionCache = new List<Entity>(); // Faster to iterate through.
                 deferredActions = new List<System.Action>();
                 queuedCommands = new List<System.Action>();
                 futureQueuedCommands = new List<System.Action>();
@@ -503,7 +524,18 @@ public class ComSat : MonoBehaviour, IClient {
                         if(ticksRemaining != 0) {
                                 Log("Tick " + tickID);
                                 tickID += 1;
+                                var sw = new System.Diagnostics.Stopwatch();
+                                sw.Start();
+                                nCreatedThisTick = 0;
+                                nDestroyedThisTick = 0;
                                 TickUpdate();
+                                sw.Stop();
+                                avgTickTime += (sw.ElapsedTicks / (float)System.Diagnostics.Stopwatch.Frequency);
+                                avgTickTime /= 2;
+                                avgCreatedPerTick += nCreatedThisTick;
+                                avgCreatedPerTick /= 2;
+                                avgDestroyedPerTick += nDestroyedThisTick;
+                                avgDestroyedPerTick /= 2;
                                 ticksRemaining -= 1;
 
                                 if(fullDump) {
@@ -605,9 +637,8 @@ public class ComSat : MonoBehaviour, IClient {
 
         // Cast a line from A to B, checking for collisions with other entities.
         public static Entity LineCast(DVector2 start, DVector2 end, out DVector2 hitPosition, int ignoreTeam = -1) {
-                foreach(Entity e in currentInstance.worldEntityCache) {
+                foreach(Entity e in currentInstance.worldEntityCollisionCache) {
                         if(e.team == ignoreTeam) continue;
-                        if(e.collisionRadius == 0) continue;
 
                         DVector2 result;
                         if(Utility.IntersectLineCircle(e.position, e.collisionRadius, start, end, out result)) {
@@ -623,9 +654,8 @@ public class ComSat : MonoBehaviour, IClient {
 
         // Locate an entity within the given circle, not on the given team.
         public static Entity FindEntityWithinRadius(DVector2 origin, DReal radius, int ignoreTeam = -1) {
-                foreach(Entity e in currentInstance.worldEntityCache) {
+                foreach(Entity e in currentInstance.worldEntityCollisionCache) {
                        if(e.team == ignoreTeam) continue;
-                        if(e.collisionRadius == 0) continue;
 
                         if((e.position - origin).sqrMagnitude < radius*radius) {
                                 return e;
@@ -639,9 +669,8 @@ public class ComSat : MonoBehaviour, IClient {
         public static List<Entity> FindEntitiesWithinRadius(DVector2 origin, DReal radius, int ignoreTeam = -1) {
                 var result = new List<Entity>();
 
-                foreach(Entity e in currentInstance.worldEntityCache) {
+                foreach(Entity e in currentInstance.worldEntityCollisionCache) {
                         if(e.team == ignoreTeam) continue;
-                        if(e.collisionRadius == 0) continue;
 
                         if((e.position - origin).sqrMagnitude < radius*radius) {
                                 result.Add(e);
@@ -730,9 +759,6 @@ public class ComSat : MonoBehaviour, IClient {
                         net.SendMessageToAll(update);
                 }
                 players.Add(p);
-
-                if (p.id == localPlayerID)
-                        ComSat.currentInstance.SetPlayerName(p, Lobby.localPlayerName);
         }
 
         void PlayerLeave(int id) {
@@ -945,7 +971,6 @@ public class ComSat : MonoBehaviour, IClient {
         public void SetPlayerName(Player player, string name) {
                 var m = new NetworkMessage(NetworkMessage.Type.PlayerUpdate);
                 m.playerID = player.id;
-                m.teamID = -1;
                 m.playerName = name;
                 m.teamID = -1;
                 net.SendMessageToServer(m);

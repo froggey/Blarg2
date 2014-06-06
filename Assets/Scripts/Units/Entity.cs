@@ -36,14 +36,26 @@ public class Entity : MonoBehaviour {
         public Renderer teamColourRenderer;
 
         public ResourceSet buildCost;
+        public bool enablePooling;
+        [HideInInspector]
+        public GameObject prototype;
 
         private List<System.Action> updateActions = new List<System.Action>();
+        private List<System.Action> instantiateActions = new List<System.Action>();
 
         void Awake() {
                 ComSat.Trace(this, "Awake");
                 collisionRadius = (DReal)collisionRadiusNumerator / collisionRadiusDenominator;
+        }
 
+        public void OnInstantiate() {
                 health = maxHealth;
+                velocity = new DVector2();
+                isSelected = false;
+                OnUnselected();
+                foreach(var a in instantiateActions) {
+                        a();
+                }
         }
 
         void Start() {
@@ -75,6 +87,11 @@ public class Entity : MonoBehaviour {
         public void AddUpdateAction(System.Action action) {
                 ComSat.Trace(this, "AddUpdateAction");
                 updateActions.Add(action);
+        }
+
+        public void AddInstantiateAction(System.Action action) {
+                ComSat.Trace(this, "AddInstantiateAction");
+                instantiateActions.Add(action);
         }
 
         public void Damage(int damage) {

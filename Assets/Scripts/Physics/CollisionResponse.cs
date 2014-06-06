@@ -25,7 +25,7 @@ public class CollisionResponse : MonoBehaviour {
                                 var maxDist = entity.collisionRadius + ent.collisionRadius;
                                 var sqrMaxDist = maxDist * maxDist;
                                 var sqrDist = (ent.position - entity.position).sqrMagnitude;
-                                var puntPower = sqrMaxDist / (sqrMaxDist - sqrDist) / 4;
+                                var puntPower = sqrMaxDist / (sqrMaxDist - sqrDist) / 2;
                                 var dir = (ent.position - entity.position).normalized;
                                 ent.position += dir * puntPower;
                         }

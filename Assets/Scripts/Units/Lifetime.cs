@@ -12,6 +12,10 @@ public class Lifetime : MonoBehaviour {
                 ComSat.Trace(this, "Awake");
                 entity = gameObject.GetComponent<Entity>();
                 entity.AddUpdateAction(TickUpdate);
+                entity.AddInstantiateAction(OnInstantiate);
+        }
+
+        void OnInstantiate() {
                 age = 0;
         }
 

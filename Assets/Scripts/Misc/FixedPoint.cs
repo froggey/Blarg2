@@ -263,7 +263,11 @@ public struct DVector2 {
         public DVector2 normalized {
                 get {
                         DReal length = this.magnitude;
-                        return new DVector2(x/length, y/length);
+                        if(length == 0) {
+                                return new DVector2(0,0);
+                        } else {
+                                return this / length;
+                        }
                 }
         }
 
@@ -277,6 +281,10 @@ public struct DVector2 {
 
         public static DVector2 operator *(DVector2 lhs, DReal rhs) {
                 return new DVector2(lhs.x * rhs, lhs.y * rhs);
+        }
+
+        public static DVector2 operator /(DVector2 lhs, DReal rhs) {
+                return new DVector2(lhs.x / rhs, lhs.y / rhs);
         }
 
         public static DVector2 FromAngle(DReal radians) {
