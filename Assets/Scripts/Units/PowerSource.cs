@@ -25,14 +25,10 @@ public class PowerSource : MonoBehaviour {
                         return;
 
                 var oldColour = Gizmos.color;
-                var c = Color.cyan;
-                c.a = 0.25f;
-                Gizmos.color = c;
-
-                Gizmos.DrawSphere(
+                Gizmos.color = Color.cyan;
+                Gizmos.DrawWireSphere(
                         new Vector3(transform.position.x, Terrain.activeTerrain.SampleHeight(transform.position), transform.position.z),
                         radius);
-
                 Gizmos.color = oldColour;
         }
 }
