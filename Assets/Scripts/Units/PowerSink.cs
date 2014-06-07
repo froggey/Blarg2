@@ -17,10 +17,7 @@ public class PowerSink : MonoBehaviour {
         void TickUpdate() {
                 currentUsage = 0;
 
-                var sources = ComSat.currentInstance.worldEntityCollisionCache
-                        .Select(e => new { entity = e, source = e.GetComponent<PowerSource>() })
-                        .Where(e => e.source != null &&
-                                (e.entity.position - entity.position).sqrMagnitude <= e.source.radius * e.source.radius);
-                currentUsage = Math.Min(sources.Sum(s => s.source.currentPower), maximumUsage);
+                var sources = ComSat.FindEntitiesWithinRadius<PowerSource>(entity.position, DReal.MaxValue, getRadius: s => s.radius);
+                currentUsage = Math.Min(sources.Sum(s => s.currentPower), maximumUsage);
         }
 }

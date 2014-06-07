@@ -16,9 +16,9 @@ public class Orb : MonoBehaviour {
         }
 
         void TickUpdate() {
-                foreach(var ent in ComSat.currentInstance.worldEntityCollisionCache) {
+                foreach(var ent in ComSat.FindEntitiesWithinRadius(entity.position, 4)) {
                         if (ent == entity) continue;
-                        if(ent.team != entity.team && (ent.position - entity.position).sqrMagnitude < ent.collisionRadius * ent.collisionRadius + 4) {
+                        if(ent.team != entity.team) {
                                 ent.Damage(5);
                         }
                 }

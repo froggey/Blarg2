@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 class Server : IServer {
         ComSat comSat;
@@ -107,14 +108,14 @@ public class ComSat : MonoBehaviour, IClient {
         private Dictionary<int, Entity> worldEntities;
         private Dictionary<Entity, int> reverseWorldEntities;
         private List<Entity> worldEntityCache;
-        public List<Entity> worldEntityCollisionCache { get; private set; }
+        private List<Entity> worldEntityCollisionCache;
 
         // Actions to be performed at the end of a tick.
         private List<System.Action> deferredActions;
         private List<System.Action> queuedCommands;
         private List<System.Action> futureQueuedCommands;
 
-        public static ComSat currentInstance { get; private set; }
+        private static ComSat currentInstance;
 
         public int localPlayerID;
         public List<Player> players = new List<Player>();
@@ -302,7 +303,7 @@ public class ComSat : MonoBehaviour, IClient {
 
                                 var obj = prefab.GetComponent<PooledObject>() != null
                                           ? ObjectPool.For(prefab).Instantiate(worldPosition, worldRotation)
-                                          : Object.Instantiate(prefab, worldPosition, worldRotation) as GameObject;
+                                          : GameObject.Instantiate(prefab, worldPosition, worldRotation) as GameObject;
                                 var thing = obj.GetComponent<Entity>();
 
                                 int id = nextEntityId;
@@ -350,7 +351,7 @@ public class ComSat : MonoBehaviour, IClient {
                                 if(e.GetComponent<PooledObject>() != null) {
                                         ObjectPool.For(e.GetComponent<PooledObject>().prototype).Uninstantiate(e.gameObject);
                                 } else {
-                                        Object.Destroy(e.gameObject);
+                                        GameObject.Destroy(e.gameObject);
                                 }
 
                                 currentInstance.nDestroyedThisTick += 1;
@@ -689,11 +690,13 @@ public class ComSat : MonoBehaviour, IClient {
         }
 
         // Locate an entity within the given circle, not on the given team.
-        public static Entity FindEntityWithinRadius(DVector2 origin, DReal radius, int ignoreTeam = -1) {
+        public static Entity FindEntityWithinRadius(DVector2 origin, DReal radius, int ignoreTeam = -1, Func<Entity, DReal> getRadius = null) {
+                getRadius = getRadius ?? (e => e.collisionRadius);
                 foreach(Entity e in currentInstance.worldEntityCollisionCache) {
-                       if(e.team == ignoreTeam) continue;
+                        if(e.team == ignoreTeam) continue;
 
-                        if((e.position - origin).sqrMagnitude < radius*radius) {
+                        var r = getRadius(e);
+                        if((e.position - origin).sqrMagnitude < radius * radius + r * r) {
                                 return e;
                         }
                 }
@@ -702,18 +705,25 @@ public class ComSat : MonoBehaviour, IClient {
         }
 
         // Locate an entity within the given circle, not on the given team.
-        public static List<Entity> FindEntitiesWithinRadius(DVector2 origin, DReal radius, int ignoreTeam = -1) {
-                var result = new List<Entity>();
+        public static List<T> FindEntitiesWithinRadius<T>(DVector2 origin, DReal radius, int ignoreTeam = -1, Func<T, DReal> getRadius = null) where T : MonoBehaviour {
+                var result = new List<T>();
 
                 foreach(Entity e in currentInstance.worldEntityCollisionCache) {
+                        T thing = (typeof(T) == typeof(Entity)) ? e as T : e.GetComponent<T>();
+                        if(thing == null) continue;
                         if(e.team == ignoreTeam) continue;
 
-                        if((e.position - origin).sqrMagnitude < radius*radius) {
-                                result.Add(e);
+                        var r = getRadius != null ? getRadius(thing) : e.collisionRadius;
+                        if((e.position - origin).sqrMagnitude < radius * radius + r * r) {
+                                result.Add(thing);
                         }
                 }
 
                 return result;
+        }
+
+        public static List<Entity> FindEntitiesWithinRadius(DVector2 origin, DReal radius, int ignoreTeam = -1, Func<Entity, DReal> getRadius = null) {
+                return FindEntitiesWithinRadius<Entity>(origin, radius, ignoreTeam, getRadius);
         }
 
         public static DReal RandomValue() {
