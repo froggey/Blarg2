@@ -58,7 +58,6 @@ public class Factory : MonoBehaviour {
                                         ComSat.AddResource(entity.team, ResourceType.MagicSmoke, -prefabs[buildMe].buildCost.MagicSmoke);
                                         var rotation = ComSat.RandomRange(0, DReal.TwoPI);
                                         var prefabSize = (DReal)prefabs[buildMe].collisionRadiusNumerator / prefabs[buildMe].collisionRadiusDenominator; // Blech. Sorry :(
-
                                         var offset = DVector2.FromAngle(rotation) * (ComSat.RandomRange(0, buildRadius) + entity.collisionRadius * 2 + prefabSize);
                                         ComSat.SpawnEntity(entity, prefabs[buildMe].gameObject, entity.position + offset, rotation);
 
@@ -119,7 +118,8 @@ public class Factory : MonoBehaviour {
                 for(int i = 0; i < prefabs.Length; ++i) {
                         GUI.backgroundColor = (i == building && Time.time % 1 < 0.5f) ? Color.green : Color.white;
 
-                        if(GUI.Button(new Rect(10 + i * 74, Camera.main.pixelHeight - 74, 64, 64), prefabs[i].buildIcon)) {
+                        if(GUI.Button(new Rect(10 + i * 74, Camera.main.pixelHeight - 74, 64, 64),
+                                      new GUIContent(prefabs[i].buildIcon, prefabs[i].ToString() + "\nBuild time: " + prefabs[i].buildTime + "\nMetal: " + prefabs[i].buildCost.Metal + "\nMagic Smoke: " + prefabs[i].buildCost.MagicSmoke))) {
                                 ComSat.IssueUIAction(entity, i);
                         }
 
@@ -130,6 +130,8 @@ public class Factory : MonoBehaviour {
                                 GUI.Label(new Rect(14 + i * 74, Camera.main.pixelHeight - 70, 64, 24), queued.ToString());
                         }
                 }
+
+                GUI.Label(new Rect(0,30,100,300), GUI.tooltip);
 
                 if(buildQueue.Any() && GUI.Button(new Rect(10 + prefabs.Length * 74, Camera.main.pixelHeight - 74, 64, 64), "Stop")) {
                         ComSat.IssueUIAction(entity, clearQueue);
