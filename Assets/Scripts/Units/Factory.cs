@@ -96,6 +96,8 @@ public class Factory : MonoBehaviour {
                 if(what == clearQueue) {
                         buildQueue.Clear();
                         delay = 0;
+                        ComSat.AddResource(entity.team, ResourceType.Metal, usedResources.Metal);
+                        ComSat.AddResource(entity.team, ResourceType.MagicSmoke, usedResources.MagicSmoke);
                         ResetBuildTime();
                 }
                 else if(what >= 0 && what < prefabs.Length) {
