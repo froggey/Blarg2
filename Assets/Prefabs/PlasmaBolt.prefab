@@ -72,7 +72,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6110fd3653f2044749ca11930d679009, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damage: 40
+  damage: 100
   initialSpeed: 50
   turnSpeed: 0
   target: {fileID: 0}
@@ -102,6 +102,9 @@ MonoBehaviour:
   hpBarTexture: {fileID: 0}
   hitOnlyIfTargetted: 0
   teamColourRenderer: {fileID: 0}
+  buildCost:
+    Metal: 0
+    MagicSmoke: 0
 --- !u!114 &11400004
 MonoBehaviour:
   m_ObjectHideFlags: 1

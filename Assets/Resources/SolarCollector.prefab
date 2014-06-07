@@ -477,14 +477,14 @@ MonoBehaviour:
   collisionRadiusDenominator: 1
   baseMesh: {fileID: 0}
   ghostPrefab: {fileID: 0}
-  buildTime: 0
+  buildTime: 5
   buildIcon: {fileID: 2800000, guid: 402d68adaff39cb459621f238c87b439, type: 3}
   hpBarTexture: {fileID: 2800000, guid: fe5e9061a9af5c24ab18c18b3c0f7857, type: 3}
   hitOnlyIfTargetted: 0
   teamColourRenderer: {fileID: 0}
   buildCost:
-    Metal: 0
-    MagicSmoke: 0
+    Metal: 200
+    MagicSmoke: 50
 --- !u!114 &11400002
 MonoBehaviour:
   m_ObjectHideFlags: 1

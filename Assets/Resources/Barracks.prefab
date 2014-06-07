@@ -51,6 +51,7 @@ Transform:
   m_Children:
   - {fileID: 400002}
   m_Father: {fileID: 0}
+  m_RootOrder: 0
 --- !u!4 &400002
 Transform:
   m_ObjectHideFlags: 1
@@ -62,6 +63,7 @@ Transform:
   m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
   m_Children: []
   m_Father: {fileID: 400000}
+  m_RootOrder: 0
 --- !u!23 &2300000
 Renderer:
   m_ObjectHideFlags: 1
@@ -80,9 +82,8 @@ Renderer:
   m_UseLightProbes: 0
   m_LightProbeAnchor: {fileID: 0}
   m_ScaleInLightmap: 1
-  m_SortingLayer: 0
-  m_SortingOrder: 0
   m_SortingLayerID: 0
+  m_SortingOrder: 0
 --- !u!33 &3300000
 MeshFilter:
   m_ObjectHideFlags: 1
@@ -147,13 +148,13 @@ MonoBehaviour:
   collisionRadiusDenominator: 1
   baseMesh: {fileID: 0}
   ghostPrefab: {fileID: 100000, guid: ea19ef9ff0fcb4494bbe118b6e98fd53, type: 2}
-  buildTime: 0
+  buildTime: 15
   buildIcon: {fileID: 2800000, guid: dca59bc4a1f864a30abf287079b8a482, type: 3}
   hpBarTexture: {fileID: 2800000, guid: fe5e9061a9af5c24ab18c18b3c0f7857, type: 3}
   hitOnlyIfTargetted: 0
   teamColourRenderer: {fileID: 2300000}
   buildCost:
-    Metal: 0
+    Metal: 500
     MagicSmoke: 0
 --- !u!114 &11400006
 MonoBehaviour:
@@ -176,7 +177,7 @@ MonoBehaviour:
   - {fileID: 11400004, guid: 4297a2b692f0a432ab453dc809305b51, type: 2}
   sabotageRepairTime: 60
   sabotageTimeMultiplier: 3
-  buildRadius: 0
+  buildRadius: 15
 --- !u!114 &11400008
 MonoBehaviour:
   m_ObjectHideFlags: 1

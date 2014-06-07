@@ -603,7 +603,6 @@ MonoBehaviour:
   - {fileID: 11400004, guid: f76b85897f3c34286ae87200c81696c7, type: 2}
   - {fileID: 11400002, guid: d65637846775d174cabbe003832b47d2, type: 2}
   - {fileID: 11400006, guid: 8f56df5a2192c41cab26f1922fb35391, type: 2}
-  - {fileID: 11400000, guid: da56b4f1051bc0e49954d47c196c03a0, type: 2}
 --- !u!114 &11400006
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -623,7 +622,7 @@ MonoBehaviour:
   collisionRadiusDenominator: 2
   baseMesh: {fileID: 0}
   ghostPrefab: {fileID: 100018, guid: bc2c1f5c27cec427ea6d8cc8f30b7f64, type: 2}
-  buildTime: 3
+  buildTime: 25
   buildIcon: {fileID: 2800000, guid: 1e5fb268caf8f4dbfbaa127ecc861ff8, type: 3}
   hpBarTexture: {fileID: 2800000, guid: fe5e9061a9af5c24ab18c18b3c0f7857, type: 3}
   hitOnlyIfTargetted: 0
@@ -631,8 +630,6 @@ MonoBehaviour:
   buildCost:
     Metal: 1000
     MagicSmoke: 0
-  enablePooling: 0
-  prototype: {fileID: 0}
 --- !u!114 &11400008
 MonoBehaviour:
   m_ObjectHideFlags: 1

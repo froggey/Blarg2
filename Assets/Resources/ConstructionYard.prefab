@@ -14,6 +14,7 @@ GameObject:
   - 114: {fileID: 11400002}
   - 114: {fileID: 11400000}
   - 65: {fileID: 6500000}
+  - 114: {fileID: 11400010}
   m_Layer: 8
   m_Name: ConstructionYard
   m_TagString: Untagged
@@ -232,7 +233,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100000}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 5.43317127, y: 52.9587746, z: 124.268227}
+  m_LocalPosition: {x: -5.49818611, y: 106.288986, z: 172.258713}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 400024}
@@ -744,6 +745,7 @@ MonoBehaviour:
   - {fileID: 11400006, guid: db717139a2f9b4014a84e348e4622957, type: 2}
   - {fileID: 11400004, guid: 82ba44e0497044bb8bcd2ecec093532a, type: 2}
   - {fileID: 11400004, guid: ec693c88864ab47a397cd9ecad7497ca, type: 2}
+  - {fileID: 11400000, guid: da56b4f1051bc0e49954d47c196c03a0, type: 2}
   sabotageRepairTime: 0
   sabotageTimeMultiplier: 3
   buildRadius: 40
@@ -787,8 +789,6 @@ MonoBehaviour:
   buildCost:
     Metal: 0
     MagicSmoke: 0
-  enablePooling: 0
-  prototype: {fileID: 0}
 --- !u!114 &11400006
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -815,6 +815,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   offset: 0
+--- !u!114 &11400010
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e8ec2f67df5c764bab0a8bda9ca6bcc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maximumUsage: 100
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

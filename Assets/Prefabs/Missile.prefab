@@ -218,8 +218,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6110fd3653f2044749ca11930d679009, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damage: 25
-  initialSpeed: 50
+  damage: 50
+  initialSpeed: 80
   turnSpeed: 360
   target: {fileID: 0}
   impactPrefab: {fileID: 100012, guid: d9d02c0a3ffc84ca1b5dfdccebb87c66, type: 2}
@@ -260,6 +260,9 @@ MonoBehaviour:
   hpBarTexture: {fileID: 0}
   hitOnlyIfTargetted: 1
   teamColourRenderer: {fileID: 0}
+  buildCost:
+    Metal: 0
+    MagicSmoke: 0
 --- !u!114 &11400006
 MonoBehaviour:
   m_ObjectHideFlags: 1
