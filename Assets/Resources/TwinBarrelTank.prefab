@@ -1346,8 +1346,6 @@ MonoBehaviour:
   buildCost:
     Metal: 200
     MagicSmoke: 0
-  enablePooling: 0
-  prototype: {fileID: 0}
 --- !u!114 &11400008
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1382,7 +1380,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   minSpeed: 0
-  maxSpeed: 70
+  maxSpeed: 50
   turnSpeed: 500
   canMoveWithoutTurning: 0
   animationDistance: 1
