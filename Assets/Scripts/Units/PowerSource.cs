@@ -20,15 +20,10 @@ public class PowerSource : MonoBehaviour {
                 currentPower = maximumPower;
         }
 
-        void OnDrawGizmos() {
-                if (!entity.isSelected)
-                        return;
-
+        void OnDrawGizmosSelected() {
                 var oldColour = Gizmos.color;
                 Gizmos.color = Color.cyan;
-                Gizmos.DrawWireSphere(
-                        new Vector3(transform.position.x, Terrain.activeTerrain.SampleHeight(transform.position), transform.position.z),
-                        radius);
+                Gizmos.DrawWireSphere(transform.position, radius);
                 Gizmos.color = oldColour;
         }
 }
