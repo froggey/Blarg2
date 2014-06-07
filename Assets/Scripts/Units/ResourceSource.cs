@@ -10,11 +10,9 @@ public class ResourceSource : MonoBehaviour {
         public int amount;
         public bool hasMine;
 
-        private Entity entity;
         private ParticleSystem particles;
 
         void Awake() {
-                entity = GetComponent<Entity>();
                 particles = GetComponentInChildren<ParticleSystem>();
         }
 

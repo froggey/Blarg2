@@ -241,7 +241,7 @@ public class ComSat : MonoBehaviour, IClient {
         public static void SpawnEntity(Entity origin, GameObject prefab, DVector2 position, DReal rotation, System.Action<Entity> onSpawn) {
                 currentInstance.SpawnEntity(prefab, origin, origin == null ? 0 : origin.team, position, rotation, onSpawn);
         }
-        
+
         public ResourceSet[] teamResources;
         public static ResourceSet localTeamResources { get { return currentInstance.teamResources[localTeam]; } }
 
