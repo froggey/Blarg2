@@ -20,4 +20,12 @@ public class ResourceSet {
         public override string ToString() {
                 return string.Format("{{ Metal: {0}, MagicSmoke: {1} }}", Metal, MagicSmoke);
         }
+
+        public static ResourceSet operator +(ResourceSet lhs, ResourceSet rhs) {
+                return new ResourceSet { Metal = lhs.Metal + rhs.Metal, MagicSmoke = lhs.MagicSmoke + rhs.MagicSmoke };
+        }
+
+        public static ResourceSet operator -(ResourceSet lhs, ResourceSet rhs) {
+                return new ResourceSet { Metal = lhs.Metal - rhs.Metal, MagicSmoke = lhs.MagicSmoke - rhs.MagicSmoke };
+        }
 }

@@ -255,6 +255,18 @@ public class ComSat : MonoBehaviour, IClient {
                 }
         }
 
+        public static bool TakeResources(int team, ResourceSet resources) {
+                var rs = currentInstance.teamResources[team];
+                if (rs.ContainsAtLeast(resources)) {
+                        rs.Metal -= resources.Metal;
+                        rs.MagicSmoke -= resources.MagicSmoke;
+                        return true;
+                }
+                else {
+                        return false;
+                }
+        }
+
         // Create a new entity at whereever.
         // Called by all, but ignored everywhere but the server.
         public static void Spawn(string entityName, int team, DVector2 position, DReal rotation) {

@@ -19,6 +19,8 @@ public class Factory : MonoBehaviour {
 
         // Construction time remaining.
         private DReal delay;
+        private DReal partialMetalUnit, partialSmokeUnit;
+        private ResourceSet usedResources;
 
         private Queue<int> buildQueue;
 
@@ -42,31 +44,51 @@ public class Factory : MonoBehaviour {
                 }
                 if (buildQueue.Any()) {
                         var buildMe = buildQueue.Peek();
-                        if (ComSat.currentInstance.teamResources[entity.team].ContainsAtLeast(prefabs[buildMe].buildCost)) {
-                                if(delay > 0) {
-                                        if(sabotageTime > 0) {
-                                                delay -= ComSat.tickRate / sabotageTimeMultiplier;
-                                        } else {
-                                                delay -= ComSat.tickRate;
-                                        }
-                                        delay -= ComSat.tickRate * powerSink.currentUsage / 100;
-                                }
-                                if(delay <= 0 && buildQueue.Any()) {
-                                        // Timer expired and we're building something.
-                                        print("Build new " + prefabs[buildMe]);
-                                        ComSat.AddResource(entity.team, ResourceType.Metal, -prefabs[buildMe].buildCost.Metal);
-                                        ComSat.AddResource(entity.team, ResourceType.MagicSmoke, -prefabs[buildMe].buildCost.MagicSmoke);
-                                        var rotation = ComSat.RandomRange(0, DReal.TwoPI);
-                                        var prefabSize = (DReal)prefabs[buildMe].collisionRadiusNumerator / prefabs[buildMe].collisionRadiusDenominator; // Blech. Sorry :(
-                                        var offset = DVector2.FromAngle(rotation) * (ComSat.RandomRange(0, buildRadius) + entity.collisionRadius * 2 + prefabSize);
-                                        ComSat.SpawnEntity(entity, prefabs[buildMe].gameObject, entity.position + offset, rotation);
 
-                                        buildQueue.Dequeue();
-                                        if (buildQueue.Any())
-                                                delay = prefabs[buildQueue.Peek()].buildTime;
+                        if(delay > 0) {
+                                var advance = ComSat.tickRate;
+                                if(sabotageTime > 0) {
+                                        advance /= sabotageTimeMultiplier;
+                                }
+                                advance += ComSat.tickRate * powerSink.currentUsage / 100;
+
+                                var completion = advance / prefabs[buildMe].buildTime;
+                                partialMetalUnit += completion * prefabs[buildMe].buildCost.Metal;
+                                partialSmokeUnit += completion * prefabs[buildMe].buildCost.MagicSmoke;
+                                var rs = new ResourceSet { Metal = (int)partialMetalUnit, MagicSmoke = (int)partialSmokeUnit };
+                                if (ComSat.TakeResources(entity.team, rs)) {
+                                        usedResources += rs;
+                                        partialMetalUnit %= 1;
+                                        partialSmokeUnit %= 1;
+                                        delay -= advance;
+                                } else {
+                                        partialMetalUnit -= completion * prefabs[buildMe].buildCost.Metal;
+                                        partialSmokeUnit -= completion * prefabs[buildMe].buildCost.MagicSmoke;
                                 }
                         }
+                        if(delay <= 0) {
+                                Debug.Log(prefabs[buildMe].buildCost - usedResources);
+                                if (!ComSat.TakeResources(entity.team, prefabs[buildMe].buildCost - usedResources)) return;
+
+                                // Timer expired and we're building something.
+                                print("Build new " + prefabs[buildMe]);
+                                var rotation = ComSat.RandomRange(0, DReal.TwoPI);
+                                var prefabSize = (DReal)prefabs[buildMe].collisionRadiusNumerator / prefabs[buildMe].collisionRadiusDenominator; // Blech. Sorry :(
+                                var offset = DVector2.FromAngle(rotation) * (ComSat.RandomRange(0, buildRadius) + entity.collisionRadius * 2 + prefabSize);
+                                ComSat.SpawnEntity(entity, prefabs[buildMe].gameObject, entity.position + offset, rotation);
+
+                                buildQueue.Dequeue();
+                                ResetBuildTime();
+                        }
                 }
+        }
+
+        private void ResetBuildTime() {
+                if (buildQueue.Any()) {
+                        delay = prefabs[buildQueue.Peek()].buildTime;
+                }
+                partialMetalUnit = partialSmokeUnit = 0;
+                usedResources = new ResourceSet();
         }
 
         void UIAction(int what) {
@@ -74,11 +96,13 @@ public class Factory : MonoBehaviour {
                 if(what == clearQueue) {
                         buildQueue.Clear();
                         delay = 0;
+                        ResetBuildTime();
                 }
                 else if(what >= 0 && what < prefabs.Length) {
                         buildQueue.Enqueue(what);
-                        if (buildQueue.Count == 1)
-                                delay = prefabs[buildQueue.Peek()].buildTime;
+                        if (buildQueue.Count == 1) {
+                                ResetBuildTime();
+                        }
                 }
         }
 
