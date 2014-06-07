@@ -7,10 +7,13 @@ public class Entity : MonoBehaviour {
         public DReal rotation;
         public DVector2 velocity;
 
+        [HideInInspector]
         public int team;
+        [HideInInspector]
         public Entity origin; // who spawned this.
 
         public int maxHealth;
+        [HideInInspector]
         public int health;
 
         public bool isSelected { get; private set; }

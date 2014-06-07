@@ -46,7 +46,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100000}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -12.4972115, y: 30.3765373, z: 26.0380383}
+  m_LocalPosition: {x: 39.9890022, y: 0, z: 60.0001221}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 400002}
@@ -58,8 +58,8 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100002}
   m_LocalRotation: {x: -.707106888, y: 0, z: -0, w: .707106769}
-  m_LocalPosition: {x: 0, y: 1, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: .319355011, y: 1.47903812, z: -.532264709}
+  m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
   m_Children: []
   m_Father: {fileID: 400000}
 --- !u!23 &2300000
@@ -141,9 +141,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   team: 0
   origin: {fileID: 0}
-  maxHealth: 500
+  maxHealth: 300
   health: 0
-  collisionRadiusNumerator: 3
+  collisionRadiusNumerator: 5
   collisionRadiusDenominator: 1
   baseMesh: {fileID: 0}
   ghostPrefab: {fileID: 100000, guid: ea19ef9ff0fcb4494bbe118b6e98fd53, type: 2}
@@ -168,16 +168,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   prefabs:
   - {fileID: 11400006, guid: f84c16673625c4e4abea2824922b9e22, type: 2}
-  - {fileID: 11400004, guid: ec693c88864ab47a397cd9ecad7497ca, type: 2}
-  - {fileID: 11400006, guid: db717139a2f9b4014a84e348e4622957, type: 2}
+  - {fileID: 11400006, guid: ce9392ef3f1ca4e9fac2d838072a99e5, type: 2}
+  - {fileID: 11400000, guid: fe70a1df14ad0ed43bf4736092c725aa, type: 2}
   - {fileID: 11400006, guid: 1bd46ae9e3366413b91a06c653a58b0c, type: 2}
   - {fileID: 11400008, guid: 1deedf8488c5a4c1b9cf8d5e9096c2a2, type: 2}
   - {fileID: 11400004, guid: 1bc94550de09f4e8d9a6a606192d4542, type: 2}
   - {fileID: 11400004, guid: 4297a2b692f0a432ab453dc809305b51, type: 2}
-  - {fileID: 11400000, guid: fe70a1df14ad0ed43bf4736092c725aa, type: 2}
-  - {fileID: 11400006, guid: ce9392ef3f1ca4e9fac2d838072a99e5, type: 2}
   sabotageRepairTime: 60
   sabotageTimeMultiplier: 3
+  buildRadius: 0
 --- !u!114 &11400008
 MonoBehaviour:
   m_ObjectHideFlags: 1

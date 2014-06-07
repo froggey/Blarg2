@@ -15,6 +15,8 @@ public class Factory : MonoBehaviour {
         // Sabotage causes everything to take this much longer.
         public int sabotageTimeMultiplier = 3;
 
+        public int buildRadius;
+
         // Construction time remaining.
         private DReal delay;
 
@@ -55,9 +57,11 @@ public class Factory : MonoBehaviour {
                                         ComSat.AddResource(entity.team, ResourceType.Metal, -prefabs[buildMe].buildCost.Metal);
                                         ComSat.AddResource(entity.team, ResourceType.MagicSmoke, -prefabs[buildMe].buildCost.MagicSmoke);
                                         var rotation = ComSat.RandomRange(0, DReal.TwoPI);
-                                        var offset = DVector2.FromAngle(rotation) * ComSat.RandomRange(entity.collisionRadius + 5, entity.collisionRadius + 15);
+                                        var prefabSize = (DReal)prefabs[buildMe].collisionRadiusNumerator / prefabs[buildMe].collisionRadiusDenominator; // Blech. Sorry :(
+
+                                        var offset = DVector2.FromAngle(rotation) * (ComSat.RandomRange(0, buildRadius) + entity.collisionRadius * 2 + prefabSize);
                                         ComSat.SpawnEntity(entity, prefabs[buildMe].gameObject, entity.position + offset, rotation);
-                                
+
                                         buildQueue.Dequeue();
                                         if (buildQueue.Any())
                                                 delay = prefabs[buildQueue.Peek()].buildTime;
@@ -130,5 +134,10 @@ public class Factory : MonoBehaviour {
                 if(buildQueue.Any() && GUI.Button(new Rect(10 + prefabs.Length * 74, Camera.main.pixelHeight - 74, 64, 64), "Stop")) {
                         ComSat.IssueUIAction(entity, clearQueue);
                 }
+        }
+
+        void OnDrawGizmosSelected() {
+                Gizmos.color = Color.magenta;
+                Gizmos.DrawWireSphere(transform.position, buildRadius);
         }
 }
