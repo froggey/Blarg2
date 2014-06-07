@@ -2,8 +2,9 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
-[RequireComponent (typeof(Entity))]
+[RequireComponent(typeof(Entity), typeof(PowerSink))]
 public class Factory : MonoBehaviour {
         public Entity[] prefabs;
 
@@ -19,7 +20,8 @@ public class Factory : MonoBehaviour {
 
         private Queue<int> buildQueue;
 
-        Entity entity;
+        private Entity entity;
+        private PowerSink powerSink;
 
         private const int clearQueue = -1;
 
@@ -27,6 +29,7 @@ public class Factory : MonoBehaviour {
                 ComSat.Trace(this, "Awake");
                 entity = GetComponent<Entity>();
                 entity.AddUpdateAction(TickUpdate);
+                powerSink = GetComponent<PowerSink>();
                 buildQueue = new Queue<int>();
         }
 
@@ -44,6 +47,7 @@ public class Factory : MonoBehaviour {
                                         } else {
                                                 delay -= ComSat.tickRate;
                                         }
+                                        delay -= ComSat.tickRate * powerSink.currentUsage / 100;
                                 }
                                 if(delay <= 0 && buildQueue.Any()) {
                                         // Timer expired and we're building something.

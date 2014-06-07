@@ -13,7 +13,7 @@ public class Entity : MonoBehaviour {
         public int maxHealth;
         public int health;
 
-        private bool isSelected;
+        public bool isSelected { get; private set; }
 
         // This is super dumb.
         // The inspector can't display DReals, so expose the collisionRadius as a fraction.
@@ -36,9 +36,6 @@ public class Entity : MonoBehaviour {
         public Renderer teamColourRenderer;
 
         public ResourceSet buildCost;
-        public bool enablePooling;
-        [HideInInspector]
-        public GameObject prototype;
 
         private List<System.Action> updateActions = new List<System.Action>();
         private List<System.Action> instantiateActions = new List<System.Action>();

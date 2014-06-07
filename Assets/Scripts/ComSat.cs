@@ -107,7 +107,7 @@ public class ComSat : MonoBehaviour, IClient {
         private Dictionary<int, Entity> worldEntities;
         private Dictionary<Entity, int> reverseWorldEntities;
         private List<Entity> worldEntityCache;
-        private List<Entity> worldEntityCollisionCache;
+        public List<Entity> worldEntityCollisionCache { get; private set; }
 
         // Actions to be performed at the end of a tick.
         private List<System.Action> deferredActions;

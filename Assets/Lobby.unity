@@ -105,6 +105,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   localPlayerID: 0
   timeAccel: 1
+  fullDump: 0
+  enableActionTracing: 0
+  enableContinuousSyncCheck: 0
   teamResources: []
 --- !u!4 &903961526
 Transform:
