@@ -47,6 +47,7 @@ public class Saboteur : MonoBehaviour {
                 ComSat.Trace(this, "Move");
                 moving = true;
                 destination = location;
+                target = null;
         }
 
         void Attack(Entity target) {
