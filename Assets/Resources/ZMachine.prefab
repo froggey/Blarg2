@@ -1132,6 +1132,7 @@ MonoBehaviour:
   projectilePrefab: {fileID: 100002, guid: c36b48d137efd47b2a09ff95402a68fd, type: 2}
   attackDistance: 150
   attackRange: 200
+  turretTurnSpeed: 400
   barrelRecycleTime: 6
 --- !u!114 &11400004
 MonoBehaviour:
@@ -1169,11 +1170,13 @@ MonoBehaviour:
   collisionRadiusDenominator: 1
   baseMesh: {fileID: 0}
   ghostPrefab: {fileID: 100000, guid: cf1c0503a040a496e8d2c1f441710538, type: 2}
-  buildTime: 6
+  buildTime: 5
   buildIcon: {fileID: 2800000, guid: 2b1fd3703a75f47cda2371c5583f96e5, type: 3}
   hpBarTexture: {fileID: 2800000, guid: fe5e9061a9af5c24ab18c18b3c0f7857, type: 3}
   hitOnlyIfTargetted: 0
   teamColourRenderer: {fileID: 2300032}
+  enablePooling: 0
+  prototype: {fileID: 0}
 --- !u!114 &11400008
 MonoBehaviour:
   m_ObjectHideFlags: 1

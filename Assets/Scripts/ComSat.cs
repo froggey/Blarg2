@@ -288,7 +288,7 @@ public class ComSat : MonoBehaviour, IClient {
                                 Vector3 worldPosition = new Vector3((float)position.y, 0, (float)position.x);
                                 Quaternion worldRotation = Quaternion.AngleAxis((float)rotation, Vector3.up);
 
-                                var obj = prefab.GetComponent<Entity>().enablePooling
+                                var obj = prefab.GetComponent<PooledObject>() != null
                                           ? ObjectPool.For(prefab).Instantiate(worldPosition, worldRotation)
                                           : Object.Instantiate(prefab, worldPosition, worldRotation) as GameObject;
                                 var thing = obj.GetComponent<Entity>();
@@ -335,8 +335,8 @@ public class ComSat : MonoBehaviour, IClient {
                                 currentInstance.worldEntityCache.Remove(e);
                                 currentInstance.worldEntityCollisionCache.Remove(e);
 
-                                if(e.enablePooling) {
-                                        ObjectPool.For(e.prototype).Uninstantiate(e.gameObject);
+                                if(e.GetComponent<PooledObject>() != null) {
+                                        ObjectPool.For(e.GetComponent<PooledObject>().prototype).Uninstantiate(e.gameObject);
                                 } else {
                                         Object.Destroy(e.gameObject);
                                 }
@@ -426,6 +426,16 @@ public class ComSat : MonoBehaviour, IClient {
                 tickID = 0;
                 turnID = 0;
 
+                serverNextTurn = false;
+                serverCommandID = 0;
+                clientCommandID = 0;
+
+                gameOver = false;
+
+                avgTickTime = 0.0f;
+                avgCreatedPerTick = 0.0f;
+                avgDestroyedPerTick = 0.0f;
+
                 worldEntities = new Dictionary<int, Entity>();
                 reverseWorldEntities = new Dictionary<Entity, int>();
                 worldEntityCache = new List<Entity>(); // Faster to iterate through.
@@ -433,6 +443,8 @@ public class ComSat : MonoBehaviour, IClient {
                 deferredActions = new List<System.Action>();
                 queuedCommands = new List<System.Action>();
                 futureQueuedCommands = new List<System.Action>();
+
+                ObjectPool.FlushAll();
 
                 if(isHost) {
                         ClearReady();
@@ -499,8 +511,20 @@ public class ComSat : MonoBehaviour, IClient {
                 }
         }
 
+        int thingsDoneThisFrame;
+
+        public static bool RateLimit() {
+                if(currentInstance.thingsDoneThisFrame > 10) {
+                        return false;
+                }
+                currentInstance.thingsDoneThisFrame += 1;
+                return true;
+        }
+
         void Update() {
                 if(!worldRunning) return;
+
+                thingsDoneThisFrame = 0;
 
                 if(replayInput != null && !goForNextTurn) {
                         // Play back commands until the next turn or the end of the replay.
@@ -759,6 +783,10 @@ public class ComSat : MonoBehaviour, IClient {
                         net.SendMessageToAll(update);
                 }
                 players.Add(p);
+                players.Sort((p1, p2) => p1.id - p2.id);
+                if (p.id == localPlayerID) {
+                        SetPlayerName(p, Lobby.localPlayerName);
+                }
         }
 
         void PlayerLeave(int id) {
