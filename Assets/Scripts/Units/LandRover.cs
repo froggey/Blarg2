@@ -2,8 +2,8 @@ using UnityEngine;
 using System.Linq;
 using System.Collections;
 
-[RequireComponent (typeof(Vehicle))]
-[RequireComponent (typeof(Entity))]
+[RequireComponent(typeof(Vehicle))]
+[RequireComponent(typeof(Entity))]
 public class LandRover : MonoBehaviour {
         bool moving;
         DVector2 destination;
@@ -50,7 +50,7 @@ public class LandRover : MonoBehaviour {
                                 Detonate();
                                 return;
                         }
-                } else {
+                } else if (targets != null && targets.Any()) {
                         PickNewTarget();
                 }
                 if(moving) {
@@ -58,7 +58,7 @@ public class LandRover : MonoBehaviour {
                                 Detonate();
                                 return;
                         }
-                        if((destination - entity.position).sqrMagnitude < sqrPositioningAccuracy) {
+                        if ((destination - entity.position).sqrMagnitude < sqrPositioningAccuracy) {
                                 // Close enough.
                                 moving = false;
                                 motor.Stop();
@@ -74,7 +74,6 @@ public class LandRover : MonoBehaviour {
                 target = null;
                 targets = null;
                 destination = location;
-                motor.MoveTowards(destination);
         }
 
         void Attack(Entity[] targets) {
