@@ -8,8 +8,8 @@ using UnityEngine;
 public class CombatVehicle : MonoBehaviour {
         public GameObject projectilePrefab;
         
-        private Mode mode;
-        private DVector2 destination; // Current movement target.
+        public Mode mode { get; private set; }
+        public DVector2 destination { get; private set; } // Current movement target.
         public Entity target { get; private set; } // Current attack target.
         private Entity[] targets;
         private bool movingToTarget; // Cleared when attackDistance is reached.
@@ -25,7 +25,7 @@ public class CombatVehicle : MonoBehaviour {
         [HideInInspector]
         public DReal turretRotation;
 
-        public bool hasRotatingTurret;
+        public bool turretAutoResets;
 
         void Awake() {
                 ComSat.Trace(this, "Awake");
@@ -36,7 +36,7 @@ public class CombatVehicle : MonoBehaviour {
                 mode = Mode.IDLE;
         }
 
-        enum Mode {
+        public enum Mode {
                 IDLE, MOVE, ATTACK
         }
 
@@ -48,7 +48,7 @@ public class CombatVehicle : MonoBehaviour {
                 mode = Mode.ATTACK;
                 this.targets = targets;
                 PickNewTarget();
-                this.movingToTarget = false;
+                movingToTarget = false;
         }
 
         void Move(DVector2 location) {
@@ -95,7 +95,9 @@ public class CombatVehicle : MonoBehaviour {
                         }
 
                         // Turn turret to point at target when close.
-                        if(dist >= attackRange * 2) targetTurretAngle = 0;
+                        if(dist >= attackRange * 2) {
+                                targetTurretAngle = turretAutoResets ? 0 : turretRotation;
+                        }
                         turretRotation = Utility.CalculateNewAngle(turretRotation, targetTurretAngle, turretTurnSpeed);
                         SendMessage("TurnTurret", turretRotation);
                         
@@ -122,11 +124,15 @@ public class CombatVehicle : MonoBehaviour {
                         } else {
                                 vehicle.MoveTowards(destination);
                         }
-                        turretRotation = Utility.CalculateNewAngle(turretRotation, 0, turretTurnSpeed);
-                        SendMessage("TurnTurret", turretRotation);
+                        if (turretAutoResets) {
+                                turretRotation = Utility.CalculateNewAngle(turretRotation, 0, turretTurnSpeed);
+                                SendMessage("TurnTurret", turretRotation);
+                        }
                 } else if(mode == Mode.IDLE) {
-                        turretRotation = Utility.CalculateNewAngle(turretRotation, 0, turretTurnSpeed);
-                        SendMessage("TurnTurret", turretRotation);
+                        if (turretAutoResets) {
+                                turretRotation = Utility.CalculateNewAngle(turretRotation, 0, turretTurnSpeed);
+                                SendMessage("TurnTurret", turretRotation);
+                        }
                 }
         }
 }

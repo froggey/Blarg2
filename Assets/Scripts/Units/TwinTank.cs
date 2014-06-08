@@ -24,26 +24,10 @@ public class TwinTank : MonoBehaviour {
                 entity.AddUpdateAction(TickUpdate);
                 combatVehicle = GetComponent<CombatVehicle>();
 
-                mode = Mode.IDLE;
                 turretRotation = 0;
 
                 fireCycle = FireCycle.READY;
         }
-
-        enum Mode {
-                IDLE, MOVE, ATTACK
-        }
-
-        static DReal attackDistance = 50; // Try to stay this close.
-        static DReal attackRange = 60; // Maximum firing range.
-        static DReal turretTurnSpeed = DReal.Radians(727); // radians per second
-        static DReal sqrPositioningAccuracy = (DReal)1 / 100;
-
-        Mode mode;
-        DVector2 destination; // Current movement target.
-        Entity target; // Current attack target.
-        Entity[] targets;
-        bool movingToTarget; // Cleared when attackDistance is reached.
 
         DReal turretRotation;
 
@@ -65,7 +49,7 @@ public class TwinTank : MonoBehaviour {
         DReal barrelRecycleTime = 2; // Delay before refiring one barrel.
 
         void TurnTurret(DReal targetAngle) {
-                turretRotation = Utility.CalculateNewAngle(turretRotation, targetAngle, turretTurnSpeed);
+                turretRotation = targetAngle;
         }
 
         void FireOneBarrel(int sign, GameObject barrel) {
@@ -76,8 +60,8 @@ public class TwinTank : MonoBehaviour {
                                    entity.position, entity.rotation + turretRotation,
                                    (Entity ent) => {
                                            var proj = ent.gameObject.GetComponent<Projectile>();
-                                           if(proj != null && ComSat.EntityExists(target)) {
-                                                   proj.target = target;
+                                           if(proj != null && ComSat.EntityExists(combatVehicle.target)) {
+                                                   proj.target = combatVehicle.target;
                                            }
                                    });
         }

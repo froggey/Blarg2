@@ -3,7 +3,7 @@ using System.Linq;
 using System.Collections;
 
 [RequireComponent (typeof(Entity))]
-[RequireComponent (typeof(Vehicle))]
+[RequireComponent (typeof(CombatVehicle))]
 [RequireComponent(typeof(AudioSource))]
 public class GiantRobot : MonoBehaviour {
         // Can't use GameObjects to set these up because floats.
@@ -18,32 +18,16 @@ public class GiantRobot : MonoBehaviour {
         public LineRenderer laser;
 
         private Entity entity;
-        private Vehicle vehicle;
+        private CombatVehicle combatVehicle;
 
         void Awake() {
                 ComSat.Trace(this, "Awake");
                 entity = GetComponent<Entity>();
                 entity.AddUpdateAction(TickUpdate);
-                vehicle = GetComponent<Vehicle>();
-
-                mode = Mode.IDLE;
+                combatVehicle = GetComponent<CombatVehicle>();
 
                 fireCycle = FireCycle.READY;
         }
-
-        enum Mode {
-                IDLE, MOVE, ATTACK
-        }
-
-        static DReal attackDistance = 100; // Try to stay this close.
-        static DReal attackRange = 125; // Maximum firing range.
-        static DReal sqrPositioningAccuracy = (DReal)1 / 100;
-
-        Mode mode;
-        DVector2 destination; // Current movement target.
-        Entity target; // Current attack target.
-        Entity[] targets;
-        bool movingToTarget; // Cleared when attackDistance is reached.
 
         // Firing cycle:
         //   10 Await trigger
@@ -68,8 +52,8 @@ public class GiantRobot : MonoBehaviour {
                                    entity.position, entity.rotation,
                                    (Entity ent) => {
                                            var proj = ent.gameObject.GetComponent<Projectile>();
-                                           if(proj != null && target != null) {
-                                                   proj.target = target;
+                                           if(proj != null && combatVehicle.target != null) {
+                                                   proj.target = combatVehicle.target;
                                            }
                                    });
         }
@@ -86,40 +70,7 @@ public class GiantRobot : MonoBehaviour {
 
         void TickUpdate() {
                 ComSat.Trace(this, "TickUpdate");
-                if(mode == Mode.ATTACK && !ComSat.EntityExists(target)) {
-                        PickNewTarget();
-                        if (target == null) vehicle.Stop();
-                }
-
-                if(mode == Mode.ATTACK) {
-                        var distVec = target.position - entity.position;
-                        var dist = distVec.magnitude;
-
-                        if(dist < attackDistance) {
-                                // Close enough.
-                                movingToTarget = false;
-                                vehicle.Stop();
-                        } else if(movingToTarget || (dist >= attackRange)) {
-                                movingToTarget = true;
-                                // Approach target.
-                                vehicle.MoveTowards(target.position);
-                        }
-
-                        // Fire when in range.
-                        if(dist < attackRange) {
-                                Fire();
-                        }
-                } else if(mode == Mode.MOVE) {
-                        // Move towards.
-                        if((destination - entity.position).sqrMagnitude < sqrPositioningAccuracy) {
-                                // Close enough.
-                                mode = Mode.IDLE;
-                                vehicle.Stop();
-                        } else {
-                                vehicle.MoveTowards(destination);
-                        }
-                }
-
+                
                 if(fireCycle != FireCycle.READY) {
                         fireDelayTime -= ComSat.tickRate;
                         if(fireDelayTime <= 0) {
@@ -137,45 +88,18 @@ public class GiantRobot : MonoBehaviour {
                 }
         }
 
-        void Attack(Entity[] targets) {
-                ComSat.Trace(this, "Attack");
-                if(target == entity) {
-                        return;
-                }
-                mode = Mode.ATTACK;
-                this.targets = targets;
-                PickNewTarget();
-                this.movingToTarget = false;
-        }
-
-        void Move(DVector2 location) {
-                ComSat.Trace(this, "Move");
-                mode = Mode.MOVE;
-                target = null;
-                targets = null;
-                destination = location;
-        }
-
-        private void PickNewTarget() {
-                if (targets == null) targets = new Entity[] {};
-                targets = targets.Where(t => t != null).OrderBy(t => (t.position - entity.position).sqrMagnitude).ToArray();
-                if (targets.Count() > 0) {
-                        target = targets[0];
-                        mode = Mode.ATTACK;
-                } else {
-                        target = null;
-                        mode = Mode.IDLE;
-                }
-        }
-
         void Update() {
-                if(mode == Mode.ATTACK && ComSat.EntityExists(target)) {
+                if(combatVehicle.mode == CombatVehicle.Mode.ATTACK && ComSat.EntityExists(combatVehicle.target)) {
                         laser.enabled = true;
                         laser.SetPosition(0, laserOrigin.transform.position);
-                        laser.SetPosition(1, target.transform.position);
+                        laser.SetPosition(1, combatVehicle.target.transform.position);
                 } else {
                         laser.enabled = false;
                 }
+        }
+
+        void TurnTurret(DReal angle) {
+                entity.rotation = angle;
         }
 
         void OnDrawGizmosSelected() {
