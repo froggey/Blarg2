@@ -5,20 +5,20 @@ using System.Text;
 using UnityEngine;
 
 public class PowerSink : MonoBehaviour {
-        public int maximumUsage;
-        public int currentUsage { get; private set; }
+        public int powerUsage;
+        public bool poweredOn;
+        public bool powerIsToggleableInGame;
         private Entity entity;
 
         void Awake() {
                 entity = GetComponent<Entity>();
-                entity.AddUpdateAction(TickUpdate);
         }
 
-        void TickUpdate() {
-                currentUsage = 0;
-
-                var sources = ComSat.FindEntitiesWithinRadius<PowerSource>(entity.position, DReal.MaxValue, getRadius: s => s.radius)
-                        .Where(e => e.GetComponent<Entity>().team == entity.team);
-                currentUsage = Math.Min(sources.Sum(s => s.currentPower), maximumUsage);
+        void OnGUI() {
+                if (entity.isSelected && powerIsToggleableInGame) {
+                        if (GUI.Button(new Rect(Camera.main.pixelWidth - 74, Camera.main.pixelHeight - 74, 64, 64), poweredOn ? "ON" : "OFF")) {
+                                poweredOn = !poweredOn;
+                        }
+                }
         }
 }

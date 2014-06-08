@@ -51,7 +51,6 @@ Transform:
   m_Children:
   - {fileID: 400002}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
 --- !u!4 &400002
 Transform:
   m_ObjectHideFlags: 1
@@ -63,7 +62,6 @@ Transform:
   m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
   m_Children: []
   m_Father: {fileID: 400000}
-  m_RootOrder: 0
 --- !u!23 &2300000
 Renderer:
   m_ObjectHideFlags: 1
@@ -82,8 +80,9 @@ Renderer:
   m_UseLightProbes: 0
   m_LightProbeAnchor: {fileID: 0}
   m_ScaleInLightmap: 1
-  m_SortingLayerID: 0
+  m_SortingLayer: 0
   m_SortingOrder: 0
+  m_SortingLayerID: 0
 --- !u!33 &3300000
 MeshFilter:
   m_ObjectHideFlags: 1
@@ -203,7 +202,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e8ec2f67df5c764bab0a8bda9ca6bcc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maximumUsage: 100
+  powerUsage: 20
+  poweredOn: 0
+  powerIsToggleableInGame: 0
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

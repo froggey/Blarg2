@@ -50,7 +50,9 @@ public class Factory : MonoBehaviour {
                                 if(sabotageTime > 0) {
                                         advance /= sabotageTimeMultiplier;
                                 }
-                                advance += ComSat.tickRate * powerSink.currentUsage / 100;
+                                if(!ComSat.TeamHasEnoughPower(entity.team)) {
+                                        advance /= 2;
+                                }
 
                                 var completion = advance / prefabs[buildMe].buildTime;
                                 partialMetalUnit += completion * prefabs[buildMe].buildCost.Metal;
@@ -86,6 +88,11 @@ public class Factory : MonoBehaviour {
         private void ResetBuildTime() {
                 if (buildQueue.Any()) {
                         delay = prefabs[buildQueue.Peek()].buildTime;
+                        powerSink.poweredOn = true;
+                }
+                else {
+                        delay = 0;
+                        powerSink.poweredOn = false;
                 }
                 partialMetalUnit = partialSmokeUnit = 0;
                 usedResources = new ResourceSet();

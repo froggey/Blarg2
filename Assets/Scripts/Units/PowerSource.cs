@@ -7,7 +7,6 @@ using UnityEngine;
 public class PowerSource : MonoBehaviour {
         public int maximumPower;
         public int currentPower { get; private set; } // TODO use this to make solar collectors dependent on light levels, etc.
-        public int radius;
 
         private Entity entity;
 
@@ -18,12 +17,5 @@ public class PowerSource : MonoBehaviour {
 
         void TickUpdate() {
                 currentPower = maximumPower;
-        }
-
-        void OnDrawGizmosSelected() {
-                var oldColour = Gizmos.color;
-                Gizmos.color = Color.cyan;
-                Gizmos.DrawWireSphere(transform.position, radius);
-                Gizmos.color = oldColour;
         }
 }

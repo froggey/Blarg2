@@ -115,7 +115,7 @@ public class ComSat : MonoBehaviour, IClient {
         private List<System.Action> queuedCommands;
         private List<System.Action> futureQueuedCommands;
 
-        private static ComSat currentInstance;
+        public static ComSat currentInstance { get; set; }
 
         public int localPlayerID;
         public List<Player> players = new List<Player>();
@@ -152,7 +152,8 @@ public class ComSat : MonoBehaviour, IClient {
         private float avgCreatedPerTick;
         private int nDestroyedThisTick;
         private float avgDestroyedPerTick;
-
+        
+        public int[] teamPowerSupply, teamPowerUse;
 
         void Log(string s) {
                 if(debugVomit) {
@@ -501,6 +502,21 @@ public class ComSat : MonoBehaviour, IClient {
         // Called every tickRate seconds when the world is live.
         // (Client)
         void TickUpdate() {
+                for (int i = 0; i < teamPowerSupply.Length; i++) {
+                        teamPowerSupply[i] = 0;
+                        teamPowerUse[i] = 0;
+                }
+                foreach(Entity e in worldEntityCache) {
+                        var sink = e.GetComponent<PowerSink>();
+                        if (sink != null && sink.poweredOn) {
+                                teamPowerUse[e.team] += sink.powerUsage;
+                        }
+                        var source = e.GetComponent<PowerSource>();
+                        if (source != null) {
+                                teamPowerSupply[e.team] += source.currentPower;
+                        }
+                }
+
                 // Must tick all objects in a consistent order across machines.
                 foreach(Entity e in worldEntityCache) {
                         e.TickUpdate();
@@ -510,6 +526,10 @@ public class ComSat : MonoBehaviour, IClient {
                         a();
                 }
                 deferredActions.Clear();
+        }
+
+        public static bool TeamHasEnoughPower(int team) {
+                return currentInstance.teamPowerSupply[team] >= currentInstance.teamPowerUse[team];
         }
 
         string currentGameState;
@@ -901,7 +921,9 @@ public class ComSat : MonoBehaviour, IClient {
                         Debug.LogException(e, this);
                 }
                 Application.LoadLevel(levelName);
-                teamResources = Enumerable.Range(0, 7).Select(_ => new ResourceSet { Metal = 2000 }).ToArray();
+                teamResources = Enumerable.Range(0, 7).Select(_ => new ResourceSet { Metal = 2000, MagicSmoke = 500 }).ToArray();
+                teamPowerSupply = new int[7];
+                teamPowerUse = new int[7];
         }
 
         bool PlayerIsAdmin(int id) {

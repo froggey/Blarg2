@@ -24,8 +24,8 @@ public class Mine : MonoBehaviour {
 
         void TickUpdate() {
                 timer += ComSat.tickRate;
-                if (entity.team != -1 && timer > 1) {
-                        var amount = Math.Min(mineRate + powerSink.currentUsage, source.amount);
+                if (entity.team != -1 && timer > 1 && powerSink.poweredOn) {
+                        var amount = Math.Min(ComSat.TeamHasEnoughPower(entity.team) ? mineRate : mineRate / 2, source.amount);
                         ComSat.AddResource(entity.team, resource, amount);
                         source.amount -= amount;
                 }

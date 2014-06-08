@@ -1,10 +1,12 @@
 using UnityEngine;
 using System.Collections;
 
-[RequireComponent (typeof(Entity))]
-[RequireComponent (typeof(AudioSource))]
+[RequireComponent(typeof(Entity))]
+[RequireComponent(typeof(AudioSource))]
+[RequireComponent(typeof(PowerSink))]
 public class Turret : MonoBehaviour {
         private Entity entity;
+        private PowerSink powerSink;
 
         DReal turretRotation;
         Entity target; // Current attack target.
@@ -26,6 +28,7 @@ public class Turret : MonoBehaviour {
                 ComSat.Trace(this, "Awake");
                 entity = GetComponent<Entity>();
                 entity.AddUpdateAction(TickUpdate);
+                powerSink = GetComponent<PowerSink>();
 
                 target = null;
                 turretRotation = 0;
@@ -56,6 +59,9 @@ public class Turret : MonoBehaviour {
 
         void TickUpdate() {
                 ComSat.Trace(this, "TickUpdate");
+                
+                if(!powerSink.poweredOn) return;
+
                 if(!ComSat.EntityExists(target)) {
                         // Magic. Destroyed GameObjects compare against null.
                         // Explicitly set to null to avoid keeping it around.
@@ -73,7 +79,7 @@ public class Turret : MonoBehaviour {
                         DReal targetTurretAngle;
 
                         var projectileProjectile = projectilePrefab.GetComponent<Projectile>();
-                        if(projectileProjectile != null) {
+                        if(projectileProjectile != null && ComSat.TeamHasEnoughPower(entity.team)) {
                                 var aimSpot = Utility.PredictShot(entity.position, projectileProjectile.initialSpeed,
                                                                   target.position, target.velocity);
                                 targetTurretAngle = DReal.Mod(DVector2.ToAngle(aimSpot - entity.position) - entity.rotation, DReal.TwoPI);

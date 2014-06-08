@@ -195,7 +195,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e8ec2f67df5c764bab0a8bda9ca6bcc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maximumUsage: 100
+  powerUsage: 20
+  poweredOn: 1
+  powerIsToggleableInGame: 1
 --- !u!114 &11400010
 MonoBehaviour:
   m_ObjectHideFlags: 1
