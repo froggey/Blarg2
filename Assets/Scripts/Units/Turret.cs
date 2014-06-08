@@ -64,8 +64,12 @@ public class Turret : MonoBehaviour {
         void TickUpdate() {
                 ComSat.Trace(this, "TickUpdate");
 
-                if(!powerSink.poweredOn) return;
-
+                if(!powerSink.poweredOn) {
+                        target = null;
+                        audio.Stop();
+                        return;
+                }
+                
                 if(!ComSat.EntityExists(target)) {
                         // Magic. Destroyed GameObjects compare against null.
                         // Explicitly set to null to avoid keeping it around.

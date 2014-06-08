@@ -34,6 +34,8 @@ public class NetworkMessage {
                 Ready = 11,
                 // Server->client.
                 NextTurn = 12,
+                // Command.
+                SetPowerState = 13,
         }
 
         public NetworkMessage() {}
@@ -111,6 +113,9 @@ public class NetworkMessage {
         // Serialized game state.
         [ProtoMember(14)]
         public string gameState;
+
+        [ProtoMember(15)]
+        public bool powerState;
 }
 
 public class NetworkClient {}

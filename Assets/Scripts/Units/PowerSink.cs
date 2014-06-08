@@ -14,14 +14,14 @@ public class PowerSink : MonoBehaviour {
                 entity = GetComponent<Entity>();
         }
 
-        void UIAction(int what) {
-                poweredOn = !poweredOn;
+        void SetPowerState(bool on) {
+                poweredOn = on;
         }
 
         void OnGUI() {
                 if (entity.isSelected && powerIsToggleableInGame) {
                         if (GUI.Button(new Rect(Camera.main.pixelWidth - 74, Camera.main.pixelHeight - 74, 64, 64), poweredOn ? "ON" : "OFF")) {
-                                ComSat.IssueUIAction(entity, 0);
+                                ComSat.IssueSetPowerState(entity, !poweredOn);
                         }
                 }
         }
