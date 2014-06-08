@@ -36,7 +36,7 @@ public class PlayerInterface : MonoBehaviour {
                 var powerUse = ComSat.currentInstance.teamPowerUse[ComSat.localTeam];
                 var powerSupply = ComSat.currentInstance.teamPowerSupply[ComSat.localTeam];
                 if (powerUse > powerSupply) GUI.color = Color.red;
-                GUI.Label(new Rect(256, 0, 128, 24), "Power Usage: " + powerUse + "/" + powerSupply);
+                GUI.Label(new Rect(256, 0, 256, 24), "Power Usage: " + powerUse + "/" + powerSupply);
                 if (powerUse > powerSupply) GUI.color = Color.white;
         }
 

@@ -100,6 +100,7 @@ Transform:
   m_LocalScale: {x: .900000036, y: .899999976, z: .899999976}
   m_Children: []
   m_Father: {fileID: 400002}
+  m_RootOrder: 0
 --- !u!4 &400002
 Transform:
   m_ObjectHideFlags: 1
@@ -112,6 +113,7 @@ Transform:
   m_Children:
   - {fileID: 400000}
   m_Father: {fileID: 400008}
+  m_RootOrder: 0
 --- !u!4 &400004
 Transform:
   m_ObjectHideFlags: 1
@@ -123,6 +125,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400006}
+  m_RootOrder: 0
 --- !u!4 &400006
 Transform:
   m_ObjectHideFlags: 1
@@ -130,12 +133,13 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100006}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -15.3606567, y: 16.4334145, z: 14.8685551}
+  m_LocalPosition: {x: 46.5094604, y: 3.71788025, z: 12.9418697}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 400004}
   - {fileID: 400008}
   m_Father: {fileID: 0}
+  m_RootOrder: 0
 --- !u!4 &400008
 Transform:
   m_ObjectHideFlags: 1
@@ -148,6 +152,7 @@ Transform:
   m_Children:
   - {fileID: 400002}
   m_Father: {fileID: 400006}
+  m_RootOrder: 1
 --- !u!23 &2300000
 Renderer:
   m_ObjectHideFlags: 1
@@ -166,9 +171,8 @@ Renderer:
   m_UseLightProbes: 0
   m_LightProbeAnchor: {fileID: 0}
   m_ScaleInLightmap: 1
-  m_SortingLayer: 0
-  m_SortingOrder: 0
   m_SortingLayerID: 0
+  m_SortingOrder: 0
 --- !u!23 &2300002
 Renderer:
   m_ObjectHideFlags: 1
@@ -187,9 +191,8 @@ Renderer:
   m_UseLightProbes: 0
   m_LightProbeAnchor: {fileID: 0}
   m_ScaleInLightmap: 1
-  m_SortingLayer: 0
-  m_SortingOrder: 0
   m_SortingLayerID: 0
+  m_SortingOrder: 0
 --- !u!23 &2300004
 Renderer:
   m_ObjectHideFlags: 1
@@ -208,9 +211,8 @@ Renderer:
   m_UseLightProbes: 0
   m_LightProbeAnchor: {fileID: 0}
   m_ScaleInLightmap: 1
-  m_SortingLayer: 0
-  m_SortingOrder: 0
   m_SortingLayerID: 0
+  m_SortingOrder: 0
 --- !u!33 &3300000
 MeshFilter:
   m_ObjectHideFlags: 1
@@ -363,9 +365,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5b53ea58446524e53aaea1586a5cb29e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  attackRange: 60
+  turretTurnSpeed: 727
+  projectileSpawnDistance: 3
   turretMesh: {fileID: 100008}
   projectilePrefab: {fileID: 100000, guid: 67be6441c97994d02ae098b97ba62e48, type: 2}
   turretBarrel: {fileID: 100000}
+  barrelRecycleTimeNumerator: 1
+  barrelRecycleTimeDenominator: 10
 --- !u!114 &11400008
 MonoBehaviour:
   m_ObjectHideFlags: 1

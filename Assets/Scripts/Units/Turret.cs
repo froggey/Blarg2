@@ -11,16 +11,18 @@ public class Turret : MonoBehaviour {
         DReal turretRotation;
         Entity target; // Current attack target.
 
-        public DReal attackRange = 60; // Maximum firing range.
-        static DReal turretTurnSpeed = DReal.Radians(727); // radians per second
+        public int attackRange = 60; // Maximum firing range.
+        public int turretTurnSpeed = 727; // Degrees per second
 
-        public DReal projectileSpawnDistance = 3;
+        public int projectileSpawnDistance = 3;
         public DVector2 turretAttachPoint = new DVector2(0, 0);
         public GameObject turretMesh;
         public GameObject projectilePrefab;
         public GameObject turretBarrel;
 
-        public DReal barrelRecycleTime = (DReal)1 / 10; // Delay before refiring one barrel.
+        public DReal barrelRecycleTime; // Delay before refiring one barrel.
+        public int barrelRecycleTimeNumerator; // Delay before refiring one barrel.
+        public int barrelRecycleTimeDenominator = 1; // Delay before refiring one barrel.
 
         private DReal fireDelay;
 
@@ -34,10 +36,12 @@ public class Turret : MonoBehaviour {
                 turretRotation = 0;
 
                 fireDelay = 0;
+
+                barrelRecycleTime = (DReal)barrelRecycleTimeNumerator / barrelRecycleTimeDenominator;
         }
 
         void TurnTurret(DReal targetAngle) {
-                turretRotation = Utility.CalculateNewAngle(turretRotation, targetAngle, turretTurnSpeed);
+                turretRotation = Utility.CalculateNewAngle(turretRotation, targetAngle, DReal.Radians(turretTurnSpeed));
         }
 
         void Fire() {
@@ -59,7 +63,7 @@ public class Turret : MonoBehaviour {
 
         void TickUpdate() {
                 ComSat.Trace(this, "TickUpdate");
-                
+
                 if(!powerSink.poweredOn) return;
 
                 if(!ComSat.EntityExists(target)) {

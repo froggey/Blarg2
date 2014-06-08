@@ -745,6 +745,7 @@ MonoBehaviour:
   - {fileID: 11400004, guid: 82ba44e0497044bb8bcd2ecec093532a, type: 2}
   - {fileID: 11400004, guid: ec693c88864ab47a397cd9ecad7497ca, type: 2}
   - {fileID: 11400000, guid: da56b4f1051bc0e49954d47c196c03a0, type: 2}
+  - {fileID: 11400006, guid: 794325221e4b94621a352ef32c738960, type: 2}
   sabotageRepairTime: 0
   sabotageTimeMultiplier: 3
   buildRadius: 40
