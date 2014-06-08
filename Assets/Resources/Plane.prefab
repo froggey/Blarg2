@@ -448,6 +448,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   projectilePrefab: {fileID: 0}
+  mode: 0
+  target: {fileID: 0}
+  _attackDistance:
+    stringValue: 0
+  _attackRange:
+    stringValue: 0
+  _turretTurnSpeed:
+    stringValue: 0
   turretAutoResets: 0
 --- !u!119 &11900000
 Projector:

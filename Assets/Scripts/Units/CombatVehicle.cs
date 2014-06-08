@@ -17,10 +17,13 @@ public class CombatVehicle : MonoBehaviour {
         private Entity entity;
         private Vehicle vehicle;
 
-        static readonly DReal attackDistance = 50; // Try to stay this close.
-        static readonly DReal attackRange = 60; // Maximum firing range.
+        public EditableDReal _attackDistance;
+        private DReal attackDistance { get { return _attackDistance.Parse(); } }
+        public EditableDReal _attackRange;
+        private DReal attackRange { get { return _attackRange.Parse(); } }
+        public EditableDReal _turretTurnSpeed;
+        private DReal turretTurnSpeed { get { return DReal.Radians(_turretTurnSpeed.Parse()); } }
         static readonly DReal sqrPositioningAccuracy = (DReal)1 / 100;
-        static readonly DReal turretTurnSpeed = DReal.Radians(727); // radians per second
 
         [HideInInspector]
         public DReal turretRotation;

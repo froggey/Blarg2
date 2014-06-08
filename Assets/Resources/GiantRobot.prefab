@@ -612,6 +612,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   projectilePrefab: {fileID: 100004, guid: 19c415a45a02e4391bee254b0693e05d, type: 2}
+  mode: 0
+  target: {fileID: 0}
+  _attackDistance:
+    stringValue: 100
+  _attackRange:
+    stringValue: 125
+  _turretTurnSpeed:
+    stringValue: 720
+  turretAutoResets: 0
 --- !u!120 &12000000
 LineRenderer:
   m_ObjectHideFlags: 1

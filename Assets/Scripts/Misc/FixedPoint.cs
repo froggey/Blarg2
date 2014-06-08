@@ -1,6 +1,7 @@
 // You are standing at the gate to Gehennom.  Unspeakable cruelty and harm lurk down there.
 
 using System;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 // Fixed point numbers.
@@ -302,5 +303,35 @@ public struct DVector2 {
 
         public static DReal Dot(DVector2 a, DVector2 b) {
                 return a.x * b.x + a.y * b.y;
+        }
+}
+
+[Serializable]
+public class EditableDReal {
+        public string stringValue = "0";
+        private DReal? cached;
+        
+        public DReal Parse() {
+                if (cached.HasValue) return cached.Value;
+
+                var match = Regex.Match(stringValue, @"^[0-9]+$");
+                if (match.Success) {
+                        cached = int.Parse(stringValue);
+                        return cached.Value;
+                }
+
+                match = Regex.Match(stringValue, @"^([0-9]+)\.([0-9]+)$");
+                if (match.Success) {
+                        cached = (DReal)int.Parse(match.Groups[1].Value + match.Groups[2].Value) / (int)Math.Pow(10, match.Groups[2].Length);
+                        return cached.Value;
+                }
+
+                match = Regex.Match(stringValue, @"^([0-9]+)/([0-9]+)$");
+                if (match.Success) {
+                        cached = (DReal)int.Parse(match.Groups[1].Value) / (DReal)int.Parse(match.Groups[2].Value);
+                        return cached.Value;
+                }
+
+                throw new FormatException(stringValue + " is an invalid DReal. Valid formats are '123' or '123.45' or '123/45'.");
         }
 }
