@@ -28,7 +28,7 @@ public class LandRover : MonoBehaviour {
         }
 
         void Detonate() {
-                Instantiate(impactPrefab, transform.position, transform.rotation);
+                ObjectPool.Instantiate(impactPrefab, transform.position, transform.rotation);
                 var sqrRadius = explosionRadius * explosionRadius;
                 foreach(var e in ComSat.FindEntitiesWithinRadius(entity.position, explosionRadius)) {
                         var sqrDist = (e.position - entity.position).sqrMagnitude;

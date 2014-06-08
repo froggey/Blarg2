@@ -61,4 +61,13 @@ public class ObjectPool : IDisposable {
                 }
                 Pools.Clear();
         }
+
+        // Instantiate prefab. Pulls from a pool if prefab is pooled, otherwise uses the normal Instantiate function.
+        public static UnityEngine.Object Instantiate(GameObject prefab, Vector3 position, Quaternion rotation) {
+                if(prefab.GetComponent<PooledObject>() != null) {
+                        return For(prefab).Instantiate(position, rotation);
+                } else {
+                        return UnityEngine.Object.Instantiate(prefab, position, rotation);
+                }
+        }
 }
