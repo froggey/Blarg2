@@ -6,9 +6,19 @@ public class PowerManager : MonoBehaviour {
         public int[] teamPowerSupply = new int[8];
         public int[] teamPowerUse = new int[8];
 
+        struct Pair<T> {
+                public Pair(Entity e, T thing) {
+                        this.e = e;
+                        this.thing = thing;
+                }
+
+                public Entity e;
+                public T thing;
+        }
+
         Entity entity;
-        List<PowerSink> sinks = new List<PowerSink>();
-        List<PowerSource> sources = new List<PowerSource>();
+        List<Pair<PowerSink>> sinks = new List<Pair<PowerSink>>();
+        List<Pair<PowerSource>> sources = new List<Pair<PowerSource>>();
 
         void Awake() {
                 entity = GetComponent<Entity>();
@@ -21,27 +31,25 @@ public class PowerManager : MonoBehaviour {
                         teamPowerUse[i] = 0;
                 }
 
-                sinks.RemoveAll(s => !ComSat.EntityExists(s.GetComponent<Entity>()));
-                sources.RemoveAll(s => !ComSat.EntityExists(s.GetComponent<Entity>()));
+                sinks.RemoveAll(s => !ComSat.EntityExists(s.e));
+                sources.RemoveAll(s => !ComSat.EntityExists(s.e));
 
                 foreach(var s in sinks) {
-                        if(s.poweredOn) {
-                                var e = s.GetComponent<Entity>();
-                                teamPowerUse[e.team] += s.powerUsage;
+                        if(s.thing.poweredOn) {
+                                teamPowerUse[s.e.team] += s.thing.powerUsage;
                         }
                 }
                 foreach(var s in sources) {
-                        var e = s.GetComponent<Entity>();
-                        teamPowerSupply[e.team] += s.currentPower;
+                        teamPowerSupply[s.e.team] += s.thing.currentPower;
                 }
         }
 
         public void AddSink(PowerSink s) {
-                sinks.Add(s);
+                sinks.Add(new Pair<PowerSink>(s.GetComponent<Entity>(), s));
         }
 
         public void AddSource(PowerSource s) {
-                sources.Add(s);
+                sources.Add(new Pair<PowerSource>(s.GetComponent<Entity>(), s));
         }
 
         public bool TeamHasEnoughPower(int team) {
