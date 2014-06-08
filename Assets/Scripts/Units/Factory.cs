@@ -29,6 +29,8 @@ public class Factory : MonoBehaviour {
 
         public int buildRadius;
 
+        public bool dontManagePower;
+
         // Construction time remaining.
         private DReal delay;
         private DReal partialMetalUnit, partialSmokeUnit;
@@ -112,10 +114,10 @@ public class Factory : MonoBehaviour {
         private void ResetBuildTime() {
                 if (buildQueue.Any()) {
                         delay = prefabs[buildQueue.Peek().what].buildTime;
-                        powerSink.poweredOn = true;
+                        if (!dontManagePower) powerSink.poweredOn = true;
                 } else {
                         delay = 0;
-                        powerSink.poweredOn = false;
+                        if (!dontManagePower) powerSink.poweredOn = false;
                 }
                 partialMetalUnit = partialSmokeUnit = 0;
                 usedResources = new ResourceSet();
