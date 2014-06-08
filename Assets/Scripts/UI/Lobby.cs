@@ -145,12 +145,12 @@ public class Lobby : MonoBehaviour {
 
                         var prevColour = GUI.backgroundColor;
 
-                        if(player.team != 0) {
+                        if(player.team != ComSat.spectatorTeam) {
                                 GUI.backgroundColor = Utility.TeamColour(player.team);
                         }
-                        if(GUILayout.Button(player.team == 0 ? "Spectate" : player.team.ToString()) &&
+                        if(GUILayout.Button(player.team == ComSat.spectatorTeam ? "Spectate" : player.team.ToString()) &&
                            (comSat.isHost || player.id == comSat.localPlayerID)) {
-                                comSat.SetPlayerTeam(player, (player.team + 1) % 8);
+                                comSat.SetPlayerTeam(player, (player.team + 1) % ComSat.teamCount);
                         }
                         GUI.backgroundColor = prevColour;
 

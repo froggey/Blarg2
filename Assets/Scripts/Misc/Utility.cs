@@ -91,12 +91,13 @@ static public class Utility {
 
         public static Color TeamColour(int team) {
                 switch(team) {
-                case 1: return Color.blue;
-                case 2: return Color.cyan;
-                case 3: return Color.green;
-                case 4: return Color.magenta;
-                case 5: return Color.red;
-                case 6: return Color.yellow;
+                case 1: return new Color(0.06f, 0.91f, 0.0f);
+                case 2: return new Color(0.0f, 0.0f, 0.0f);
+                case 3: return new Color(0.0f, 0.02f, 1.0f);
+                case 4: return new Color(1.0f, 1.0f, 0.0f);
+                case 5: return new Color(1.0f, 1.0f, 1.0f);
+                case 6: return new Color(0.91f, 0.37f, 0.0f);
+                case 7: return new Color(0.65f, 0.69f, 0.9f);
                 }
                 return Color.white;
         }

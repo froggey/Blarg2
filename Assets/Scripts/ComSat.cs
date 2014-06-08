@@ -90,10 +90,13 @@ public class ComSat : MonoBehaviour, IClient {
         }
 
         // Game runs at this rate.
-        public static DReal tickRate = (DReal)1 / (DReal)25;
+        public readonly static DReal tickRate = (DReal)1 / (DReal)25;
         // This many ticks per communication turn.
         // Max input lag = ticksPerTurn * tickRate.
-        public static int ticksPerTurn = 10; // set this to 10(?) for release, 1 for locally debugging desyncs
+        public readonly static int ticksPerTurn = 10; // set this to 10(?) for release, 1 for locally debugging desyncs
+
+        public readonly static int teamCount = 8;
+        public readonly static int spectatorTeam = 0; // Also used for the environment.
 
         private float timeSlop;
         private int ticksRemaining; // Ticks remaining in this turn.
@@ -182,7 +185,7 @@ public class ComSat : MonoBehaviour, IClient {
                         GUILayout.Label(kv.Key.name + " " + kv.Value.Count);
                 }
                 if(gameOver) {
-                        if(winningTeam == 0) {
+                        if(winningTeam == spectatorTeam) {
                                 GUILayout.Label("DRAW!");
                         } else {
                                 GUILayout.Label("Player " + winningTeam + " wins!");
@@ -236,11 +239,11 @@ public class ComSat : MonoBehaviour, IClient {
         }
 
         public static void SpawnEntity(Entity origin, GameObject prefab, DVector2 position, DReal rotation) {
-                currentInstance.SpawnEntity(prefab, origin, origin == null ? 0 : origin.team, position, rotation, e => {});
+                currentInstance.SpawnEntity(prefab, origin, origin == null ? spectatorTeam : origin.team, position, rotation, e => {});
         }
 
         public static void SpawnEntity(Entity origin, GameObject prefab, DVector2 position, DReal rotation, System.Action<Entity> onSpawn) {
-                currentInstance.SpawnEntity(prefab, origin, origin == null ? 0 : origin.team, position, rotation, onSpawn);
+                currentInstance.SpawnEntity(prefab, origin, origin == null ? spectatorTeam : origin.team, position, rotation, onSpawn);
         }
 
         // Create a new entity at whereever.
@@ -249,7 +252,7 @@ public class ComSat : MonoBehaviour, IClient {
                 if(currentInstance.replayInput != null) return;
 
                 // Only spawn if the team exists or if generating scenery.
-                if(team != 0 && !currentInstance.players.Any(p => p.team == team)) {
+                if(team != spectatorTeam && !currentInstance.players.Any(p => p.team == team)) {
                         return;
                 }
 
@@ -441,7 +444,7 @@ public class ComSat : MonoBehaviour, IClient {
                 queuedCommands = new List<System.Action>();
                 futureQueuedCommands = new List<System.Action>();
 
-                SpawnEntity(managerPrefab, null, 0, new DVector2(0,0), 0, x=>{});
+                SpawnEntity(managerPrefab, null, spectatorTeam, new DVector2(0,0), 0, x=>{});
 
                 ObjectPool.FlushAll();
 
@@ -617,10 +620,10 @@ public class ComSat : MonoBehaviour, IClient {
 
                 if(!gameOver && turnID > 5) {
                         // Win check.
-                        int winningTeam = 0;
+                        int winningTeam = spectatorTeam;
                         int teamMask = 0;
                         foreach(var ent in worldEntityCache) {
-                                if(ent.team == 0) continue;
+                                if(ent.team == spectatorTeam) continue;
                                 teamMask |= 1 << ent.team;
                                 winningTeam = ent.team;
                         }
@@ -783,7 +786,7 @@ public class ComSat : MonoBehaviour, IClient {
                 var p = new Player();
                 p.id = id;
                 p.name = "<Player " + p.id + ">";
-                p.team = 0;
+                p.team = spectatorTeam;
                 if(isHost) {
                         // Automatically assign a team.
                         var teams = new List<int>{ 1,2,3,4,5,6,7 };
