@@ -225,7 +225,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100012}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 22.6185913, y: 4.210495, z: 15.5950069}
+  m_LocalPosition: {x: 71.5638275, y: 55.5899887, z: 64.7372894}
   m_LocalScale: {x: 2, y: 2, z: 2}
   m_Children:
   - {fileID: 400014}
@@ -599,7 +599,7 @@ MonoBehaviour:
   ghostPrefab: {fileID: 0}
   buildTime: 15
   buildIcon: {fileID: 2800000, guid: 64dc383a2b5c24fcbae3fc972ce908f6, type: 3}
-  hpBarTexture: {fileID: 0}
+  hpBarTexture: {fileID: 2800000, guid: fe5e9061a9af5c24ab18c18b3c0f7857, type: 3}
   hitOnlyIfTargetted: 0
   teamColourRenderer: {fileID: 0}
   buildCost:
