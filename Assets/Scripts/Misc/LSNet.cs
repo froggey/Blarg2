@@ -116,6 +116,9 @@ public class NetworkMessage {
 
         [ProtoMember(15)]
         public bool powerState;
+
+        [ProtoMember(16)]
+        public int[] targetIDs;
 }
 
 public class NetworkClient {}

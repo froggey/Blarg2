@@ -10,6 +10,8 @@ public class PlayerInterface : MonoBehaviour {
         Vector2 marqueeOrigin;
         Rect marqueeRect;
         bool marqueeActive;
+        enum MarqueeMode { Select, Target };
+        MarqueeMode marqueeMode;
 
         List<GameObject> selectedUnits = new List<GameObject>();
 
@@ -109,7 +111,7 @@ public class PlayerInterface : MonoBehaviour {
                                 Entity target = hit.transform.gameObject.GetComponent<Entity>();
                                 foreach(var unit in selectedUnits) {
                                         if(unit == null) continue;
-                                        ComSat.IssueAttack(unit.GetComponent<Entity>(), target);
+                                        ComSat.IssueAttack(unit.GetComponent<Entity>(), new[] { target });
                                 }
                         // Otherwise, do a move.
                         } else if(Physics.Raycast(ray, out hit, Mathf.Infinity, 1<<9)) {
@@ -121,14 +123,17 @@ public class PlayerInterface : MonoBehaviour {
                         }
                 }
 
-                if(Input.GetMouseButtonDown(0)) {
+                if(Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1)) {
+                        marqueeMode = Input.GetMouseButtonDown(0) ? MarqueeMode.Select : MarqueeMode.Target;
                         marqueeActive = true;
                         marqueeOrigin = MousePosition();
                 }
 
-                if(Input.GetMouseButtonUp(0)) {
+                if(Input.GetMouseButtonUp(0) || Input.GetMouseButtonUp(1)) {
                         if(marqueeRect.width != 0 && marqueeRect.height != 0) {
-                                if(!addToSelection) {
+                                var selection = new List<Entity>();
+
+                                if(!addToSelection && Input.GetMouseButtonUp(0)) {
                                         ClearSelected();
                                 }
 
@@ -139,14 +144,27 @@ public class PlayerInterface : MonoBehaviour {
                                                 Debug.LogWarning("No entity in unit " + unit);
                                                 continue;
                                         }
-                                        if(e.team != ComSat.localTeam) continue;
+                                        if(marqueeMode == MarqueeMode.Select && e.team != ComSat.localTeam) continue;
+                                        if(marqueeMode == MarqueeMode.Target && e.team == ComSat.localTeam) continue;
 
                                         // Convert the world position of the unit to a screen position and then to a GUI point.
                                         Vector3 screenPos = Camera.main.WorldToScreenPoint(unit.transform.position);
                                         Vector2 screenPoint = new Vector2(screenPos.x, Screen.height - screenPos.y);
 
                                         if(marqueeRect.Contains(screenPoint)) {
-                                                SelectUnit(unit);
+                                                selection.Add(e);
+                                        }
+                                }
+
+                                if (marqueeMode == MarqueeMode.Select) {
+                                        foreach (var u in selection) {
+                                                SelectUnit(u.gameObject);
+                                        }
+                                }
+                                else {
+                                        var a = selection.ToArray();
+                                        foreach (var attacker in selectedUnits) {
+                                                ComSat.IssueAttack(attacker.GetComponent<Entity>(), a);
                                         }
                                 }
                         }
@@ -157,7 +175,7 @@ public class PlayerInterface : MonoBehaviour {
                         marqueeActive = false;
                 }
 
-                if(Input.GetMouseButton(0)) {
+                if(Input.GetMouseButton(0) || Input.GetMouseButton(1)) {
                         Vector2 mouse = MousePosition();
 
                         // Compute a new marquee rectangle.

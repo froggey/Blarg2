@@ -164,7 +164,7 @@ public class ComSat : MonoBehaviour, IClient {
         void OnGUI() {
                 if(!worldRunning) return;
 
-                GUILayout.BeginArea(new Rect (Screen.width-200, 0, 200, 400));
+                GUILayout.BeginArea(new Rect(Screen.width - 200, 0, 200, 400));
                 if(GUILayout.Button("Disconnect")) {
                         Disconnect();
                 }
@@ -378,12 +378,13 @@ public class ComSat : MonoBehaviour, IClient {
         }
 
         // (Client)
-        void AttackCommand(int team, int entityID, int targetID) {
+        void AttackCommand(int team, int entityID, int[] targetIDs) {
+                targetIDs = targetIDs ?? new int[] {};
                 var entity = EntityFromID(entityID);
-                var target = EntityFromID(targetID);
-                if(entity != null && target != null && entity.team == team) {
-                        Log("{" + tickID + "} " + entity + "[" + entityID + "] attack " + target + "[" + targetID + "]");
-                        entity.gameObject.SendMessage("Attack", target, SendMessageOptions.DontRequireReceiver);
+                var targets = targetIDs.Select(id => EntityFromID(id)).Where(e => e != null).ToArray();
+                if(entity != null && targets.Any() && entity.team == team) {
+                        Log("{" + tickID + "} " + entity + "[" + entityID + "] attack " + string.Join(", ", targetIDs.Select(x => x.ToString()).ToArray()));
+                        entity.gameObject.SendMessage("Attack", targets, SendMessageOptions.DontRequireReceiver);
                 }
         }
 
@@ -776,12 +777,12 @@ public class ComSat : MonoBehaviour, IClient {
                 currentInstance.net.SendMessageToServer(m);
         }
 
-        public static void IssueAttack(Entity unit, Entity target) {
+        public static void IssueAttack(Entity unit, Entity[] targets) {
                 if(currentInstance.replayInput != null) return;
 
                 var m = new NetworkMessage(NetworkMessage.Type.Attack);
                 m.entityID = currentInstance.reverseWorldEntities[unit];
-                m.targetID = currentInstance.reverseWorldEntities[target];
+                m.targetIDs = targets.Select(t => currentInstance.reverseWorldEntities[t]).ToArray();
                 currentInstance.net.SendMessageToServer(m);
         }
 
@@ -910,7 +911,7 @@ public class ComSat : MonoBehaviour, IClient {
                 case NetworkMessage.Type.Attack:
                         SaveReplayCommand(message);
                         QueueCommand(message.turnID, message.commandID,
-                                     () => { AttackCommand(message.teamID, message.entityID, message.targetID); });
+                                     () => { AttackCommand(message.teamID, message.entityID, message.targetIDs); });
                         break;
                 case NetworkMessage.Type.UIAction:
                         SaveReplayCommand(message);

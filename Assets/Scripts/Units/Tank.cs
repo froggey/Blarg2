@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Linq;
 
 [RequireComponent (typeof(Entity))]
 [RequireComponent (typeof(Vehicle))]
@@ -38,6 +39,7 @@ public class Tank : MonoBehaviour {
         Mode mode;
         DVector2 destination; // Current movement target.
         Entity target; // Current attack target.
+        Entity[] targets;
         bool movingToTarget; // Cleared when attackDistance is reached.
 
         DReal turretRotation;
@@ -73,9 +75,8 @@ public class Tank : MonoBehaviour {
         void TickUpdate() {
                 ComSat.Trace(this, "TickUpdate");
                 if(mode == Mode.ATTACK && !ComSat.EntityExists(target)) {
-                        target = null;
-                        mode = Mode.IDLE;
-                        vehicle.Stop();
+                        PickNewTarget();
+                        if (target == null) vehicle.Stop();
                 }
 
                 if(mode == Mode.ATTACK) {
@@ -134,13 +135,14 @@ public class Tank : MonoBehaviour {
                 }
         }
 
-        void Attack(Entity target) {
+        void Attack(Entity[] targets) {
                 ComSat.Trace(this, "Attack");
                 if(target == entity) {
                         return;
                 }
                 mode = Mode.ATTACK;
-                this.target = target;
+                this.targets = targets;
+                PickNewTarget();
                 this.movingToTarget = false;
         }
 
@@ -149,6 +151,18 @@ public class Tank : MonoBehaviour {
                 mode = Mode.MOVE;
                 target = null;
                 destination = location;
+        }
+
+        private void PickNewTarget() {
+                if (targets == null) targets = new Entity[] {};
+                targets = targets.Where(t => t != null).OrderBy(t => (t.position - entity.position).sqrMagnitude).ToArray();
+                if (targets.Count() > 0) {
+                        target = targets[0];
+                        mode = Mode.ATTACK;
+                } else {
+                        target = null;
+                        mode = Mode.IDLE;
+                }
         }
 
         void Update() {

@@ -53,6 +53,7 @@ public class Factory : MonoBehaviour {
                                 if(!ComSat.TeamHasEnoughPower(entity.team)) {
                                         advance /= 2;
                                 }
+                                advance *= 10;
 
                                 var completion = advance / prefabs[buildMe].buildTime;
                                 partialMetalUnit += completion * prefabs[buildMe].buildCost.Metal;

@@ -1,11 +1,12 @@
 // You are standing at the gate to Gehennom.  Unspeakable cruelty and harm lurk down there.
 
+using System;
 using UnityEngine;
 
 // Fixed point numbers.
 
 [ProtoBuf.ProtoContract]
-public struct DReal {
+public struct DReal : IComparable<DReal> {
         public static DReal PI = Create(205887); // 3.14... * 2**16. Change this if fixedShift changes.
         public static DReal HalfPI = Create(102943); // 1.57... * 2**16. Change this if fixedShift changes.
         public static DReal TwoPI = Create(411774); // 1.57... * 2**16. Change this if fixedShift changes.
@@ -235,6 +236,10 @@ public struct DReal {
 
         public static DReal Max(DReal a, DReal b) {
                 return (a > b) ? a : b;
+        }
+
+        public int CompareTo(DReal other) {
+                return this < other ? -1 : this > other ? 1 : 0;
         }
 }
 
