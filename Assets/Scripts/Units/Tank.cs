@@ -17,7 +17,8 @@ public class Tank : MonoBehaviour {
 
         DReal fireDelayTime;
 
-        DReal barrelRecycleTime = 2; // Delay before refiring one barrel.
+        public EditableDReal _barrelRecycleTime;
+        private DReal barrelRecycleTime { get { return _barrelRecycleTime.Parse(); } } // Delay before refiring one barrel.
 
         private Entity entity;
         private CombatVehicle combatVehicle;

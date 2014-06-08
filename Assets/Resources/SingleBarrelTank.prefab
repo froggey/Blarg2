@@ -1157,6 +1157,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   turretMesh: {fileID: 100036}
   barrel: {fileID: 100030}
+  _barrelRecycleTime:
+    stringValue: 2
 --- !u!114 &11400002
 MonoBehaviour:
   m_ObjectHideFlags: 1

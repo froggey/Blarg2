@@ -8,8 +8,11 @@ using UnityEngine;
 public class CombatVehicle : MonoBehaviour {
         public GameObject projectilePrefab;
         
+        [HideInInspector]
         public Mode mode;
+        [HideInInspector]
         public DVector2 destination; // Current movement target.
+        [HideInInspector]
         public Entity target; // Current attack target.
         private Entity[] targets;
         private bool movingToTarget; // Cleared when attackDistance is reached.
@@ -52,6 +55,7 @@ public class CombatVehicle : MonoBehaviour {
                 this.targets = targets;
                 PickNewTarget();
                 movingToTarget = false;
+                vehicle.Stop();
         }
 
         void Move(DVector2 location) {
@@ -80,7 +84,8 @@ public class CombatVehicle : MonoBehaviour {
                         PickNewTarget();
                         if (target == null) vehicle.Stop();
                 }
-
+                
+                Debug.Log(mode);
                 if(mode == Mode.ATTACK) {
                         var distVec = target.position - entity.position;
                         var dist = distVec.magnitude;
@@ -106,9 +111,11 @@ public class CombatVehicle : MonoBehaviour {
                         
                         if(dist < attackDistance) {
                                 // Close enough.
+                                Debug.Log("stop");
                                 movingToTarget = false;
                                 vehicle.Stop();
                         } else if(movingToTarget || (dist >= attackRange)) {
+                                Debug.Log("go");
                                 movingToTarget = true;
                                 // Approach target.
                                 vehicle.MoveTowards(target.position);
@@ -132,6 +139,7 @@ public class CombatVehicle : MonoBehaviour {
                                 SendMessage("TurnTurret", turretRotation);
                         }
                 } else if(mode == Mode.IDLE) {
+                        vehicle.Stop();
                         if (turretAutoResets) {
                                 turretRotation = Utility.CalculateNewAngle(turretRotation, 0, turretTurnSpeed);
                                 SendMessage("TurnTurret", turretRotation);
