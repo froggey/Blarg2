@@ -381,7 +381,7 @@ public class ComSat : MonoBehaviour, IClient {
         void AttackCommand(int team, int entityID, int[] targetIDs) {
                 targetIDs = targetIDs ?? new int[] {};
                 var entity = EntityFromID(entityID);
-                var targets = targetIDs.Select(id => EntityFromID(id)).Where(e => e != null).ToArray();
+                var targets = targetIDs.Select(id => EntityFromID(id)).Where(e => ComSat.EntityExists(e)).ToArray();
                 if(entity != null && targets.Any() && entity.team == team) {
                         Log("{" + tickID + "} " + entity + "[" + entityID + "] attack " + string.Join(", ", targetIDs.Select(x => x.ToString()).ToArray()));
                         entity.gameObject.SendMessage("Attack", targets, SendMessageOptions.DontRequireReceiver);

@@ -1,8 +1,9 @@
 using UnityEngine;
 using System.Collections;
+using System.Linq;
 
 [RequireComponent (typeof(Entity))]
-[RequireComponent (typeof(Vehicle))]
+[RequireComponent (typeof(CombatVehicle))]
 public class TwinTank : MonoBehaviour {
         // Can't use GameObjects to set these up because floats.
         // Unity refuses to edit these because they're structs.
@@ -15,13 +16,13 @@ public class TwinTank : MonoBehaviour {
         public GameObject leftBarrel, rightBarrel;
 
         private Entity entity;
-        private Vehicle vehicle;
+        private CombatVehicle combatVehicle;
 
         void Awake() {
                 ComSat.Trace(this, "Awake");
                 entity = GetComponent<Entity>();
                 entity.AddUpdateAction(TickUpdate);
-                vehicle = GetComponent<Vehicle>();
+                combatVehicle = GetComponent<CombatVehicle>();
 
                 mode = Mode.IDLE;
                 turretRotation = 0;
@@ -41,6 +42,7 @@ public class TwinTank : MonoBehaviour {
         Mode mode;
         DVector2 destination; // Current movement target.
         Entity target; // Current attack target.
+        Entity[] targets;
         bool movingToTarget; // Cleared when attackDistance is reached.
 
         DReal turretRotation;
@@ -89,66 +91,9 @@ public class TwinTank : MonoBehaviour {
                 fireDelayTime = barrelDelay;
                 FireOneBarrel(+1, leftBarrel);
         }
-
+        
         void TickUpdate() {
                 ComSat.Trace(this, "TickUpdate");
-                if(mode == Mode.ATTACK && !ComSat.EntityExists(target)) {
-                        target = null;
-                        mode = Mode.IDLE;
-                        vehicle.Stop();
-                }
-
-                if(mode == Mode.ATTACK) {
-                        var distVec = target.position - entity.position;
-                        var dist = distVec.magnitude;
-
-                        DReal targetTurretAngle;
-
-                        var projectileProjectile = projectilePrefab.GetComponent<Projectile>();
-                        if(projectileProjectile != null) {
-                                var aimSpot = Utility.PredictShot(entity.position, projectileProjectile.initialSpeed,
-                                                                  target.position, target.velocity);
-
-                                targetTurretAngle = DReal.Mod(DVector2.ToAngle(aimSpot - entity.position) - entity.rotation, DReal.TwoPI);
-                        } else {
-                                targetTurretAngle = DReal.Mod(DVector2.ToAngle(distVec) - entity.rotation, DReal.TwoPI);
-                        }
-
-                        // Turn turret to point at target when close.
-                        if(dist < attackRange * 2) {
-                                TurnTurret(targetTurretAngle);
-                        } else {
-                                TurnTurret(0);
-                        }
-
-                        if(dist < attackDistance) {
-                                // Close enough.
-                                movingToTarget = false;
-                                vehicle.Stop();
-                        } else if(movingToTarget || (dist >= attackRange)) {
-                                movingToTarget = true;
-                                // Approach target.
-                                vehicle.MoveTowards(target.position);
-                        }
-
-                        // Fire when in range and pointing the gun at the target.
-                        if(dist < attackRange && targetTurretAngle == turretRotation) {
-                                Fire();
-                        }
-                } else if(mode == Mode.MOVE) {
-                        // Move towards.
-                        if((destination - entity.position).sqrMagnitude < sqrPositioningAccuracy) {
-                                // Close enough.
-                                mode = Mode.IDLE;
-                                vehicle.Stop();
-                        } else {
-                                vehicle.MoveTowards(destination);
-                        }
-                        TurnTurret(0);
-                } else if(mode == Mode.IDLE) {
-                        TurnTurret(0);
-                }
-
                 if(fireCycle != FireCycle.READY) {
                         fireDelayTime -= ComSat.tickRate;
                         if(fireDelayTime <= 0) {
@@ -163,24 +108,7 @@ public class TwinTank : MonoBehaviour {
                                         fireCycle = FireCycle.READY;
                                 }
                         }
-                }
-        }
-
-        void Attack(Entity target) {
-                ComSat.Trace(this, "Attack");
-                if(target == entity) {
-                        return;
-                }
-                mode = Mode.ATTACK;
-                this.target = target;
-                this.movingToTarget = false;
-        }
-
-        void Move(DVector2 location) {
-                ComSat.Trace(this, "Move");
-                mode = Mode.MOVE;
-                target = null;
-                destination = location;
+                 }
         }
 
         void Update() {

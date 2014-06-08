@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Linq;
 using System.Collections;
 
 [RequireComponent (typeof(Vehicle))]
@@ -7,6 +8,7 @@ public class LandRover : MonoBehaviour {
         bool moving;
         DVector2 destination;
         Entity target;
+        Entity[] targets;
 
         public GameObject impactPrefab;
         public int detonateRange;
@@ -49,7 +51,7 @@ public class LandRover : MonoBehaviour {
                                 return;
                         }
                 } else {
-                        target = null;
+                        PickNewTarget();
                 }
                 if(moving) {
                         if((ComSat.RandomValue() % 500) == 0) {
@@ -69,11 +71,26 @@ public class LandRover : MonoBehaviour {
         void Move(DVector2 location) {
                 ComSat.Trace(this, "Move");
                 moving = true;
+                target = null;
+                targets = null;
                 destination = location;
         }
 
-        void Attack(Entity target) {
-                this.target = target;
+        void Attack(Entity[] targets) {
+                this.targets = targets;
+                PickNewTarget();
+        }
+
+        private void PickNewTarget() {
+                if (targets == null) targets = new Entity[] {};
+                targets = targets.Where(t => t != null).OrderBy(t => (t.position - entity.position).sqrMagnitude).ToArray();
+                if (targets.Count() > 0) {
+                        target = targets[0];
+                        moving = true;
+                } else {
+                        target = null;
+                        moving = false;
+                }
         }
 
         void OnDrawGizmosSelected() {

@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Linq;
 using System.Collections;
 
 [RequireComponent (typeof(Entity))]
@@ -41,6 +42,7 @@ public class GiantRobot : MonoBehaviour {
         Mode mode;
         DVector2 destination; // Current movement target.
         Entity target; // Current attack target.
+        Entity[] targets;
         bool movingToTarget; // Cleared when attackDistance is reached.
 
         // Firing cycle:
@@ -85,9 +87,8 @@ public class GiantRobot : MonoBehaviour {
         void TickUpdate() {
                 ComSat.Trace(this, "TickUpdate");
                 if(mode == Mode.ATTACK && !ComSat.EntityExists(target)) {
-                        target = null;
-                        mode = Mode.IDLE;
-                        vehicle.Stop();
+                        PickNewTarget();
+                        if (target == null) vehicle.Stop();
                 }
 
                 if(mode == Mode.ATTACK) {
@@ -136,13 +137,14 @@ public class GiantRobot : MonoBehaviour {
                 }
         }
 
-        void Attack(Entity target) {
+        void Attack(Entity[] targets) {
                 ComSat.Trace(this, "Attack");
                 if(target == entity) {
                         return;
                 }
                 mode = Mode.ATTACK;
-                this.target = target;
+                this.targets = targets;
+                PickNewTarget();
                 this.movingToTarget = false;
         }
 
@@ -150,7 +152,20 @@ public class GiantRobot : MonoBehaviour {
                 ComSat.Trace(this, "Move");
                 mode = Mode.MOVE;
                 target = null;
+                targets = null;
                 destination = location;
+        }
+
+        private void PickNewTarget() {
+                if (targets == null) targets = new Entity[] {};
+                targets = targets.Where(t => t != null).OrderBy(t => (t.position - entity.position).sqrMagnitude).ToArray();
+                if (targets.Count() > 0) {
+                        target = targets[0];
+                        mode = Mode.ATTACK;
+                } else {
+                        target = null;
+                        mode = Mode.IDLE;
+                }
         }
 
         void Update() {
