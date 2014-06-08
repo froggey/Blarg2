@@ -20,7 +20,7 @@ public class NetworkMessage {
                 PlayerUpdate = 4,
                 // Client->server, sends player ID.
                 KickPlayer = 5,
-                // Bidirectional, sends levelName.
+                // Bidirectional, sends levelName and gameSpeed.
                 StartGame = 6,
                 // Command.
                 SpawnEntity = 7,
@@ -116,6 +116,9 @@ public class NetworkMessage {
 
         [ProtoMember(15)]
         public bool powerState;
+
+        [ProtoMember(17)]
+        public float gameSpeed;
 }
 
 public class NetworkClient {}
@@ -296,7 +299,7 @@ public class LSNet : UnityEngine.MonoBehaviour {
                         AddUnityAction(() => { localClient.OnServerMessage(message); });
                         return;
                 }
-                
+
                 var buffer = message.Serialize();
 
                 SendMessageToClient(clientSockets[target], buffer);

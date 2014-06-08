@@ -152,7 +152,7 @@ public class ComSat : MonoBehaviour, IClient {
         private float avgCreatedPerTick;
         private int nDestroyedThisTick;
         private float avgDestroyedPerTick;
-        
+
         public int[] teamPowerSupply, teamPowerUse;
 
         void Log(string s) {
@@ -466,6 +466,10 @@ public class ComSat : MonoBehaviour, IClient {
                 deferredActions = new List<System.Action>();
                 queuedCommands = new List<System.Action>();
                 futureQueuedCommands = new List<System.Action>();
+
+                teamResources = Enumerable.Range(0, 8).Select(_ => new ResourceSet { Metal = 2000, MagicSmoke = 500 }).ToArray();
+                teamPowerSupply = new int[8];
+                teamPowerUse = new int[8];
 
                 ObjectPool.FlushAll();
 
@@ -894,6 +898,7 @@ public class ComSat : MonoBehaviour, IClient {
                         if(worldRunning) {
                                 throw new System.Exception("Got start game while world running?");
                         }
+                        timeAccel = message.gameSpeed;
                         StartGame(message.levelName);
                         break;
                 case NetworkMessage.Type.SpawnEntity:
@@ -944,9 +949,6 @@ public class ComSat : MonoBehaviour, IClient {
                         Debug.LogException(e, this);
                 }
                 Application.LoadLevel(levelName);
-                teamResources = Enumerable.Range(0, 7).Select(_ => new ResourceSet { Metal = 2000, MagicSmoke = 500 }).ToArray();
-                teamPowerSupply = new int[7];
-                teamPowerUse = new int[7];
         }
 
         bool PlayerIsAdmin(int id) {
@@ -1062,6 +1064,7 @@ public class ComSat : MonoBehaviour, IClient {
         public void StartGame() {
                 var m = new NetworkMessage(NetworkMessage.Type.StartGame);
                 m.levelName = "main";
+                m.gameSpeed = timeAccel;
                 net.SendMessageToServer(m);
         }
         public void SetPlayerName(Player player, string name) {

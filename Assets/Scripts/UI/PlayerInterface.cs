@@ -30,14 +30,16 @@ public class PlayerInterface : MonoBehaviour {
                         }
                 }
 
-                GUI.color = Color.white;
-                GUI.Label(new Rect(0, 0, 128, 24), "Metal: " + ComSat.localTeamResources.Metal);
-                GUI.Label(new Rect(128, 0, 128, 24), "Magic Smoke: " + ComSat.localTeamResources.MagicSmoke);
-                var powerUse = ComSat.currentInstance.teamPowerUse[ComSat.localTeam];
-                var powerSupply = ComSat.currentInstance.teamPowerSupply[ComSat.localTeam];
-                if (powerUse > powerSupply) GUI.color = Color.red;
-                GUI.Label(new Rect(256, 0, 256, 24), "Power Usage: " + powerUse + "/" + powerSupply);
-                if (powerUse > powerSupply) GUI.color = Color.white;
+                if(ComSat.localTeam != -1) {
+                        GUI.color = Color.white;
+                        GUI.Label(new Rect(0, 0, 128, 24), "Metal: " + ComSat.localTeamResources.Metal);
+                        GUI.Label(new Rect(128, 0, 128, 24), "Magic Smoke: " + ComSat.localTeamResources.MagicSmoke);
+                        var powerUse = ComSat.currentInstance.teamPowerUse[ComSat.localTeam];
+                        var powerSupply = ComSat.currentInstance.teamPowerSupply[ComSat.localTeam];
+                        if (powerUse > powerSupply) GUI.color = Color.red;
+                        GUI.Label(new Rect(256, 0, 256, 24), "Power Usage: " + powerUse + "/" + powerSupply);
+                        if (powerUse > powerSupply) GUI.color = Color.white;
+                }
         }
 
         Vector2 MousePosition() {
