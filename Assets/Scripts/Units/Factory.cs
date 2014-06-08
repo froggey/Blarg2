@@ -29,12 +29,15 @@ public class Factory : MonoBehaviour {
 
         private const int clearQueue = -1;
 
+        private ResourceManager resourceMan;
+
         void Awake() {
                 ComSat.Trace(this, "Awake");
                 entity = GetComponent<Entity>();
                 entity.AddUpdateAction(TickUpdate);
                 powerSink = GetComponent<PowerSink>();
                 buildQueue = new Queue<int>();
+                resourceMan = FindObjectOfType<ResourceManager>();
         }
 
         void TickUpdate() {
@@ -50,7 +53,7 @@ public class Factory : MonoBehaviour {
                                 if(sabotageTime > 0) {
                                         advance /= sabotageTimeMultiplier;
                                 }
-                                if(!ComSat.TeamHasEnoughPower(entity.team)) {
+                                if(!powerSink.Powered()) {
                                         advance /= 2;
                                 }
 
@@ -58,7 +61,7 @@ public class Factory : MonoBehaviour {
                                 partialMetalUnit += completion * prefabs[buildMe].buildCost.Metal;
                                 partialSmokeUnit += completion * prefabs[buildMe].buildCost.MagicSmoke;
                                 var rs = new ResourceSet { Metal = (int)partialMetalUnit, MagicSmoke = (int)partialSmokeUnit };
-                                if (ComSat.TakeResources(entity.team, rs)) {
+                                if (resourceMan.TakeResources(entity.team, rs)) {
                                         usedResources += rs;
                                         partialMetalUnit %= 1;
                                         partialSmokeUnit %= 1;
@@ -70,7 +73,7 @@ public class Factory : MonoBehaviour {
                         }
                         if(delay <= 0) {
                                 Debug.Log(prefabs[buildMe].buildCost - usedResources);
-                                if (!ComSat.TakeResources(entity.team, prefabs[buildMe].buildCost - usedResources)) return;
+                                if (!resourceMan.TakeResources(entity.team, prefabs[buildMe].buildCost - usedResources)) return;
 
                                 // Timer expired and we're building something.
                                 print("Build new " + prefabs[buildMe]);
@@ -89,8 +92,7 @@ public class Factory : MonoBehaviour {
                 if (buildQueue.Any()) {
                         delay = prefabs[buildQueue.Peek()].buildTime;
                         powerSink.poweredOn = true;
-                }
-                else {
+                } else {
                         delay = 0;
                         powerSink.poweredOn = false;
                 }
@@ -103,8 +105,8 @@ public class Factory : MonoBehaviour {
                 if(what == clearQueue) {
                         buildQueue.Clear();
                         delay = 0;
-                        ComSat.AddResource(entity.team, ResourceType.Metal, usedResources.Metal);
-                        ComSat.AddResource(entity.team, ResourceType.MagicSmoke, usedResources.MagicSmoke);
+                        resourceMan.AddResource(entity.team, ResourceType.Metal, usedResources.Metal);
+                        resourceMan.AddResource(entity.team, ResourceType.MagicSmoke, usedResources.MagicSmoke);
                         ResetBuildTime();
                 }
                 else if(what >= 0 && what < prefabs.Length) {

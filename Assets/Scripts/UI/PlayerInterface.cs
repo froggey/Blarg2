@@ -15,6 +15,18 @@ public class PlayerInterface : MonoBehaviour {
 
         List<GameObject>[] unitGroups = new List<GameObject>[10];
 
+        PowerManager powerMan;
+        ResourceManager resourceMan;
+
+        void Update() {
+                if(powerMan == null) {
+                        powerMan = FindObjectOfType<PowerManager>();
+                }
+                if(resourceMan == null) {
+                        resourceMan = FindObjectOfType<ResourceManager>();
+                }
+        }
+
         void OnGUI() {
                 if(marqueeActive) {
                         GUI.color = overlayColour;
@@ -32,13 +44,17 @@ public class PlayerInterface : MonoBehaviour {
 
                 if(ComSat.localTeam != -1) {
                         GUI.color = Color.white;
-                        GUI.Label(new Rect(0, 0, 128, 24), "Metal: " + ComSat.localTeamResources.Metal);
-                        GUI.Label(new Rect(128, 0, 128, 24), "Magic Smoke: " + ComSat.localTeamResources.MagicSmoke);
-                        var powerUse = ComSat.currentInstance.teamPowerUse[ComSat.localTeam];
-                        var powerSupply = ComSat.currentInstance.teamPowerSupply[ComSat.localTeam];
-                        if (powerUse > powerSupply) GUI.color = Color.red;
-                        GUI.Label(new Rect(256, 0, 256, 24), "Power Usage: " + powerUse + "/" + powerSupply);
-                        if (powerUse > powerSupply) GUI.color = Color.white;
+                        if(resourceMan) {
+                                GUI.Label(new Rect(0, 0, 128, 24), "Metal: " + resourceMan.teamResources[ComSat.localTeam].Metal);
+                                GUI.Label(new Rect(128, 0, 128, 24), "Magic Smoke: " + resourceMan.teamResources[ComSat.localTeam].MagicSmoke);
+                        }
+                        if(powerMan != null) {
+                                var powerUse = powerMan.teamPowerUse[ComSat.localTeam];
+                                var powerSupply = powerMan.teamPowerSupply[ComSat.localTeam];
+                                if (powerUse > powerSupply) GUI.color = Color.red;
+                                GUI.Label(new Rect(256, 0, 256, 24), "Power Usage: " + powerUse + "/" + powerSupply);
+                                if (powerUse > powerSupply) GUI.color = Color.white;
+                        }
                 }
         }
 

@@ -115,7 +115,7 @@ public class ComSat : MonoBehaviour, IClient {
         private List<System.Action> queuedCommands;
         private List<System.Action> futureQueuedCommands;
 
-        public static ComSat currentInstance { get; set; }
+        private static ComSat currentInstance;
 
         public int localPlayerID;
         public List<Player> players = new List<Player>();
@@ -153,7 +153,7 @@ public class ComSat : MonoBehaviour, IClient {
         private int nDestroyedThisTick;
         private float avgDestroyedPerTick;
 
-        public int[] teamPowerSupply, teamPowerUse;
+        public GameObject managerPrefab;
 
         void Log(string s) {
                 if(debugVomit) {
@@ -241,32 +241,6 @@ public class ComSat : MonoBehaviour, IClient {
 
         public static void SpawnEntity(Entity origin, GameObject prefab, DVector2 position, DReal rotation, System.Action<Entity> onSpawn) {
                 currentInstance.SpawnEntity(prefab, origin, origin == null ? 0 : origin.team, position, rotation, onSpawn);
-        }
-
-        public ResourceSet[] teamResources;
-        public static ResourceSet localTeamResources { get { return currentInstance.teamResources[localTeam]; } }
-
-        public static void AddResource(int team, ResourceType resource, int amount) {
-                switch (resource) {
-                        case ResourceType.MagicSmoke:
-                                currentInstance.teamResources[team].MagicSmoke += amount;
-                                break;
-                        case ResourceType.Metal:
-                                currentInstance.teamResources[team].Metal += amount;
-                                break;
-                }
-        }
-
-        public static bool TakeResources(int team, ResourceSet resources) {
-                var rs = currentInstance.teamResources[team];
-                if (rs.ContainsAtLeast(resources)) {
-                        rs.Metal -= resources.Metal;
-                        rs.MagicSmoke -= resources.MagicSmoke;
-                        return true;
-                }
-                else {
-                        return false;
-                }
         }
 
         // Create a new entity at whereever.
@@ -467,9 +441,7 @@ public class ComSat : MonoBehaviour, IClient {
                 queuedCommands = new List<System.Action>();
                 futureQueuedCommands = new List<System.Action>();
 
-                teamResources = Enumerable.Range(0, 8).Select(_ => new ResourceSet { Metal = 2000, MagicSmoke = 500 }).ToArray();
-                teamPowerSupply = new int[8];
-                teamPowerUse = new int[8];
+                SpawnEntity(managerPrefab, null, 0, new DVector2(0,0), 0, x=>{});
 
                 ObjectPool.FlushAll();
 
@@ -515,21 +487,6 @@ public class ComSat : MonoBehaviour, IClient {
         // Called every tickRate seconds when the world is live.
         // (Client)
         void TickUpdate() {
-                for (int i = 0; i < teamPowerSupply.Length; i++) {
-                        teamPowerSupply[i] = 0;
-                        teamPowerUse[i] = 0;
-                }
-                foreach(Entity e in worldEntityCache) {
-                        var sink = e.GetComponent<PowerSink>();
-                        if (sink != null && sink.poweredOn) {
-                                teamPowerUse[e.team] += sink.powerUsage;
-                        }
-                        var source = e.GetComponent<PowerSource>();
-                        if (source != null) {
-                                teamPowerSupply[e.team] += source.currentPower;
-                        }
-                }
-
                 // Must tick all objects in a consistent order across machines.
                 foreach(Entity e in worldEntityCache) {
                         e.TickUpdate();
@@ -539,10 +496,6 @@ public class ComSat : MonoBehaviour, IClient {
                         a();
                 }
                 deferredActions.Clear();
-        }
-
-        public static bool TeamHasEnoughPower(int team) {
-                return currentInstance.teamPowerSupply[team] >= currentInstance.teamPowerUse[team];
         }
 
         string currentGameState;

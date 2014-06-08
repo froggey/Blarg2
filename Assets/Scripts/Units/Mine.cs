@@ -13,6 +13,7 @@ public class Mine : MonoBehaviour {
         private PowerSink powerSink;
         private ResourceSource source;
         private DReal timer;
+        private ResourceManager resourceMan;
 
         void Start() {
                 entity = GetComponent<Entity>();
@@ -20,13 +21,14 @@ public class Mine : MonoBehaviour {
                 powerSink = GetComponent<PowerSink>();
                 source = Utility.GetThingAt<ResourceSource>(entity.position);
                 source.hasMine = true;
+                resourceMan = FindObjectOfType<ResourceManager>();
         }
 
         void TickUpdate() {
                 timer += ComSat.tickRate;
                 if (entity.team != -1 && timer > 1 && powerSink.poweredOn) {
-                        var amount = Math.Min(ComSat.TeamHasEnoughPower(entity.team) ? mineRate : mineRate / 2, source.amount);
-                        ComSat.AddResource(entity.team, resource, amount);
+                        var amount = Math.Min(powerSink.Powered() ? mineRate : mineRate / 2, source.amount);
+                        resourceMan.AddResource(entity.team, resource, amount);
                         source.amount -= amount;
                 }
                 timer %= 1;
