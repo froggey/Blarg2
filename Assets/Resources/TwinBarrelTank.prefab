@@ -1408,7 +1408,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   projectilePrefab: {fileID: 100000, guid: feb241d717a6d4aed84e1d8194b2df13, type: 2}
-  hasRotatingTurret: 1
+  turretAutoResets: 1
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

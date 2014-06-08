@@ -8,9 +8,9 @@ using UnityEngine;
 public class CombatVehicle : MonoBehaviour {
         public GameObject projectilePrefab;
         
-        public Mode mode { get; private set; }
-        public DVector2 destination { get; private set; } // Current movement target.
-        public Entity target { get; private set; } // Current attack target.
+        public Mode mode;
+        public DVector2 destination; // Current movement target.
+        public Entity target; // Current attack target.
         private Entity[] targets;
         private bool movingToTarget; // Cleared when attackDistance is reached.
         
@@ -84,7 +84,7 @@ public class CombatVehicle : MonoBehaviour {
 
                         DReal targetTurretAngle;
 
-                        var projectileProjectile = projectilePrefab.GetComponent<Projectile>();
+                        var projectileProjectile = projectilePrefab != null ? projectilePrefab.GetComponent<Projectile>() : null;
                         if(projectileProjectile != null) {
                                 var aimSpot = Utility.PredictShot(entity.position, projectileProjectile.initialSpeed,
                                                                   target.position, target.velocity);

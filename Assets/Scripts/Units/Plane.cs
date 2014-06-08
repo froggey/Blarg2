@@ -2,22 +2,21 @@ using UnityEngine;
 using System.Collections;
 
 [RequireComponent (typeof(Entity))]
-[RequireComponent (typeof(Vehicle))]
+[RequireComponent (typeof(CombatVehicle))]
 public class Plane : MonoBehaviour {
         public GameObject missilePrefab;
         public GameObject gunPrefab;
 
         private Entity entity;
-        private Vehicle vehicle;
+        private CombatVehicle combatVehicle;
 
         void Awake() {
                 ComSat.Trace(this, "Awake");
                 entity = GetComponent<Entity>();
                 entity.AddUpdateAction(TickUpdate);
-                vehicle = GetComponent<Vehicle>();
+                combatVehicle = GetComponent<CombatVehicle>();
 
                 missilesLoaded = maxMissiles;
-                destination = entity.position;
         }
 
         public int maxMissiles;
@@ -36,10 +35,6 @@ public class Plane : MonoBehaviour {
         DReal missileRecycleDelay;
         DReal gunRecycleDelay;
 
-        bool explicitMove;
-        DVector2 destination; // Current movement target.
-        Entity target; // Current attack target.
-
         void FireGun() {
                 if(gunRecycleDelay > 0) return;
 
@@ -47,8 +42,8 @@ public class Plane : MonoBehaviour {
                                    entity.position, entity.rotation,
                                    (Entity ent) => {
                                            var proj = ent.gameObject.GetComponent<Projectile>();
-                                           if(proj != null && ComSat.EntityExists(target)) {
-                                                   proj.target = target;
+                                           if(proj != null && ComSat.EntityExists(combatVehicle.target)) {
+                                                   proj.target = combatVehicle.target;
                                            }
                                    });
 
@@ -64,8 +59,8 @@ public class Plane : MonoBehaviour {
                                    entity.position, entity.rotation,
                                    (Entity ent) => {
                                            var proj = ent.gameObject.GetComponent<Projectile>();
-                                           if(proj != null && ComSat.EntityExists(target)) {
-                                                   proj.target = target;
+                                           if(proj != null && ComSat.EntityExists(combatVehicle.target)) {
+                                                   proj.target = combatVehicle.target;
                                            }
                                    });
 
@@ -75,18 +70,14 @@ public class Plane : MonoBehaviour {
 
         void TickUpdate() {
                 ComSat.Trace(this, "TickUpdate");
-                if(!ComSat.EntityExists(target)) {
-                        target = null;
-                        if(!explicitMove) {
-                                // Chill out here.
-                                destination = entity.position;
-                                explicitMove = true;
-                        }
-                        gunFireSound.Stop();
-                } else {
-                        destination = target.position;
 
-                        var dist = target.position - entity.position;
+                if (combatVehicle.mode == CombatVehicle.Mode.IDLE) {
+                        combatVehicle.mode = CombatVehicle.Mode.MOVE;
+                        combatVehicle.destination = entity.position;
+                }
+
+                if (ComSat.EntityExists(combatVehicle.target)) {
+                        var dist = combatVehicle.target.position - entity.position;
                         var sqrDist = dist.sqrMagnitude;
                         var targetAngle = DReal.Mod(DVector2.ToAngle(dist), DReal.TwoPI);
 
@@ -111,8 +102,6 @@ public class Plane : MonoBehaviour {
                         }
                 }
 
-                vehicle.MoveTowards(destination);
-
                 if(missilesLoaded < maxMissiles) {
                         if(missileReloadTime <= 0) {
                                 missileReloadTime = missileReloadDelay;
@@ -133,19 +122,7 @@ public class Plane : MonoBehaviour {
                 }
         }
 
-        void Attack(Entity target) {
-                ComSat.Trace(this, "Attack");
-                if(target == entity) {
-                        return;
-                }
-                this.target = target;
-                explicitMove = false;
-        }
-
-        void Move(DVector2 location) {
-                ComSat.Trace(this, "Move");
-                target = null;
-                destination = location;
-                explicitMove = true;
-        }
+        // ignore these signals, planes have special firing behaviour because two guns and stuff
+        void TurnTurret(DReal angle) {}
+        void Fire() {}
 }
