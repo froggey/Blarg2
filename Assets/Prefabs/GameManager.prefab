@@ -11,6 +11,7 @@ GameObject:
   - 114: {fileID: 11400002}
   - 114: {fileID: 11400000}
   - 114: {fileID: 11400004}
+  - 114: {fileID: 11400006}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -65,11 +66,12 @@ MonoBehaviour:
   buildTime: 0
   buildIcon: {fileID: 0}
   hpBarTexture: {fileID: 0}
-  hitOnlyIfTargetted: 0
-  teamColourRenderer: {fileID: 0}
   buildCost:
     Metal: 0
     MagicSmoke: 0
+  buildAtPoint: 0
+  hitOnlyIfTargetted: 0
+  teamColourRenderer: {fileID: 0}
 --- !u!114 &11400004
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -82,6 +84,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   teamResources: []
+--- !u!114 &11400006
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d7064cff924c4b7fa4c8ef569464144, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

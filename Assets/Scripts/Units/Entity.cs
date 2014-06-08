@@ -30,12 +30,12 @@ public class Entity : MonoBehaviour {
         public int buildTime = 0;
         public Texture2D buildIcon;
         public Texture2D hpBarTexture;
+        public ResourceSet buildCost;
+        public bool buildAtPoint;
 
         public bool hitOnlyIfTargetted = false;
 
         public Renderer teamColourRenderer;
-
-        public ResourceSet buildCost;
 
         private List<System.Action> updateActions = new List<System.Action>();
         private List<System.Action> instantiateActions = new List<System.Action>();
@@ -120,5 +120,9 @@ public class Entity : MonoBehaviour {
                         new Rect(p.x - 16, Camera.main.pixelHeight - p.y + 8, 32, 4),
                         hpBarTexture,
                         new Rect((float)(maxHealth - health) / maxHealth / 2, 0, 0.5f, 1));
+        }
+
+        public string BuildToolTip() {
+                return gameObject.ToString() + "\nBuild time: " + buildTime + "\nMetal: " + buildCost.Metal + "\nMagic Smoke: " + buildCost.MagicSmoke;
         }
 }

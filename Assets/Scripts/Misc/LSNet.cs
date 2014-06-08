@@ -36,6 +36,8 @@ public class NetworkMessage {
                 NextTurn = 12,
                 // Command.
                 SetPowerState = 13,
+                // Command. sends entity, what, and position.
+                Build = 14,
         }
 
         public NetworkMessage() {}
