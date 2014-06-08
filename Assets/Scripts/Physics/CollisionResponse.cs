@@ -11,6 +11,7 @@ public class CollisionResponse : MonoBehaviour {
 
         public Layer layer;
         public bool fixedPosition;
+        public bool canPush = true;
 
         void Awake() {
                 entity = GetComponent<Entity>();
@@ -21,7 +22,7 @@ public class CollisionResponse : MonoBehaviour {
                 foreach(var ent in ComSat.FindEntitiesWithinRadius(entity.position, entity.collisionRadius)) {
                         if(ent == entity) continue;
                         var cr = ent.GetComponent<CollisionResponse>();
-                        if(cr != null && cr.layer == this.layer && !cr.fixedPosition) {
+                        if(cr != null && cr.layer == this.layer && !cr.fixedPosition && (canPush || !cr.canPush)) {
                                 var maxDist = entity.collisionRadius + ent.collisionRadius;
                                 var sqrMaxDist = maxDist * maxDist;
                                 var sqrDist = (ent.position - entity.position).sqrMagnitude;

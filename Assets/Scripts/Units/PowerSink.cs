@@ -8,14 +8,22 @@ public class PowerSink : MonoBehaviour {
         public int powerUsage;
         public bool poweredOn;
         public bool powerIsToggleableInGame;
+
         private Entity entity;
+        private PowerManager powerMan;
 
         void Awake() {
                 entity = GetComponent<Entity>();
+                powerMan = FindObjectOfType<PowerManager>();
+                powerMan.AddSink(this);
         }
 
         void SetPowerState(bool on) {
                 poweredOn = on;
+        }
+
+        public bool Powered() {
+                return poweredOn && powerMan.TeamHasEnoughPower(entity.team);
         }
 
         void OnGUI() {

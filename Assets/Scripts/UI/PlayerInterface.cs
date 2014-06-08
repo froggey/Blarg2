@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class PlayerInterface : MonoBehaviour {
+        public int selectableThingLayer = 8;
+        public int terrainLayer = 9;
         private bool disabledBecauseGUI = false;
 
         public Texture marqueeGraphics;
@@ -16,6 +18,23 @@ public class PlayerInterface : MonoBehaviour {
         List<GameObject> selectedUnits = new List<GameObject>();
 
         List<GameObject>[] unitGroups = new List<GameObject>[10];
+
+        PowerManager powerMan;
+        ResourceManager resourceMan;
+
+        // Thing placement.
+        GameObject activeGhost;
+        System.Func<DVector2, bool> placementValidCallback;
+        System.Action<DVector2> placeCallback;
+
+        void Update() {
+                if(powerMan == null) {
+                        powerMan = FindObjectOfType<PowerManager>();
+                }
+                if(resourceMan == null) {
+                        resourceMan = FindObjectOfType<ResourceManager>();
+                }
+        }
 
         void OnGUI() {
                 if(marqueeActive) {
@@ -32,14 +51,40 @@ public class PlayerInterface : MonoBehaviour {
                         }
                 }
 
-                GUI.color = Color.white;
-                GUI.Label(new Rect(0, 0, 128, 24), "Metal: " + ComSat.localTeamResources.Metal);
-                GUI.Label(new Rect(128, 0, 128, 24), "Magic Smoke: " + ComSat.localTeamResources.MagicSmoke);
-                var powerUse = ComSat.currentInstance.teamPowerUse[ComSat.localTeam];
-                var powerSupply = ComSat.currentInstance.teamPowerSupply[ComSat.localTeam];
-                if (powerUse > powerSupply) GUI.color = Color.red;
-                GUI.Label(new Rect(256, 0, 256, 24), "Power Usage: " + powerUse + "/" + powerSupply);
-                if (powerUse > powerSupply) GUI.color = Color.white;
+                if(ComSat.localTeam != -1) {
+                        GUI.color = Color.white;
+                        if(resourceMan) {
+                                GUI.Label(new Rect(0, 0, 128, 24), "Metal: " + resourceMan.teamResources[ComSat.localTeam].Metal);
+                                GUI.Label(new Rect(128, 0, 128, 24), "Magic Smoke: " + resourceMan.teamResources[ComSat.localTeam].MagicSmoke);
+                        }
+                        if(powerMan != null) {
+                                var powerUse = powerMan.teamPowerUse[ComSat.localTeam];
+                                var powerSupply = powerMan.teamPowerSupply[ComSat.localTeam];
+                                if (powerUse > powerSupply) GUI.color = Color.red;
+                                GUI.Label(new Rect(256, 0, 256, 24), "Power Usage: " + powerUse + "/" + powerSupply);
+                                if (powerUse > powerSupply) GUI.color = Color.white;
+                        }
+                }
+        }
+
+        public void PlaceThingOnTerrain(GameObject ghostPrefab, System.Func<DVector2, bool> placementValidCallback, System.Action<DVector2> placeCallback) {
+                if(activeGhost != null) {
+                        Destroy(activeGhost);
+                }
+                marqueeRect.width = 0;
+                marqueeRect.height = 0;
+                marqueeActive = false;
+
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                RaycastHit hit;
+                Vector3 position = new Vector3();
+                if(Physics.Raycast(ray, out hit, Mathf.Infinity, 1<<terrainLayer)) {
+                        position = hit.point;
+                }
+
+                activeGhost = GameObject.Instantiate(ghostPrefab, position, Quaternion.AngleAxis(0, Vector3.up)) as GameObject;
+                this.placementValidCallback = placementValidCallback;
+                this.placeCallback = placeCallback;
         }
 
         Vector2 MousePosition() {
@@ -67,6 +112,35 @@ public class PlayerInterface : MonoBehaviour {
                 selectedUnits.Remove(unit);
         }
 
+        void TryToPlaceThing() {
+                if(Input.GetMouseButtonUp(0)) {
+                        var position = new DVector2((DReal)activeGhost.transform.position.z, (DReal)activeGhost.transform.position.x);
+                        if(placementValidCallback(position)) {
+                                placeCallback(position);
+                                Destroy(activeGhost);
+                                placementValidCallback = null;
+                                placeCallback = null;
+                                return;
+                        }
+                } else if(Input.GetMouseButtonUp(1)) {
+                        Destroy(activeGhost);
+                        placementValidCallback = null;
+                        placeCallback = null;
+                        return;
+                }
+
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                RaycastHit hit;
+                if(Physics.Raycast(ray, out hit, Mathf.Infinity, 1<<terrainLayer)) {
+                        activeGhost.transform.position = hit.point;
+                        var position = new DVector2((DReal)activeGhost.transform.position.z, (DReal)activeGhost.transform.position.x);
+                        var colour = placementValidCallback(position) ? Color.green : Color.red;
+                        foreach(var r in activeGhost.GetComponentsInChildren<Renderer>()) {
+                                r.material.color = colour;
+                        }
+                }
+        }
+
         void LateUpdate() {
                 if(!marqueeActive) {
                         // No raycasting when over a GUI widget.
@@ -82,6 +156,11 @@ public class PlayerInterface : MonoBehaviour {
                         }
                 }
 
+                if(activeGhost != null) {
+                        TryToPlaceThing();
+                        return;
+                }
+
                 bool addToSelection = ModifierActive("left shift") || ModifierActive("right shift");
 
                 if(Input.GetButtonUp("Select")) {
@@ -93,7 +172,7 @@ public class PlayerInterface : MonoBehaviour {
 
                         // Selectable units only.
                         RaycastHit hit;
-                        if(Physics.Raycast(ray, out hit, Mathf.Infinity, 1<<8)) {
+                        if(Physics.Raycast(ray, out hit, Mathf.Infinity, 1<<selectableThingLayer)) {
                                 var unit = hit.transform.gameObject;
                                 if(!selectedUnits.Contains(unit)) {
                                         SelectUnit(unit);
@@ -107,14 +186,14 @@ public class PlayerInterface : MonoBehaviour {
                         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
                         // Shoot for units first.
                         RaycastHit hit;
-                        if(Physics.Raycast(ray, out hit, Mathf.Infinity, 1<<8)) {
+                        if(Physics.Raycast(ray, out hit, Mathf.Infinity, 1<<selectableThingLayer)) {
                                 Entity target = hit.transform.gameObject.GetComponent<Entity>();
                                 foreach(var unit in selectedUnits) {
                                         if(unit == null) continue;
                                         ComSat.IssueAttack(unit.GetComponent<Entity>(), new[] { target });
                                 }
                         // Otherwise, do a move.
-                        } else if(Physics.Raycast(ray, out hit, Mathf.Infinity, 1<<9)) {
+                        } else if(Physics.Raycast(ray, out hit, Mathf.Infinity, 1<<terrainLayer)) {
                                 DVector2 point = new DVector2((DReal)hit.point.z, (DReal)hit.point.x);
                                 foreach(var unit in selectedUnits) {
                                         if(unit == null) continue;
@@ -164,6 +243,7 @@ public class PlayerInterface : MonoBehaviour {
                                 else {
                                         var a = selection.ToArray();
                                         foreach (var attacker in selectedUnits) {
+                                                if (attacker == null) continue;
                                                 ComSat.IssueAttack(attacker.GetComponent<Entity>(), a);
                                         }
                                 }

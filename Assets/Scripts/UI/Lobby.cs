@@ -54,6 +54,20 @@ public class Lobby : MonoBehaviour {
                 }
         }
 
+        void GameSpeedButtons() {
+                GUILayout.BeginHorizontal();
+                GUILayout.Label("Game Speed: ");
+                float[] speeds = { 0.25f, 0.5f, 1.0f, 2.0f, 4.0f, 10.0f };
+                foreach(var speed in speeds) {
+                        GUI.backgroundColor = (comSat.timeAccel == speed) ? Color.green : Color.white;
+                        if(GUILayout.Button(speed.ToString() + "x")) {
+                                comSat.timeAccel = speed;
+                        }
+                        GUI.backgroundColor = Color.white;
+                }
+                GUILayout.EndHorizontal();
+        }
+
         void ConnectGUI() {
 		GUILayout.BeginArea(new Rect (100, 50, Screen.width-200, Screen.height-100));
                 GUILayout.BeginVertical();
@@ -84,6 +98,7 @@ public class Lobby : MonoBehaviour {
 
                 StateDumpButton();
                 TraceButton();
+                GameSpeedButtons();
 
                 // Game options.
                 scrollMode = GUILayout.Toggle(scrollMode == 1 ? true : false, "Camera Scroll Mode") ? 1 : 0;
@@ -130,12 +145,12 @@ public class Lobby : MonoBehaviour {
 
                         var prevColour = GUI.backgroundColor;
 
-                        if(player.team != 0) {
+                        if(player.team != ComSat.spectatorTeam) {
                                 GUI.backgroundColor = Utility.TeamColour(player.team);
                         }
-                        if(GUILayout.Button(player.team == 0 ? "Spectate" : player.team.ToString()) &&
+                        if(GUILayout.Button(player.team == ComSat.spectatorTeam ? "Spectate" : player.team.ToString()) &&
                            (comSat.isHost || player.id == comSat.localPlayerID)) {
-                                comSat.SetPlayerTeam(player, (player.team + 1) % 8);
+                                comSat.SetPlayerTeam(player, (player.team + 1) % ComSat.teamCount);
                         }
                         GUI.backgroundColor = prevColour;
 
@@ -158,6 +173,10 @@ public class Lobby : MonoBehaviour {
 
                 StateDumpButton();
                 TraceButton();
+
+                if(comSat.isHost) {
+                        GameSpeedButtons();
+                }
 
                 GUILayout.EndVertical();
 		GUILayout.EndArea();

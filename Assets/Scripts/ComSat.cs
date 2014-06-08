@@ -90,10 +90,13 @@ public class ComSat : MonoBehaviour, IClient {
         }
 
         // Game runs at this rate.
-        public static DReal tickRate = (DReal)1 / (DReal)25;
+        public readonly static DReal tickRate = (DReal)1 / (DReal)25;
         // This many ticks per communication turn.
         // Max input lag = ticksPerTurn * tickRate.
-        public static int ticksPerTurn = 10; // set this to 10(?) for release, 1 for locally debugging desyncs
+        public readonly static int ticksPerTurn = 10; // set this to 10(?) for release, 1 for locally debugging desyncs
+
+        public readonly static int teamCount = 8;
+        public readonly static int spectatorTeam = 0; // Also used for the environment.
 
         private float timeSlop;
         private int ticksRemaining; // Ticks remaining in this turn.
@@ -115,7 +118,7 @@ public class ComSat : MonoBehaviour, IClient {
         private List<System.Action> queuedCommands;
         private List<System.Action> futureQueuedCommands;
 
-        public static ComSat currentInstance { get; set; }
+        private static ComSat currentInstance;
 
         public int localPlayerID;
         public List<Player> players = new List<Player>();
@@ -152,8 +155,8 @@ public class ComSat : MonoBehaviour, IClient {
         private float avgCreatedPerTick;
         private int nDestroyedThisTick;
         private float avgDestroyedPerTick;
-        
-        public int[] teamPowerSupply, teamPowerUse;
+
+        public GameObject managerPrefab;
 
         void Log(string s) {
                 if(debugVomit) {
@@ -182,7 +185,7 @@ public class ComSat : MonoBehaviour, IClient {
                         GUILayout.Label(kv.Key.name + " " + kv.Value.Count);
                 }
                 if(gameOver) {
-                        if(winningTeam == 0) {
+                        if(winningTeam == spectatorTeam) {
                                 GUILayout.Label("DRAW!");
                         } else {
                                 GUILayout.Label("Player " + winningTeam + " wins!");
@@ -236,37 +239,11 @@ public class ComSat : MonoBehaviour, IClient {
         }
 
         public static void SpawnEntity(Entity origin, GameObject prefab, DVector2 position, DReal rotation) {
-                currentInstance.SpawnEntity(prefab, origin, origin == null ? 0 : origin.team, position, rotation, e => {});
+                currentInstance.SpawnEntity(prefab, origin, origin == null ? spectatorTeam : origin.team, position, rotation, e => {});
         }
 
         public static void SpawnEntity(Entity origin, GameObject prefab, DVector2 position, DReal rotation, System.Action<Entity> onSpawn) {
-                currentInstance.SpawnEntity(prefab, origin, origin == null ? 0 : origin.team, position, rotation, onSpawn);
-        }
-
-        public ResourceSet[] teamResources;
-        public static ResourceSet localTeamResources { get { return currentInstance.teamResources[localTeam]; } }
-
-        public static void AddResource(int team, ResourceType resource, int amount) {
-                switch (resource) {
-                        case ResourceType.MagicSmoke:
-                                currentInstance.teamResources[team].MagicSmoke += amount;
-                                break;
-                        case ResourceType.Metal:
-                                currentInstance.teamResources[team].Metal += amount;
-                                break;
-                }
-        }
-
-        public static bool TakeResources(int team, ResourceSet resources) {
-                var rs = currentInstance.teamResources[team];
-                if (rs.ContainsAtLeast(resources)) {
-                        rs.Metal -= resources.Metal;
-                        rs.MagicSmoke -= resources.MagicSmoke;
-                        return true;
-                }
-                else {
-                        return false;
-                }
+                currentInstance.SpawnEntity(prefab, origin, origin == null ? spectatorTeam : origin.team, position, rotation, onSpawn);
         }
 
         // Create a new entity at whereever.
@@ -275,7 +252,7 @@ public class ComSat : MonoBehaviour, IClient {
                 if(currentInstance.replayInput != null) return;
 
                 // Only spawn if the team exists or if generating scenery.
-                if(team != 0 && !currentInstance.players.Any(p => p.team == team)) {
+                if(team != spectatorTeam && !currentInstance.players.Any(p => p.team == team)) {
                         return;
                 }
 
@@ -407,6 +384,15 @@ public class ComSat : MonoBehaviour, IClient {
         }
 
         // (Client)
+        void BuildCommand(int team, int entityID, int what, DVector2 position) {
+                var entity = EntityFromID(entityID);
+                if(entity != null && entity.team == team) {
+                        Log("{" + tickID + "} " + entity + "[" + entityID + "] built " + what + " at " + position);
+                        entity.gameObject.SendMessage("Build", new BuildCommandData(what, position), SendMessageOptions.DontRequireReceiver);
+                }
+        }
+
+        // (Client)
         void QueueCommand(int onTurn, int commandID, System.Action command) {
                 clientCommandID += 1;
                 if(commandID != clientCommandID) {
@@ -468,6 +454,8 @@ public class ComSat : MonoBehaviour, IClient {
                 queuedCommands = new List<System.Action>();
                 futureQueuedCommands = new List<System.Action>();
 
+                SpawnEntity(managerPrefab, null, spectatorTeam, new DVector2(0,0), 0, x=>{});
+
                 ObjectPool.FlushAll();
 
                 if(isHost) {
@@ -512,21 +500,6 @@ public class ComSat : MonoBehaviour, IClient {
         // Called every tickRate seconds when the world is live.
         // (Client)
         void TickUpdate() {
-                for (int i = 0; i < teamPowerSupply.Length; i++) {
-                        teamPowerSupply[i] = 0;
-                        teamPowerUse[i] = 0;
-                }
-                foreach(Entity e in worldEntityCache) {
-                        var sink = e.GetComponent<PowerSink>();
-                        if (sink != null && sink.poweredOn) {
-                                teamPowerUse[e.team] += sink.powerUsage;
-                        }
-                        var source = e.GetComponent<PowerSource>();
-                        if (source != null) {
-                                teamPowerSupply[e.team] += source.currentPower;
-                        }
-                }
-
                 // Must tick all objects in a consistent order across machines.
                 foreach(Entity e in worldEntityCache) {
                         e.TickUpdate();
@@ -536,10 +509,6 @@ public class ComSat : MonoBehaviour, IClient {
                         a();
                 }
                 deferredActions.Clear();
-        }
-
-        public static bool TeamHasEnoughPower(int team) {
-                return currentInstance.teamPowerSupply[team] >= currentInstance.teamPowerUse[team];
         }
 
         string currentGameState;
@@ -661,10 +630,10 @@ public class ComSat : MonoBehaviour, IClient {
 
                 if(!gameOver && turnID > 5) {
                         // Win check.
-                        int winningTeam = 0;
+                        int winningTeam = spectatorTeam;
                         int teamMask = 0;
                         foreach(var ent in worldEntityCache) {
-                                if(ent.team == 0) continue;
+                                if(ent.team == spectatorTeam) continue;
                                 teamMask |= 1 << ent.team;
                                 winningTeam = ent.team;
                         }
@@ -804,6 +773,16 @@ public class ComSat : MonoBehaviour, IClient {
                 currentInstance.net.SendMessageToServer(m);
         }
 
+        public static void IssueBuild(Entity unit, int what, DVector2 position) {
+                if(currentInstance.replayInput != null) return;
+
+                var m = new NetworkMessage(NetworkMessage.Type.Build);
+                m.entityID = currentInstance.reverseWorldEntities[unit];
+                m.UIwhat = what;
+                m.position = position;
+                currentInstance.net.SendMessageToServer(m);
+        }
+
         // Network stuff.
 
         public void OnConnected(LSNet net) {
@@ -827,7 +806,7 @@ public class ComSat : MonoBehaviour, IClient {
                 var p = new Player();
                 p.id = id;
                 p.name = "<Player " + p.id + ">";
-                p.team = 0;
+                p.team = spectatorTeam;
                 if(isHost) {
                         // Automatically assign a team.
                         var teams = new List<int>{ 1,2,3,4,5,6,7 };
@@ -895,6 +874,7 @@ public class ComSat : MonoBehaviour, IClient {
                         if(worldRunning) {
                                 throw new System.Exception("Got start game while world running?");
                         }
+                        timeAccel = message.gameSpeed;
                         StartGame(message.levelName);
                         break;
                 case NetworkMessage.Type.SpawnEntity:
@@ -923,6 +903,11 @@ public class ComSat : MonoBehaviour, IClient {
                         QueueCommand(message.turnID, message.commandID,
                                 () => { SetPowerStateCommand(message.teamID, message.entityID, message.powerState); });
                         break;
+                case NetworkMessage.Type.Build:
+                        SaveReplayCommand(message);
+                        QueueCommand(message.turnID, message.commandID,
+                                     () => { BuildCommand(message.teamID, message.entityID, message.UIwhat, message.position); });
+                        break;
                 case NetworkMessage.Type.NextTurn:
                         SaveReplayCommand(message);
                         NextTurn();
@@ -945,9 +930,6 @@ public class ComSat : MonoBehaviour, IClient {
                         Debug.LogException(e, this);
                 }
                 Application.LoadLevel(levelName);
-                teamResources = Enumerable.Range(0, 7).Select(_ => new ResourceSet { Metal = 2000, MagicSmoke = 500 }).ToArray();
-                teamPowerSupply = new int[7];
-                teamPowerUse = new int[7];
         }
 
         bool PlayerIsAdmin(int id) {
@@ -984,6 +966,7 @@ public class ComSat : MonoBehaviour, IClient {
                 case NetworkMessage.Type.Attack:
                 case NetworkMessage.Type.UIAction:
                 case NetworkMessage.Type.SetPowerState:
+                case NetworkMessage.Type.Build:
                         serverCommandID += 1;
                         message.commandID = serverCommandID;
                         message.turnID = serverNextTurn ? turnID + 1 : turnID;
@@ -1063,6 +1046,7 @@ public class ComSat : MonoBehaviour, IClient {
         public void StartGame() {
                 var m = new NetworkMessage(NetworkMessage.Type.StartGame);
                 m.levelName = "main";
+                m.gameSpeed = timeAccel;
                 net.SendMessageToServer(m);
         }
         public void SetPlayerName(Player player, string name) {

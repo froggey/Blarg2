@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Linq;
 
 [RequireComponent (typeof(Vehicle))]
 [RequireComponent (typeof(Entity))]
@@ -50,17 +51,11 @@ public class Saboteur : MonoBehaviour {
                 target = null;
         }
 
-        void Attack(Entity target) {
+        void Attack(Entity[] targets) {
                 ComSat.Trace(this, "Attack");
-                if(target == entity) {
-                        return;
-                }
-                var factory = target.GetComponent<Factory>();
-                if(factory == null) {
-                        return;
-                }
-
-                this.target = target;
+                var validTargets = targets.Where(t => t.GetComponent<Factory>() != null).OrderBy(t => (t.position - entity.position).sqrMagnitude);
+                if (!validTargets.Any()) return;
+                target = validTargets.First();
                 moving = true;
         }
 }

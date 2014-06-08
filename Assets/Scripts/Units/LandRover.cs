@@ -74,6 +74,7 @@ public class LandRover : MonoBehaviour {
                 target = null;
                 targets = null;
                 destination = location;
+                motor.MoveTowards(destination);
         }
 
         void Attack(Entity[] targets) {

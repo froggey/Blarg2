@@ -69,7 +69,7 @@ public class Turret : MonoBehaviour {
                         audio.Stop();
                         return;
                 }
-                
+
                 if(!ComSat.EntityExists(target)) {
                         // Magic. Destroyed GameObjects compare against null.
                         // Explicitly set to null to avoid keeping it around.
@@ -87,7 +87,7 @@ public class Turret : MonoBehaviour {
                         DReal targetTurretAngle;
 
                         var projectileProjectile = projectilePrefab.GetComponent<Projectile>();
-                        if(projectileProjectile != null && ComSat.TeamHasEnoughPower(entity.team)) {
+                        if(projectileProjectile != null && powerSink.Powered()) {
                                 var aimSpot = Utility.PredictShot(entity.position, projectileProjectile.initialSpeed,
                                                                   target.position, target.velocity);
                                 targetTurretAngle = DReal.Mod(DVector2.ToAngle(aimSpot - entity.position) - entity.rotation, DReal.TwoPI);

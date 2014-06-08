@@ -28,6 +28,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
+  m_RootOrder: 0
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -40,6 +41,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   localPlayerID: 0
+  timeAccel: 1
+  fullDump: 0
+  enableActionTracing: 0
+  enableContinuousSyncCheck: 0
+  managerPrefab: {fileID: 100000, guid: 5c9ae7a39fb6547d4b838241b10c403b, type: 2}
+  teamResources: []
 --- !u!114 &11400002
 MonoBehaviour:
   m_ObjectHideFlags: 1
