@@ -58,8 +58,9 @@ public class Factory : MonoBehaviour {
                                 }
 
                                 var completion = advance / prefabs[buildMe].buildTime;
-                                partialMetalUnit += completion * prefabs[buildMe].buildCost.Metal;
-                                partialSmokeUnit += completion * prefabs[buildMe].buildCost.MagicSmoke;
+                                var totalRemaining = prefabs[buildMe].buildCost - usedResources;
+                                partialMetalUnit += DReal.Min(completion * prefabs[buildMe].buildCost.Metal, totalRemaining.Metal);
+                                partialSmokeUnit += DReal.Min(completion * prefabs[buildMe].buildCost.MagicSmoke, totalRemaining.MagicSmoke);
                                 var rs = new ResourceSet { Metal = (int)partialMetalUnit, MagicSmoke = (int)partialSmokeUnit };
                                 if (resourceMan.TakeResources(entity.team, rs)) {
                                         usedResources += rs;
@@ -72,7 +73,6 @@ public class Factory : MonoBehaviour {
                                 }
                         }
                         if(delay <= 0) {
-                                Debug.Log(prefabs[buildMe].buildCost - usedResources);
                                 if (!resourceMan.TakeResources(entity.team, prefabs[buildMe].buildCost - usedResources)) return;
 
                                 // Timer expired and we're building something.
