@@ -108,9 +108,7 @@ MonoBehaviour:
   fullDump: 0
   enableActionTracing: 0
   enableContinuousSyncCheck: 0
-  teamPowerSupply: 
-  teamPowerUse: 
-  teamResources: []
+  managerPrefab: {fileID: 100000, guid: 5c9ae7a39fb6547d4b838241b10c403b, type: 2}
 --- !u!4 &903961526
 Transform:
   m_ObjectHideFlags: 0
