@@ -159,6 +159,10 @@ public class PlayerInterface : MonoBehaviour {
                         return;
                 }
 
+                if(selectedUnits != null) {
+                        selectedUnits.RemoveAll(e => e == null);
+                }
+
                 bool addToSelection = ModifierActive("left shift") || ModifierActive("right shift");
 
                 if(Input.GetButtonUp("Select")) {
@@ -264,6 +268,12 @@ public class PlayerInterface : MonoBehaviour {
         }
 
         void GroupStuff() {
+                // Flush away any null units in the groups.
+                foreach(var group in unitGroups) {
+                        if(group == null) continue;
+                        group.RemoveAll(go => go == null);
+                }
+
                 int groupID = -1;
                 if(Input.GetButtonUp("Group 0")) {
                         groupID = 0;
@@ -306,12 +316,6 @@ public class PlayerInterface : MonoBehaviour {
                                         SelectUnit(unit);
                                 }
                         }
-                }
-
-                // Flush away any null units in the groups.
-                foreach(var group in unitGroups) {
-                        if(group == null) continue;
-                        group.RemoveAll(go => go == null);
                 }
         }
 }
