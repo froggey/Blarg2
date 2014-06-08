@@ -85,7 +85,6 @@ public class CombatVehicle : MonoBehaviour {
                         if (target == null) vehicle.Stop();
                 }
                 
-                Debug.Log(mode);
                 if(mode == Mode.ATTACK) {
                         var distVec = target.position - entity.position;
                         var dist = distVec.magnitude;
@@ -111,11 +110,9 @@ public class CombatVehicle : MonoBehaviour {
                         
                         if(dist < attackDistance) {
                                 // Close enough.
-                                Debug.Log("stop");
                                 movingToTarget = false;
                                 vehicle.Stop();
                         } else if(movingToTarget || (dist >= attackRange)) {
-                                Debug.Log("go");
                                 movingToTarget = true;
                                 // Approach target.
                                 vehicle.MoveTowards(target.position);
