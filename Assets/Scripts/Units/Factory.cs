@@ -51,11 +51,13 @@ public class Factory : MonoBehaviour {
                 ComSat.Trace(this, "Awake");
                 entity = GetComponent<Entity>();
                 entity.AddUpdateAction(TickUpdate);
+                entity.AddDestroyAction(DestroyAction);
                 powerSink = GetComponent<PowerSink>();
                 buildQueue = new Queue<BuildCommandData>();
                 resourceMan = FindObjectOfType<ResourceManager>();
                 buildMan = FindObjectOfType<BuildManager>();
                 playerInterface = FindObjectOfType<PlayerInterface>();
+                ResetBuildTime();
         }
 
         void TickUpdate() {
@@ -109,6 +111,10 @@ public class Factory : MonoBehaviour {
                                 ResetBuildTime();
                         }
                 }
+        }
+
+        void DestroyAction() {
+                UIAction(clearQueue);
         }
 
         private void ResetBuildTime() {
