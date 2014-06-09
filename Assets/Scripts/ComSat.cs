@@ -317,6 +317,8 @@ public class ComSat : MonoBehaviour, IClient {
                                         // It's possible for a thing to be destroyed twice in one tick.
                                         return;
                                 }
+                                e.DestroyAction();
+
                                 int id = currentInstance.reverseWorldEntities[e];
                                 if(currentInstance.debugVomit) {
                                         currentInstance.Log("{" + currentInstance.tickID + "} Destroy entity " + e + "[" + id + "] at " + e.position + ":" + e.rotation);

@@ -39,6 +39,7 @@ public class Entity : MonoBehaviour {
 
         private List<System.Action> updateActions = new List<System.Action>();
         private List<System.Action> instantiateActions = new List<System.Action>();
+        private List<System.Action> destroyActions = new List<System.Action>();
 
         void Awake() {
                 ComSat.Trace(this, "Awake");
@@ -51,6 +52,12 @@ public class Entity : MonoBehaviour {
                 isSelected = false;
                 OnUnselected();
                 foreach(var a in instantiateActions) {
+                        a();
+                }
+        }
+
+        public void DestroyAction() {
+                foreach(var a in destroyActions) {
                         a();
                 }
         }
@@ -89,6 +96,11 @@ public class Entity : MonoBehaviour {
         public void AddInstantiateAction(System.Action action) {
                 ComSat.Trace(this, "AddInstantiateAction");
                 instantiateActions.Add(action);
+        }
+
+        public void AddDestroyAction(System.Action action) {
+                ComSat.Trace(this, "AddDestroyAction");
+                destroyActions.Add(action);
         }
 
         public void Damage(int damage) {
