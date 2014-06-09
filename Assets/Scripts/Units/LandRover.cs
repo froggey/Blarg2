@@ -25,7 +25,7 @@ public class LandRover : MonoBehaviour {
                 motor = GetComponent<Vehicle>();
                 entity = GetComponent<Entity>();
                 entity.AddUpdateAction(TickUpdate);
-                entity.AddDestoryAction(Detonate);
+                entity.AddDestroyAction(Detonate);
         }
 
         void Detonate() {
