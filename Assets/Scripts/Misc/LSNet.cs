@@ -121,6 +121,9 @@ public class NetworkMessage {
 
         [ProtoMember(17)]
         public float gameSpeed;
+
+        [ProtoMember(18)]
+        public bool repeatBuild;
 }
 
 public class NetworkClient {}

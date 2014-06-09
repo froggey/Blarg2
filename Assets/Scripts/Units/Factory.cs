@@ -8,12 +8,7 @@ public struct BuildCommandData {
         public int what;
         public DVector2 position;
         public GameObject buildCollider;
-
-        public BuildCommandData(int what, DVector2 position) {
-                this.what = what;
-                this.position = position;
-                this.buildCollider = null;
-        }
+        public bool repeat;
 }
 
 [RequireComponent(typeof(Entity), typeof(PowerSink))]
@@ -105,7 +100,7 @@ public class Factory : MonoBehaviour {
                                 if(buildMe.buildCollider != null) {
                                         buildMan.RemovePendingBuild(buildMe.buildCollider);
                                 }
-                                buildQueue.Dequeue();
+                                if (!buildMe.repeat) buildQueue.Dequeue();
                                 ResetBuildTime();
                         }
                 }
@@ -207,9 +202,9 @@ public class Factory : MonoBehaviour {
                                 if(prefab.buildAtPoint) {
                                         playerInterface.PlaceThingOnTerrain(prefab.ghostPrefab,
                                                                             position => { return CanPlaceAt(prefab, position); },
-                                                                            position => ComSat.IssueBuild(entity, id, position));
+                                                                            position => ComSat.IssueBuild(entity, id, position, false));
                                 } else {
-                                        ComSat.IssueBuild(entity, id, new DVector2());
+                                        ComSat.IssueBuild(entity, id, new DVector2(), Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
                                 }
                         }
 
@@ -217,7 +212,7 @@ public class Factory : MonoBehaviour {
 
                         var queued = buildQueue.Count(qi => qi.what == i);
                         if(queued > 0) {
-                                GUI.Label(new Rect(14 + i * 74, Camera.main.pixelHeight - 70, 64, 24), queued.ToString());
+                                GUI.Label(new Rect(14 + i * 74, Camera.main.pixelHeight - 70, 64, 24), buildQueue.First(qi => qi.what == i).repeat ? "\u221e" : queued.ToString());
                         }
                 }
 

@@ -383,11 +383,11 @@ public class ComSat : MonoBehaviour, IClient {
         }
 
         // (Client)
-        void BuildCommand(int team, int entityID, int what, DVector2 position) {
+        void BuildCommand(int team, int entityID, int what, DVector2 position, bool repeat) {
                 var entity = EntityFromID(entityID);
                 if(entity != null && entity.team == team) {
                         Log("{" + tickID + "} " + entity + "[" + entityID + "] built " + what + " at " + position);
-                        entity.gameObject.SendMessage("Build", new BuildCommandData(what, position), SendMessageOptions.DontRequireReceiver);
+                        entity.gameObject.SendMessage("Build", new BuildCommandData { what = what, position = position, repeat = repeat }, SendMessageOptions.DontRequireReceiver);
                 }
         }
 
@@ -772,13 +772,14 @@ public class ComSat : MonoBehaviour, IClient {
                 currentInstance.net.SendMessageToServer(m);
         }
 
-        public static void IssueBuild(Entity unit, int what, DVector2 position) {
+        public static void IssueBuild(Entity unit, int what, DVector2 position, bool repeat) {
                 if(currentInstance.replayInput != null) return;
 
                 var m = new NetworkMessage(NetworkMessage.Type.Build);
                 m.entityID = currentInstance.reverseWorldEntities[unit];
                 m.UIwhat = what;
                 m.position = position;
+                m.repeatBuild = repeat;
                 currentInstance.net.SendMessageToServer(m);
         }
 
@@ -905,7 +906,7 @@ public class ComSat : MonoBehaviour, IClient {
                 case NetworkMessage.Type.Build:
                         SaveReplayCommand(message);
                         QueueCommand(message.turnID, message.commandID,
-                                     () => { BuildCommand(message.teamID, message.entityID, message.UIwhat, message.position); });
+                                     () => { BuildCommand(message.teamID, message.entityID, message.UIwhat, message.position, message.repeatBuild); });
                         break;
                 case NetworkMessage.Type.NextTurn:
                         SaveReplayCommand(message);
