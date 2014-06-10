@@ -78,7 +78,7 @@ public class Turret : MonoBehaviour {
 
                         // Search for victims.
                         target = ComSat.FindEntityWithinRadius(entity.position, attackRange, entity.team);
-                        if(ComSat.EntityExists(target)) {
+                        if(target != null) {
                                 audio.Play();
                         }
                 } else {
