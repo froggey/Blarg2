@@ -38,6 +38,8 @@ public class NetworkMessage {
                 SetPowerState = 13,
                 // Command. sends entity, what, and position.
                 Build = 14,
+                // Command, sends entity.
+                Sell = 15,
         }
 
         public NetworkMessage() {}
@@ -124,6 +126,9 @@ public class NetworkMessage {
 
         [ProtoMember(17)]
         public float gameSpeed;
+
+        [ProtoMember(18)]
+        public bool repeatBuild;
 }
 
 public class NetworkClient {}

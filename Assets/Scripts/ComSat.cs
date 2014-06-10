@@ -4,6 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 
+public enum DestroyReason {
+        Damaged, Sold, Tranformed, OldAge, HitTarget
+}
+
 class Server : IServer {
         ComSat comSat;
         LSNet net;
@@ -308,7 +312,7 @@ public class ComSat : MonoBehaviour, IClient {
                         });
         }
 
-        public static void DestroyEntity(Entity e) {
+        public static void DestroyEntity(Entity e, DestroyReason reason) {
                 if(currentInstance.debugVomit) {
                         currentInstance.Log("Destroy entity " + e + "[" + currentInstance.reverseWorldEntities[e] + "] at " + e.position + ":" + e.rotation);
                 }
@@ -317,6 +321,8 @@ public class ComSat : MonoBehaviour, IClient {
                                         // It's possible for a thing to be destroyed twice in one tick.
                                         return;
                                 }
+                                e.DestroyAction(reason);
+
                                 int id = currentInstance.reverseWorldEntities[e];
                                 if(currentInstance.debugVomit) {
                                         currentInstance.Log("{" + currentInstance.tickID + "} Destroy entity " + e + "[" + id + "] at " + e.position + ":" + e.rotation);
@@ -384,11 +390,20 @@ public class ComSat : MonoBehaviour, IClient {
         }
 
         // (Client)
-        void BuildCommand(int team, int entityID, int what, DVector2 position) {
+        void BuildCommand(int team, int entityID, int what, DVector2 position, bool repeat) {
                 var entity = EntityFromID(entityID);
                 if(entity != null && entity.team == team) {
                         Log("{" + tickID + "} " + entity + "[" + entityID + "] built " + what + " at " + position);
-                        entity.gameObject.SendMessage("Build", new BuildCommandData(what, position), SendMessageOptions.DontRequireReceiver);
+                        entity.gameObject.SendMessage("Build", new BuildCommandData { what = what, position = position, repeat = repeat }, SendMessageOptions.DontRequireReceiver);
+                }
+        }
+
+        // (Client)
+        void SellCommand(int team, int entityID) {
+                var entity = EntityFromID(entityID);
+                if(entity != null && entity.team == team && entity.sellable) {
+                        Log("{" + tickID + "} " + entity + "[" + entityID + "] sold");
+                        entity.Sell();
                 }
         }
 
@@ -773,13 +788,22 @@ public class ComSat : MonoBehaviour, IClient {
                 currentInstance.net.SendMessageToServer(m);
         }
 
-        public static void IssueBuild(Entity unit, int what, DVector2 position) {
+        public static void IssueBuild(Entity unit, int what, DVector2 position, bool repeat) {
                 if(currentInstance.replayInput != null) return;
 
                 var m = new NetworkMessage(NetworkMessage.Type.Build);
                 m.entityID = currentInstance.reverseWorldEntities[unit];
                 m.UIwhat = what;
                 m.position = position;
+                m.repeatBuild = repeat;
+                currentInstance.net.SendMessageToServer(m);
+        }
+
+        public static void IssueSell(Entity unit) {
+                if(currentInstance.replayInput != null) return;
+
+                var m = new NetworkMessage(NetworkMessage.Type.Sell);
+                m.entityID = currentInstance.reverseWorldEntities[unit];
                 currentInstance.net.SendMessageToServer(m);
         }
 
@@ -906,7 +930,12 @@ public class ComSat : MonoBehaviour, IClient {
                 case NetworkMessage.Type.Build:
                         SaveReplayCommand(message);
                         QueueCommand(message.turnID, message.commandID,
-                                     () => { BuildCommand(message.teamID, message.entityID, message.UIwhat, message.position); });
+                                     () => { BuildCommand(message.teamID, message.entityID, message.UIwhat, message.position, message.repeatBuild); });
+                        break;
+                case NetworkMessage.Type.Sell:
+                        SaveReplayCommand(message);
+                        QueueCommand(message.turnID, message.commandID,
+                                     () => { SellCommand(message.teamID, message.entityID); });
                         break;
                 case NetworkMessage.Type.NextTurn:
                         SaveReplayCommand(message);
@@ -967,6 +996,7 @@ public class ComSat : MonoBehaviour, IClient {
                 case NetworkMessage.Type.UIAction:
                 case NetworkMessage.Type.SetPowerState:
                 case NetworkMessage.Type.Build:
+                case NetworkMessage.Type.Sell:
                         serverCommandID += 1;
                         message.commandID = serverCommandID;
                         message.turnID = serverNextTurn ? turnID + 1 : turnID;

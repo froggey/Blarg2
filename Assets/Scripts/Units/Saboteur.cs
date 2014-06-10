@@ -30,7 +30,7 @@ public class Saboteur : MonoBehaviour {
 
                         if((target.position - entity.position).sqrMagnitude < target.collisionRadius * target.collisionRadius) {
                                 target.GetComponent<Factory>().Sabotage();
-                                ComSat.DestroyEntity(entity);
+                                ComSat.DestroyEntity(entity, DestroyReason.HitTarget);
                         }
                 }
                 if(moving) {

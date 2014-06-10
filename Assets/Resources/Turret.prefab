@@ -353,6 +353,7 @@ MonoBehaviour:
     Metal: 150
     MagicSmoke: 0
   buildAtPoint: 1
+  sellable: 1
   hitOnlyIfTargetted: 0
   teamColourRenderer: {fileID: 2300000}
 --- !u!114 &11400006

@@ -33,12 +33,15 @@ public class Entity : MonoBehaviour {
         public ResourceSet buildCost;
         public bool buildAtPoint;
 
+        public bool sellable;
+
         public bool hitOnlyIfTargetted = false;
 
         public Renderer teamColourRenderer;
 
         private List<System.Action> updateActions = new List<System.Action>();
         private List<System.Action> instantiateActions = new List<System.Action>();
+        private List<System.Action<DestroyReason>> destroyActions = new List<System.Action<DestroyReason>>();
 
         void Awake() {
                 ComSat.Trace(this, "Awake");
@@ -52,6 +55,12 @@ public class Entity : MonoBehaviour {
                 OnUnselected();
                 foreach(var a in instantiateActions) {
                         a();
+                }
+        }
+
+        public void DestroyAction(DestroyReason reason) {
+                foreach(var a in destroyActions) {
+                        a(reason);
                 }
         }
 
@@ -91,12 +100,31 @@ public class Entity : MonoBehaviour {
                 instantiateActions.Add(action);
         }
 
+        public void AddDestroyAction(System.Action<DestroyReason> action) {
+                ComSat.Trace(this, "AddDestroyAction");
+                destroyActions.Add(action);
+        }
+
         public void Damage(int damage) {
                 ComSat.Trace(this, "Damage");
+                if(maxHealth == 0) {
+                        return;
+                }
                 health -= damage;
                 if(health <= 0) {
-                        ComSat.DestroyEntity(this);
+                        ComSat.DestroyEntity(this, DestroyReason.Damaged);
                 }
+        }
+
+        public void Sell() {
+                var value = health / maxHealth * ((DReal)3 / 4);
+                var resources = buildCost * value;
+
+                print("Selling " + this + " for " + resources.Metal + " Metal and " + resources.MagicSmoke + " Smoke");
+                print("Value: " + value);
+                var resourceMan = FindObjectOfType<ResourceManager>();
+                resourceMan.teamResources[team] += resources;
+                ComSat.DestroyEntity(this, DestroyReason.Sold);
         }
 
         void OnDrawGizmosSelected() {

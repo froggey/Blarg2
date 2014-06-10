@@ -601,8 +601,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   constructionPrefabs:
   - {fileID: 11400004, guid: f76b85897f3c34286ae87200c81696c7, type: 2}
-  - {fileID: 11400002, guid: d65637846775d174cabbe003832b47d2, type: 2}
-  - {fileID: 11400006, guid: 8f56df5a2192c41cab26f1922fb35391, type: 2}
 --- !u!114 &11400006
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -616,7 +614,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   team: 0
   origin: {fileID: 0}
-  maxHealth: 50
+  maxHealth: 100
   health: 0
   collisionRadiusNumerator: 7
   collisionRadiusDenominator: 2
@@ -625,11 +623,12 @@ MonoBehaviour:
   buildTime: 25
   buildIcon: {fileID: 2800000, guid: 1e5fb268caf8f4dbfbaa127ecc861ff8, type: 3}
   hpBarTexture: {fileID: 2800000, guid: fe5e9061a9af5c24ab18c18b3c0f7857, type: 3}
-  hitOnlyIfTargetted: 0
-  teamColourRenderer: {fileID: 2300016}
   buildCost:
     Metal: 1000
     MagicSmoke: 0
+  buildAtPoint: 0
+  hitOnlyIfTargetted: 0
+  teamColourRenderer: {fileID: 2300016}
 --- !u!114 &11400008
 MonoBehaviour:
   m_ObjectHideFlags: 1

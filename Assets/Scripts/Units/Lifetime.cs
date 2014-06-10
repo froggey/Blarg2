@@ -23,7 +23,7 @@ public class Lifetime : MonoBehaviour {
                 ComSat.Trace(this, "TickUpdate");
                 age += ComSat.tickRate;
                 if(age >= lifetime) {
-                        ComSat.DestroyEntity(entity);
+                        ComSat.DestroyEntity(entity, DestroyReason.OldAge);
                 }
         }
 }
