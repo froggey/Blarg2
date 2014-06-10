@@ -354,7 +354,7 @@ public class ComSat : MonoBehaviour, IClient {
         // (Client)
         void MoveCommand(int team, int entityID, DVector2 position) {
                 var entity = EntityFromID(entityID);
-                if(entity != null && entity.team == team) {
+                if(EntityExists(entity) && entity.team == team) {
                         Log("{" + tickID + "} Move " + entity + "[" + entityID + "] to " + position);
                         entity.gameObject.SendMessage("Move", position, SendMessageOptions.DontRequireReceiver);
                 }
@@ -365,7 +365,7 @@ public class ComSat : MonoBehaviour, IClient {
                 targetIDs = targetIDs ?? new int[] {};
                 var entity = EntityFromID(entityID);
                 var targets = targetIDs.Select(id => EntityFromID(id)).Where(e => ComSat.EntityExists(e)).ToArray();
-                if(entity != null && targets.Any() && entity.team == team) {
+                if(EntityExists(entity) && targets.Any() && entity.team == team) {
                         Log("{" + tickID + "} " + entity + "[" + entityID + "] attack " + string.Join(", ", targetIDs.Select(x => x.ToString()).ToArray()));
                         entity.gameObject.SendMessage("Attack", targets, SendMessageOptions.DontRequireReceiver);
                 }
@@ -374,7 +374,7 @@ public class ComSat : MonoBehaviour, IClient {
         // (Client)
         void UIActionCommand(int team, int entityID, int what) {
                 var entity = EntityFromID(entityID);
-                if(entity != null && entity.team == team) {
+                if(EntityExists(entity) && entity.team == team) {
                         Log("{" + tickID + "} " + entity + "[" + entityID + "] UI action " + what);
                         entity.gameObject.SendMessage("UIAction", what, SendMessageOptions.DontRequireReceiver);
                 }
@@ -383,7 +383,7 @@ public class ComSat : MonoBehaviour, IClient {
         // (Client)
         void SetPowerStateCommand(int team, int entityID, bool on) {
                 var entity = EntityFromID(entityID);
-                if(entity != null && entity.team == team) {
+                if(EntityExists(entity) && entity.team == team) {
                         Log("{" + tickID + "} " + entity + "[" + entityID + "] set power state " + on);
                         entity.gameObject.SendMessage("SetPowerState", on, SendMessageOptions.DontRequireReceiver);
                 }
@@ -392,7 +392,7 @@ public class ComSat : MonoBehaviour, IClient {
         // (Client)
         void BuildCommand(int team, int entityID, int what, DVector2 position, bool repeat) {
                 var entity = EntityFromID(entityID);
-                if(entity != null && entity.team == team) {
+                if(EntityExists(entity) && entity.team == team) {
                         Log("{" + tickID + "} " + entity + "[" + entityID + "] built " + what + " at " + position);
                         entity.gameObject.SendMessage("Build", new BuildCommandData { what = what, position = position, repeat = repeat }, SendMessageOptions.DontRequireReceiver);
                 }
@@ -401,7 +401,7 @@ public class ComSat : MonoBehaviour, IClient {
         // (Client)
         void SellCommand(int team, int entityID) {
                 var entity = EntityFromID(entityID);
-                if(entity != null && entity.team == team && entity.sellable) {
+                if(EntityExists(entity) && entity.team == team && entity.sellable) {
                         Log("{" + tickID + "} " + entity + "[" + entityID + "] sold");
                         entity.Sell();
                 }
