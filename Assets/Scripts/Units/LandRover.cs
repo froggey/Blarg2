@@ -19,16 +19,30 @@ public class LandRover : MonoBehaviour {
         Vehicle motor;
         Entity entity;
 
+        bool haveExploded;
+
         void Awake() {
                 ComSat.Trace(this, "Awake");
                 moving = false;
+                haveExploded = false;
                 motor = GetComponent<Vehicle>();
                 entity = GetComponent<Entity>();
                 entity.AddUpdateAction(TickUpdate);
-                entity.AddDestroyAction(Detonate);
+                entity.AddDestroyAction(DestroyAction);
+        }
+
+        void DestroyAction(DestroyReason reason) {
+                if(reason == DestroyReason.Damaged) {
+                        Detonate();
+                }
         }
 
         void Detonate() {
+                if(haveExploded) {
+                        return;
+                }
+
+                haveExploded = true;
                 ObjectPool.Instantiate(impactPrefab, transform.position, transform.rotation);
                 var sqrRadius = explosionRadius * explosionRadius;
                 foreach(var e in ComSat.FindEntitiesWithinRadius(entity.position, explosionRadius)) {
@@ -37,7 +51,7 @@ public class LandRover : MonoBehaviour {
                         print("Exploding on " + e + "  sd: " + sqrDist + "  sr: " + sqrRadius + "  pwr: " + power + "  dam: " + (int)(damageAtCentre * power));
                         e.Damage((int)(damageAtCentre * power));
                 }
-                ComSat.DestroyEntity(entity);
+                ComSat.DestroyEntity(entity, DestroyReason.Damaged);
         }
 
         void TickUpdate() {

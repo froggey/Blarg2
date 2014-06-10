@@ -31,7 +31,7 @@ public class Constructor : MonoBehaviour {
                         var sourceHere = Utility.GetThingAt<ResourceSource>(entity.position);
                         if (sourceHere == null || sourceHere.hasMine || sourceHere.resource != mine.resource)
                                 return;
-                        
+
                         buildPosition = sourceHere.GetComponent<Entity>().position;
                         movable.Move(buildPosition);
                         buildIndex = what;
@@ -39,13 +39,13 @@ public class Constructor : MonoBehaviour {
                 }
 
                 ComSat.SpawnEntity(constructionPrefabs[what].gameObject, entity.team, entity.position, entity.rotation);
-                ComSat.DestroyEntity(entity);
+                ComSat.DestroyEntity(entity, DestroyReason.Tranformed);
         }
 
         void TickUpdate() {
                 if (buildIndex > -1 && (buildPosition - entity.position).sqrMagnitude < 1) {
                         ComSat.SpawnEntity(constructionPrefabs[buildIndex].gameObject, entity.team, buildPosition, entity.rotation);
-                        ComSat.DestroyEntity(entity);
+                        ComSat.DestroyEntity(entity, DestroyReason.Tranformed);
                 }
         }
 

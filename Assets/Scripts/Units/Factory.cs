@@ -108,7 +108,7 @@ public class Factory : MonoBehaviour {
                 }
         }
 
-        void DestroyAction() {
+        void DestroyAction(DestroyReason reason) {
                 UIAction(clearQueue);
         }
 

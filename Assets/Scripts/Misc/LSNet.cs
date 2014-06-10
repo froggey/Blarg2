@@ -38,6 +38,8 @@ public class NetworkMessage {
                 SetPowerState = 13,
                 // Command. sends entity, what, and position.
                 Build = 14,
+                // Command, sends entity.
+                Sell = 15,
         }
 
         public NetworkMessage() {}

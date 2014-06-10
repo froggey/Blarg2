@@ -785,13 +785,14 @@ MonoBehaviour:
   collisionRadiusDenominator: 1
   baseMesh: {fileID: 100024}
   ghostPrefab: {fileID: 100024, guid: 8f76a6d5950c0486a8fc4da545049a09, type: 2}
-  buildTime: 0
+  buildTime: 25
   buildIcon: {fileID: 2800000, guid: 97bba0230231843858db0ecd2865b1c0, type: 3}
   hpBarTexture: {fileID: 2800000, guid: fe5e9061a9af5c24ab18c18b3c0f7857, type: 3}
   buildCost:
-    Metal: 0
+    Metal: 1000
     MagicSmoke: 0
   buildAtPoint: 1
+  sellable: 1
   hitOnlyIfTargetted: 0
   teamColourRenderer: {fileID: 0}
 --- !u!114 &11400006

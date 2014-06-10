@@ -35,6 +35,14 @@ public class PlayerInterface : MonoBehaviour {
         }
 
         void OnGUI() {
+                if(selectedUnits.Count == 1 && selectedUnits[0] != null) {
+                        var unit = selectedUnits[0].GetComponent<Entity>();
+                        if(unit != null && unit.sellable &&
+                           GUI.Button(new Rect(450, 0, 64, 24), "Sell")) {
+                                ComSat.IssueSell(unit);
+                        }
+                }
+
                 if(marqueeActive) {
                         GUI.color = overlayColour;
                         GUI.DrawTexture(marqueeRect, marqueeGraphics);

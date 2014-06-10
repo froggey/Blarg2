@@ -53,7 +53,7 @@ public class Projectile : MonoBehaviour {
                         //        trail = null;
                         //}
 
-                        ComSat.DestroyEntity(entity);
+                        ComSat.DestroyEntity(entity, DestroyReason.HitTarget);
                         return;
                 }
         }

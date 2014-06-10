@@ -28,4 +28,8 @@ public class ResourceSet {
         public static ResourceSet operator -(ResourceSet lhs, ResourceSet rhs) {
                 return new ResourceSet { Metal = lhs.Metal - rhs.Metal, MagicSmoke = lhs.MagicSmoke - rhs.MagicSmoke };
         }
+
+        public static ResourceSet operator *(ResourceSet lhs, DReal rhs) {
+                return new ResourceSet { Metal = (int)(lhs.Metal * rhs), MagicSmoke = (int)(lhs.MagicSmoke * rhs) };
+        }
 }
