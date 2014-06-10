@@ -107,6 +107,9 @@ public class Entity : MonoBehaviour {
 
         public void Damage(int damage) {
                 ComSat.Trace(this, "Damage");
+                if(maxHealth == 0) {
+                        return;
+                }
                 health -= damage;
                 if(health <= 0) {
                         ComSat.DestroyEntity(this, DestroyReason.Damaged);
