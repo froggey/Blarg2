@@ -52,7 +52,7 @@ public class GiantRobot : MonoBehaviour {
                                    entity.position, entity.rotation,
                                    (Entity ent) => {
                                            var proj = ent.gameObject.GetComponent<Projectile>();
-                                           if(proj != null && combatVehicle.target != null) {
+                                           if(proj != null && ComSat.EntityExists(combatVehicle.target)) {
                                                    proj.target = combatVehicle.target;
                                            }
                                    });

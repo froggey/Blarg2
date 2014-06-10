@@ -243,11 +243,11 @@ public class ComSat : MonoBehaviour, IClient {
         }
 
         public static void SpawnEntity(Entity origin, GameObject prefab, DVector2 position, DReal rotation) {
-                currentInstance.SpawnEntity(prefab, origin, origin == null ? spectatorTeam : origin.team, position, rotation, e => {});
+                currentInstance.SpawnEntity(prefab, origin, EntityExists(origin) ? spectatorTeam : origin.team, position, rotation, e => {});
         }
 
         public static void SpawnEntity(Entity origin, GameObject prefab, DVector2 position, DReal rotation, System.Action<Entity> onSpawn) {
-                currentInstance.SpawnEntity(prefab, origin, origin == null ? spectatorTeam : origin.team, position, rotation, onSpawn);
+                currentInstance.SpawnEntity(prefab, origin, EntityExists(origin) ? spectatorTeam : origin.team, position, rotation, onSpawn);
         }
 
         // Create a new entity at whereever.

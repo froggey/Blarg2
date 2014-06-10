@@ -35,7 +35,7 @@ public class Orb : MonoBehaviour {
         
         private void PickNewTarget() {
                 if (targets == null) targets = new Entity[] {};
-                targets = targets.Where(t => t != null).OrderBy(t => (t.position - entity.position).sqrMagnitude).ToArray();
+                targets = targets.Where(t => ComSat.EntityExists(t)).OrderBy(t => (t.position - entity.position).sqrMagnitude).ToArray();
                 target = targets.FirstOrDefault();
                 if (target != null) motor.Move(target.position);
         }

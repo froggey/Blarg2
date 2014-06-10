@@ -78,7 +78,7 @@ public class CombatVehicle : MonoBehaviour {
                 ComSat.Trace(this, "TickUpdate");
                 if(mode == Mode.ATTACK && !ComSat.EntityExists(target)) {
                         PickNewTarget();
-                        if (target == null) vehicle.Stop();
+                        if (!ComSat.EntityExists(target)) vehicle.Stop();
                 }
                 
                 if(mode == Mode.ATTACK) {
