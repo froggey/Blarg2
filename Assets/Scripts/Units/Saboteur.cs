@@ -53,7 +53,7 @@ public class Saboteur : MonoBehaviour {
 
         void Attack(Entity[] targets) {
                 ComSat.Trace(this, "Attack");
-                var validTargets = targets.Where(t => t.GetComponent<Factory>() != null).OrderBy(t => (t.position - entity.position).sqrMagnitude);
+                var validTargets = targets.Where(t => ComSat.EntityExists(t) && t.GetComponent<Factory>() != null).OrderBy(t => (t.position - entity.position).sqrMagnitude);
                 if (!validTargets.Any()) return;
                 target = validTargets.First();
                 moving = true;

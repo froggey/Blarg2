@@ -98,7 +98,7 @@ public class LandRover : MonoBehaviour {
 
         private void PickNewTarget() {
                 if (targets == null) targets = new Entity[] {};
-                targets = targets.Where(t => t != null).OrderBy(t => (t.position - entity.position).sqrMagnitude).ToArray();
+                targets = targets.Where(t => ComSat.EntityExists(t)).OrderBy(t => (t.position - entity.position).sqrMagnitude).ToArray();
                 if (targets.Count() > 0) {
                         target = targets[0];
                         moving = true;
