@@ -7,7 +7,7 @@ using UnityEngine;
 [RequireComponent(typeof(Entity), typeof(Vehicle))]
 public class CombatVehicle : MonoBehaviour {
         public GameObject projectilePrefab;
-        
+
         [HideInInspector]
         public Mode mode;
         [HideInInspector]
@@ -16,7 +16,7 @@ public class CombatVehicle : MonoBehaviour {
         public Entity target; // Current attack target.
         private Entity[] targets;
         private bool movingToTarget; // Cleared when attackDistance is reached.
-        
+
         private Entity entity;
         private Vehicle vehicle;
 
@@ -49,6 +49,7 @@ public class CombatVehicle : MonoBehaviour {
         void Attack(Entity[] targets) {
                 ComSat.Trace(this, "Attack");
                 mode = Mode.ATTACK;
+                target = null;
                 this.targets = targets;
                 movingToTarget = false;
                 vehicle.Stop();
@@ -73,14 +74,14 @@ public class CombatVehicle : MonoBehaviour {
                         mode = Mode.IDLE;
                 }
         }
-        
+
         void TickUpdate() {
                 ComSat.Trace(this, "TickUpdate");
                 if(mode == Mode.ATTACK && !ComSat.EntityExists(target)) {
                         PickNewTarget();
                         if (!ComSat.EntityExists(target)) vehicle.Stop();
                 }
-                
+
                 if(mode == Mode.ATTACK) {
                         var distVec = target.position - entity.position;
                         var dist = distVec.magnitude;
@@ -103,7 +104,7 @@ public class CombatVehicle : MonoBehaviour {
                         }
                         turretRotation = Utility.CalculateNewAngle(turretRotation, targetTurretAngle, turretTurnSpeed);
                         SendMessage("TurnTurret", turretRotation);
-                        
+
                         if(dist < attackDistance) {
                                 // Close enough.
                                 movingToTarget = false;
