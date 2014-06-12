@@ -235,7 +235,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400024}
-  m_RootOrder: 3
 --- !u!4 &400002
 Transform:
   m_ObjectHideFlags: 1
@@ -247,7 +246,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400004}
-  m_RootOrder: 0
 --- !u!4 &400004
 Transform:
   m_ObjectHideFlags: 1
@@ -260,7 +258,6 @@ Transform:
   m_Children:
   - {fileID: 400002}
   m_Father: {fileID: 400006}
-  m_RootOrder: 0
 --- !u!4 &400006
 Transform:
   m_ObjectHideFlags: 1
@@ -273,7 +270,6 @@ Transform:
   m_Children:
   - {fileID: 400004}
   m_Father: {fileID: 400014}
-  m_RootOrder: 0
 --- !u!4 &400008
 Transform:
   m_ObjectHideFlags: 1
@@ -285,7 +281,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400010}
-  m_RootOrder: 0
 --- !u!4 &400010
 Transform:
   m_ObjectHideFlags: 1
@@ -298,7 +293,6 @@ Transform:
   m_Children:
   - {fileID: 400008}
   m_Father: {fileID: 400012}
-  m_RootOrder: 0
 --- !u!4 &400012
 Transform:
   m_ObjectHideFlags: 1
@@ -311,7 +305,6 @@ Transform:
   m_Children:
   - {fileID: 400010}
   m_Father: {fileID: 400016}
-  m_RootOrder: 0
 --- !u!4 &400014
 Transform:
   m_ObjectHideFlags: 1
@@ -324,7 +317,6 @@ Transform:
   m_Children:
   - {fileID: 400006}
   m_Father: {fileID: 400018}
-  m_RootOrder: 1
 --- !u!4 &400016
 Transform:
   m_ObjectHideFlags: 1
@@ -337,7 +329,6 @@ Transform:
   m_Children:
   - {fileID: 400012}
   m_Father: {fileID: 400018}
-  m_RootOrder: 0
 --- !u!4 &400018
 Transform:
   m_ObjectHideFlags: 1
@@ -351,7 +342,6 @@ Transform:
   - {fileID: 400016}
   - {fileID: 400014}
   m_Father: {fileID: 400022}
-  m_RootOrder: 0
 --- !u!4 &400020
 Transform:
   m_ObjectHideFlags: 1
@@ -363,7 +353,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400024}
-  m_RootOrder: 1
 --- !u!4 &400022
 Transform:
   m_ObjectHideFlags: 1
@@ -376,7 +365,6 @@ Transform:
   m_Children:
   - {fileID: 400018}
   m_Father: {fileID: 400024}
-  m_RootOrder: 0
 --- !u!4 &400024
 Transform:
   m_ObjectHideFlags: 1
@@ -392,7 +380,6 @@ Transform:
   - {fileID: 400026}
   - {fileID: 400000}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
 --- !u!4 &400026
 Transform:
   m_ObjectHideFlags: 1
@@ -404,7 +391,6 @@ Transform:
   m_LocalScale: {x: .25, y: .25, z: .25}
   m_Children: []
   m_Father: {fileID: 400024}
-  m_RootOrder: 2
 --- !u!23 &2300000
 Renderer:
   m_ObjectHideFlags: 1
@@ -423,8 +409,9 @@ Renderer:
   m_UseLightProbes: 0
   m_LightProbeAnchor: {fileID: 0}
   m_ScaleInLightmap: 1
-  m_SortingLayerID: 0
+  m_SortingLayer: 0
   m_SortingOrder: 0
+  m_SortingLayerID: 0
 --- !u!33 &3300000
 MeshFilter:
   m_ObjectHideFlags: 1
@@ -504,7 +491,7 @@ AudioSource:
     m_PostInfinity: 2
 --- !u!95 &9500000
 Animator:
-  serializedVersion: 3
+  serializedVersion: 2
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
@@ -513,8 +500,8 @@ Animator:
   m_Avatar: {fileID: 9000000, guid: 9ff952754025741b8aac9b115df1c630, type: 3}
   m_Controller: {fileID: 9100000, guid: f59d6edb1588d4c6c9c541367e5a13db, type: 2}
   m_CullingMode: 1
-  m_UpdateMode: 0
   m_ApplyRootMotion: 1
+  m_AnimatePhysics: 0
   m_HasTransformHierarchy: 1
 --- !u!114 &11400000
 MonoBehaviour:
@@ -569,13 +556,11 @@ MonoBehaviour:
   buildTime: 6
   buildIcon: {fileID: 2800000, guid: e2a3e278973194529b6e9a7a4dba57be, type: 3}
   hpBarTexture: {fileID: 2800000, guid: fe5e9061a9af5c24ab18c18b3c0f7857, type: 3}
+  hitOnlyIfTargetted: 0
+  teamColourRenderer: {fileID: 13700000}
   buildCost:
     Metal: 500
     MagicSmoke: 0
-  buildAtPoint: 0
-  sellable: 0
-  hitOnlyIfTargetted: 0
-  teamColourRenderer: {fileID: 13700000}
 --- !u!114 &11400006
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -615,7 +600,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   layer: 0
   fixedPosition: 0
-  canPush: 1
 --- !u!114 &11400012
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -628,13 +612,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   projectilePrefab: {fileID: 100004, guid: 19c415a45a02e4391bee254b0693e05d, type: 2}
-  attackRange: 125
-  tetherRange: 50
-  turretTurnSpeed: 720
-  turretAutoResets: 0
-  stance: 1
   mode: 0
   target: {fileID: 0}
+  _attackDistance:
+    stringValue: 100
+  _attackRange:
+    stringValue: 125
+  _turretTurnSpeed:
+    stringValue: 720
+  turretAutoResets: 0
 --- !u!120 &12000000
 LineRenderer:
   m_ObjectHideFlags: 1
@@ -653,8 +639,9 @@ LineRenderer:
   m_UseLightProbes: 0
   m_LightProbeAnchor: {fileID: 0}
   m_ScaleInLightmap: 1
-  m_SortingLayerID: 0
+  m_SortingLayer: 0
   m_SortingOrder: 0
+  m_SortingLayerID: 0
   m_Positions:
   - {x: 0, y: 0, z: 0}
   - {x: 0, y: 0, z: 0}
@@ -686,8 +673,9 @@ SkinnedMeshRenderer:
   m_UseLightProbes: 0
   m_LightProbeAnchor: {fileID: 0}
   m_ScaleInLightmap: 1
-  m_SortingLayerID: 0
+  m_SortingLayer: 0
   m_SortingOrder: 0
+  m_SortingLayerID: 0
   serializedVersion: 2
   m_Quality: 0
   m_UpdateWhenOffscreen: 0

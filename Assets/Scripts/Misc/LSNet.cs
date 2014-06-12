@@ -40,8 +40,6 @@ public class NetworkMessage {
                 Build = 14,
                 // Command, sends entity.
                 Sell = 15,
-                // Command.
-                SetDefenceStance = 16,
         }
 
         public NetworkMessage() {}
@@ -131,8 +129,6 @@ public class NetworkMessage {
 
         [ProtoMember(18)]
         public bool repeatBuild;
-
-        public CombatVehicle.Stance defenceStance;
 }
 
 public class NetworkClient {}

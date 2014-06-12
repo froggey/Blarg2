@@ -343,7 +343,6 @@ Transform:
   m_Children:
   - {fileID: 400002}
   m_Father: {fileID: 400036}
-  m_RootOrder: 0
 --- !u!4 &400002
 Transform:
   m_ObjectHideFlags: 1
@@ -355,7 +354,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400000}
-  m_RootOrder: 0
 --- !u!4 &400004
 Transform:
   m_ObjectHideFlags: 1
@@ -367,7 +365,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400032}
-  m_RootOrder: 13
 --- !u!4 &400006
 Transform:
   m_ObjectHideFlags: 1
@@ -379,7 +376,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400032}
-  m_RootOrder: 12
 --- !u!4 &400008
 Transform:
   m_ObjectHideFlags: 1
@@ -391,7 +387,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400032}
-  m_RootOrder: 11
 --- !u!4 &400010
 Transform:
   m_ObjectHideFlags: 1
@@ -403,7 +398,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400032}
-  m_RootOrder: 10
 --- !u!4 &400012
 Transform:
   m_ObjectHideFlags: 1
@@ -415,7 +409,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400032}
-  m_RootOrder: 9
 --- !u!4 &400014
 Transform:
   m_ObjectHideFlags: 1
@@ -427,7 +420,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400032}
-  m_RootOrder: 8
 --- !u!4 &400016
 Transform:
   m_ObjectHideFlags: 1
@@ -439,7 +431,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400032}
-  m_RootOrder: 7
 --- !u!4 &400018
 Transform:
   m_ObjectHideFlags: 1
@@ -451,7 +442,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400032}
-  m_RootOrder: 6
 --- !u!4 &400020
 Transform:
   m_ObjectHideFlags: 1
@@ -463,7 +453,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400032}
-  m_RootOrder: 5
 --- !u!4 &400022
 Transform:
   m_ObjectHideFlags: 1
@@ -475,7 +464,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400032}
-  m_RootOrder: 4
 --- !u!4 &400024
 Transform:
   m_ObjectHideFlags: 1
@@ -487,7 +475,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400032}
-  m_RootOrder: 3
 --- !u!4 &400026
 Transform:
   m_ObjectHideFlags: 1
@@ -499,7 +486,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400032}
-  m_RootOrder: 2
 --- !u!4 &400028
 Transform:
   m_ObjectHideFlags: 1
@@ -511,7 +497,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400032}
-  m_RootOrder: 1
 --- !u!4 &400030
 Transform:
   m_ObjectHideFlags: 1
@@ -523,7 +508,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400032}
-  m_RootOrder: 0
 --- !u!4 &400032
 Transform:
   m_ObjectHideFlags: 1
@@ -549,7 +533,6 @@ Transform:
   - {fileID: 400006}
   - {fileID: 400004}
   m_Father: {fileID: 400034}
-  m_RootOrder: 1
 --- !u!4 &400034
 Transform:
   m_ObjectHideFlags: 1
@@ -563,7 +546,6 @@ Transform:
   - {fileID: 400036}
   - {fileID: 400032}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
 --- !u!4 &400036
 Transform:
   m_ObjectHideFlags: 1
@@ -576,7 +558,6 @@ Transform:
   m_Children:
   - {fileID: 400000}
   m_Father: {fileID: 400034}
-  m_RootOrder: 0
 --- !u!23 &2300000
 Renderer:
   m_ObjectHideFlags: 1
@@ -595,8 +576,9 @@ Renderer:
   m_UseLightProbes: 0
   m_LightProbeAnchor: {fileID: 0}
   m_ScaleInLightmap: 1
-  m_SortingLayerID: 0
+  m_SortingLayer: 0
   m_SortingOrder: 0
+  m_SortingLayerID: 0
 --- !u!23 &2300002
 Renderer:
   m_ObjectHideFlags: 1
@@ -615,8 +597,9 @@ Renderer:
   m_UseLightProbes: 0
   m_LightProbeAnchor: {fileID: 0}
   m_ScaleInLightmap: 1
-  m_SortingLayerID: 0
+  m_SortingLayer: 0
   m_SortingOrder: 0
+  m_SortingLayerID: 0
 --- !u!23 &2300004
 Renderer:
   m_ObjectHideFlags: 1
@@ -635,8 +618,9 @@ Renderer:
   m_UseLightProbes: 0
   m_LightProbeAnchor: {fileID: 0}
   m_ScaleInLightmap: 1
-  m_SortingLayerID: 0
+  m_SortingLayer: 0
   m_SortingOrder: 0
+  m_SortingLayerID: 0
 --- !u!23 &2300006
 Renderer:
   m_ObjectHideFlags: 1
@@ -655,8 +639,9 @@ Renderer:
   m_UseLightProbes: 0
   m_LightProbeAnchor: {fileID: 0}
   m_ScaleInLightmap: 1
-  m_SortingLayerID: 0
+  m_SortingLayer: 0
   m_SortingOrder: 0
+  m_SortingLayerID: 0
 --- !u!23 &2300008
 Renderer:
   m_ObjectHideFlags: 1
@@ -675,8 +660,9 @@ Renderer:
   m_UseLightProbes: 0
   m_LightProbeAnchor: {fileID: 0}
   m_ScaleInLightmap: 1
-  m_SortingLayerID: 0
+  m_SortingLayer: 0
   m_SortingOrder: 0
+  m_SortingLayerID: 0
 --- !u!23 &2300010
 Renderer:
   m_ObjectHideFlags: 1
@@ -695,8 +681,9 @@ Renderer:
   m_UseLightProbes: 0
   m_LightProbeAnchor: {fileID: 0}
   m_ScaleInLightmap: 1
-  m_SortingLayerID: 0
+  m_SortingLayer: 0
   m_SortingOrder: 0
+  m_SortingLayerID: 0
 --- !u!23 &2300012
 Renderer:
   m_ObjectHideFlags: 1
@@ -715,8 +702,9 @@ Renderer:
   m_UseLightProbes: 0
   m_LightProbeAnchor: {fileID: 0}
   m_ScaleInLightmap: 1
-  m_SortingLayerID: 0
+  m_SortingLayer: 0
   m_SortingOrder: 0
+  m_SortingLayerID: 0
 --- !u!23 &2300014
 Renderer:
   m_ObjectHideFlags: 1
@@ -735,8 +723,9 @@ Renderer:
   m_UseLightProbes: 0
   m_LightProbeAnchor: {fileID: 0}
   m_ScaleInLightmap: 1
-  m_SortingLayerID: 0
+  m_SortingLayer: 0
   m_SortingOrder: 0
+  m_SortingLayerID: 0
 --- !u!23 &2300016
 Renderer:
   m_ObjectHideFlags: 1
@@ -755,8 +744,9 @@ Renderer:
   m_UseLightProbes: 0
   m_LightProbeAnchor: {fileID: 0}
   m_ScaleInLightmap: 1
-  m_SortingLayerID: 0
+  m_SortingLayer: 0
   m_SortingOrder: 0
+  m_SortingLayerID: 0
 --- !u!23 &2300018
 Renderer:
   m_ObjectHideFlags: 1
@@ -775,8 +765,9 @@ Renderer:
   m_UseLightProbes: 0
   m_LightProbeAnchor: {fileID: 0}
   m_ScaleInLightmap: 1
-  m_SortingLayerID: 0
+  m_SortingLayer: 0
   m_SortingOrder: 0
+  m_SortingLayerID: 0
 --- !u!23 &2300020
 Renderer:
   m_ObjectHideFlags: 1
@@ -795,8 +786,9 @@ Renderer:
   m_UseLightProbes: 0
   m_LightProbeAnchor: {fileID: 0}
   m_ScaleInLightmap: 1
-  m_SortingLayerID: 0
+  m_SortingLayer: 0
   m_SortingOrder: 0
+  m_SortingLayerID: 0
 --- !u!23 &2300022
 Renderer:
   m_ObjectHideFlags: 1
@@ -815,8 +807,9 @@ Renderer:
   m_UseLightProbes: 0
   m_LightProbeAnchor: {fileID: 0}
   m_ScaleInLightmap: 1
-  m_SortingLayerID: 0
+  m_SortingLayer: 0
   m_SortingOrder: 0
+  m_SortingLayerID: 0
 --- !u!23 &2300024
 Renderer:
   m_ObjectHideFlags: 1
@@ -835,8 +828,9 @@ Renderer:
   m_UseLightProbes: 0
   m_LightProbeAnchor: {fileID: 0}
   m_ScaleInLightmap: 1
-  m_SortingLayerID: 0
+  m_SortingLayer: 0
   m_SortingOrder: 0
+  m_SortingLayerID: 0
 --- !u!23 &2300026
 Renderer:
   m_ObjectHideFlags: 1
@@ -855,8 +849,9 @@ Renderer:
   m_UseLightProbes: 0
   m_LightProbeAnchor: {fileID: 0}
   m_ScaleInLightmap: 1
-  m_SortingLayerID: 0
+  m_SortingLayer: 0
   m_SortingOrder: 0
+  m_SortingLayerID: 0
 --- !u!23 &2300028
 Renderer:
   m_ObjectHideFlags: 1
@@ -875,8 +870,9 @@ Renderer:
   m_UseLightProbes: 0
   m_LightProbeAnchor: {fileID: 0}
   m_ScaleInLightmap: 1
-  m_SortingLayerID: 0
+  m_SortingLayer: 0
   m_SortingOrder: 0
+  m_SortingLayerID: 0
 --- !u!23 &2300030
 Renderer:
   m_ObjectHideFlags: 1
@@ -895,8 +891,9 @@ Renderer:
   m_UseLightProbes: 0
   m_LightProbeAnchor: {fileID: 0}
   m_ScaleInLightmap: 1
-  m_SortingLayerID: 0
+  m_SortingLayer: 0
   m_SortingOrder: 0
+  m_SortingLayerID: 0
 --- !u!23 &2300032
 Renderer:
   m_ObjectHideFlags: 1
@@ -915,8 +912,9 @@ Renderer:
   m_UseLightProbes: 0
   m_LightProbeAnchor: {fileID: 0}
   m_ScaleInLightmap: 1
-  m_SortingLayerID: 0
+  m_SortingLayer: 0
   m_SortingOrder: 0
+  m_SortingLayerID: 0
 --- !u!33 &3300000
 MeshFilter:
   m_ObjectHideFlags: 1
@@ -1115,7 +1113,7 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 3
   m_audioClip: {fileID: 8300000, guid: 98a3db8b3263c441ba62d4a71eaf9cc1, type: 3}
-  m_PlayOnAwake: 0
+  m_PlayOnAwake: 1
   m_Volume: 1
   m_Pitch: 1
   Loop: 0
@@ -1177,7 +1175,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   layer: 0
   fixedPosition: 0
-  canPush: 1
 --- !u!114 &11400002
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1201,8 +1198,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   minSpeed: 0
-  maxSpeed: 35
-  turnSpeed: 180
+  maxSpeed: 40
+  turnSpeed: 200
   canMoveWithoutTurning: 0
   animationDistance: 1
   animator: {fileID: 0}
@@ -1219,22 +1216,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   team: 0
   origin: {fileID: 0}
-  maxHealth: 100
+  maxHealth: 80
   health: 0
   collisionRadiusNumerator: 3
   collisionRadiusDenominator: 1
   baseMesh: {fileID: 0}
   ghostPrefab: {fileID: 100000, guid: cf1c0503a040a496e8d2c1f441710538, type: 2}
-  buildTime: 10
+  buildTime: 5
   buildIcon: {fileID: 2800000, guid: 2b1fd3703a75f47cda2371c5583f96e5, type: 3}
   hpBarTexture: {fileID: 2800000, guid: fe5e9061a9af5c24ab18c18b3c0f7857, type: 3}
-  buildCost:
-    Metal: 300
-    MagicSmoke: 50
-  buildAtPoint: 0
-  sellable: 0
   hitOnlyIfTargetted: 0
   teamColourRenderer: {fileID: 2300032}
+  buildCost:
+    Metal: 300
+    MagicSmoke: 0
 --- !u!114 &11400008
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1284,13 +1279,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   projectilePrefab: {fileID: 100002, guid: c36b48d137efd47b2a09ff95402a68fd, type: 2}
-  attackRange: 200
-  tetherRange: 50
-  turretTurnSpeed: 300
-  turretAutoResets: 1
-  stance: 1
   mode: 0
   target: {fileID: 0}
+  _attackDistance:
+    stringValue: 150
+  _attackRange:
+    stringValue: 200
+  _turretTurnSpeed:
+    stringValue: 400
+  turretAutoResets: 1
 --- !u!114 &11400016
 MonoBehaviour:
   m_ObjectHideFlags: 1
