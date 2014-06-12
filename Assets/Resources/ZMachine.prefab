@@ -1225,12 +1225,12 @@ MonoBehaviour:
   collisionRadiusDenominator: 1
   baseMesh: {fileID: 0}
   ghostPrefab: {fileID: 100000, guid: cf1c0503a040a496e8d2c1f441710538, type: 2}
-  buildTime: 5
+  buildTime: 10
   buildIcon: {fileID: 2800000, guid: 2b1fd3703a75f47cda2371c5583f96e5, type: 3}
   hpBarTexture: {fileID: 2800000, guid: fe5e9061a9af5c24ab18c18b3c0f7857, type: 3}
   buildCost:
     Metal: 300
-    MagicSmoke: 0
+    MagicSmoke: 50
   buildAtPoint: 0
   sellable: 0
   hitOnlyIfTargetted: 0
@@ -1284,15 +1284,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   projectilePrefab: {fileID: 100002, guid: c36b48d137efd47b2a09ff95402a68fd, type: 2}
+  attackRange: 200
+  tetherRange: 50
+  turretTurnSpeed: 0
+  turretAutoResets: 1
+  stance: 1
   mode: 0
   target: {fileID: 0}
-  _attackDistance:
-    stringValue: 150
-  _attackRange:
-    stringValue: 200
-  _turretTurnSpeed:
-    stringValue: 50
-  turretAutoResets: 1
 --- !u!114 &11400016
 MonoBehaviour:
   m_ObjectHideFlags: 1

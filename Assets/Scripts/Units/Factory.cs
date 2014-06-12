@@ -222,7 +222,7 @@ public class Factory : MonoBehaviour {
                         }
                 }
 
-                GUI.Label(new Rect(0,30,200,300), GUI.tooltip);
+                GUI.Label(new Rect(0,30,500,500), GUI.tooltip);
 
                 if(buildQueue.Any() && GUI.Button(new Rect(10 + prefabs.Length * 74, Camera.main.pixelHeight - 74, 64, 64), "Stop")) {
                         ComSat.IssueUIAction(entity, clearQueue);

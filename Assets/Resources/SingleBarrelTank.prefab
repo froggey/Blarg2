@@ -1199,15 +1199,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   projectilePrefab: {fileID: 100000, guid: feb241d717a6d4aed84e1d8194b2df13, type: 2}
+  attackRange: 60
+  tetherRange: 50
+  turretTurnSpeed: 360
+  turretAutoResets: 1
+  stance: 1
   mode: 0
   target: {fileID: 0}
-  _attackDistance:
-    stringValue: 50
-  _attackRange:
-    stringValue: 60
-  _turretTurnSpeed:
-    stringValue: 90
-  turretAutoResets: 1
 --- !u!114 &11400008
 MonoBehaviour:
   m_ObjectHideFlags: 1

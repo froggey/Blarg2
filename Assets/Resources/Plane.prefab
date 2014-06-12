@@ -101,6 +101,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400002}
+  m_RootOrder: 0
 --- !u!4 &400002
 Transform:
   m_ObjectHideFlags: 1
@@ -114,6 +115,7 @@ Transform:
   - {fileID: 400000}
   - {fileID: 400008}
   m_Father: {fileID: 0}
+  m_RootOrder: 0
 --- !u!4 &400004
 Transform:
   m_ObjectHideFlags: 1
@@ -125,6 +127,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400008}
+  m_RootOrder: 1
 --- !u!4 &400006
 Transform:
   m_ObjectHideFlags: 1
@@ -136,6 +139,7 @@ Transform:
   m_LocalScale: {x: .160147622, y: .160147622, z: .630277216}
   m_Children: []
   m_Father: {fileID: 400008}
+  m_RootOrder: 0
 --- !u!4 &400008
 Transform:
   m_ObjectHideFlags: 1
@@ -149,6 +153,7 @@ Transform:
   - {fileID: 400006}
   - {fileID: 400004}
   m_Father: {fileID: 400002}
+  m_RootOrder: 1
 --- !u!23 &2300002
 Renderer:
   m_ObjectHideFlags: 1
@@ -167,9 +172,8 @@ Renderer:
   m_UseLightProbes: 0
   m_LightProbeAnchor: {fileID: 0}
   m_ScaleInLightmap: 1
-  m_SortingLayer: 0
-  m_SortingOrder: 0
   m_SortingLayerID: 0
+  m_SortingOrder: 0
 --- !u!23 &2300004
 Renderer:
   m_ObjectHideFlags: 1
@@ -188,9 +192,8 @@ Renderer:
   m_UseLightProbes: 0
   m_LightProbeAnchor: {fileID: 0}
   m_ScaleInLightmap: 1
-  m_SortingLayer: 0
-  m_SortingOrder: 0
   m_SortingLayerID: 0
+  m_SortingOrder: 0
 --- !u!33 &3300002
 MeshFilter:
   m_ObjectHideFlags: 1
@@ -392,11 +395,13 @@ MonoBehaviour:
   buildTime: 4
   buildIcon: {fileID: 2800000, guid: b495f2818b16c4e3eb4a10c64b1e4d8f, type: 3}
   hpBarTexture: {fileID: 2800000, guid: fe5e9061a9af5c24ab18c18b3c0f7857, type: 3}
-  hitOnlyIfTargetted: 1
-  teamColourRenderer: {fileID: 2300002}
   buildCost:
     Metal: 500
     MagicSmoke: 100
+  buildAtPoint: 0
+  sellable: 0
+  hitOnlyIfTargetted: 1
+  teamColourRenderer: {fileID: 2300002}
 --- !u!114 &11400006
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -436,6 +441,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   layer: 1
   fixedPosition: 0
+  canPush: 1
 --- !u!114 &11400012
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -448,15 +454,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   projectilePrefab: {fileID: 0}
+  attackRange: 90
+  tetherRange: 50
+  turretTurnSpeed: 0
+  turretAutoResets: 0
+  stance: 1
   mode: 0
   target: {fileID: 0}
-  _attackDistance:
-    stringValue: 0
-  _attackRange:
-    stringValue: 0
-  _turretTurnSpeed:
-    stringValue: 0
-  turretAutoResets: 0
 --- !u!119 &11900000
 Projector:
   m_ObjectHideFlags: 1

@@ -408,6 +408,16 @@ public class ComSat : MonoBehaviour, IClient {
         }
 
         // (Client)
+        void SetDefenceStanceCommand(int team, int entityID, CombatVehicle.Stance stance) {
+                var entity = EntityFromID(entityID);
+                if(entity != null && entity.team == team) {
+                        Log("{" + tickID + "} " + entity + "[" + entityID + "] changed stance to " + stance);
+                        var cv = entity.GetComponent<CombatVehicle>();
+                        cv.stance = stance;
+                }
+        }
+
+        // (Client)
         void QueueCommand(int onTurn, int commandID, System.Action command) {
                 clientCommandID += 1;
                 if(commandID != clientCommandID) {
@@ -807,6 +817,15 @@ public class ComSat : MonoBehaviour, IClient {
                 currentInstance.net.SendMessageToServer(m);
         }
 
+        public static void IssueSetDefenceStance(Entity unit, CombatVehicle.Stance stance) {
+                if(currentInstance.replayInput != null) return;
+
+                var m = new NetworkMessage(NetworkMessage.Type.SetDefenceStance);
+                m.entityID = currentInstance.reverseWorldEntities[unit];
+                m.defenceStance = stance;
+                currentInstance.net.SendMessageToServer(m);
+        }
+
         // Network stuff.
 
         public void OnConnected(LSNet net) {
@@ -937,6 +956,11 @@ public class ComSat : MonoBehaviour, IClient {
                         QueueCommand(message.turnID, message.commandID,
                                      () => { SellCommand(message.teamID, message.entityID); });
                         break;
+                case NetworkMessage.Type.SetDefenceStance:
+                        SaveReplayCommand(message);
+                        QueueCommand(message.turnID, message.commandID,
+                                     () => { SetDefenceStanceCommand(message.teamID, message.entityID, message.defenceStance); });
+                        break;
                 case NetworkMessage.Type.NextTurn:
                         SaveReplayCommand(message);
                         NextTurn();
@@ -997,6 +1021,7 @@ public class ComSat : MonoBehaviour, IClient {
                 case NetworkMessage.Type.SetPowerState:
                 case NetworkMessage.Type.Build:
                 case NetworkMessage.Type.Sell:
+                case NetworkMessage.Type.SetDefenceStance:
                         serverCommandID += 1;
                         message.commandID = serverCommandID;
                         message.turnID = serverNextTurn ? turnID + 1 : turnID;
