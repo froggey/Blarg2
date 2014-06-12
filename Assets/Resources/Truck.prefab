@@ -625,8 +625,9 @@ MonoBehaviour:
   hpBarTexture: {fileID: 2800000, guid: fe5e9061a9af5c24ab18c18b3c0f7857, type: 3}
   buildCost:
     Metal: 1000
-    MagicSmoke: 0
+    MagicSmoke: 50
   buildAtPoint: 0
+  sellable: 0
   hitOnlyIfTargetted: 0
   teamColourRenderer: {fileID: 2300016}
 --- !u!114 &11400008
@@ -668,6 +669,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   layer: 0
   fixedPosition: 0
+  canPush: 1
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1
