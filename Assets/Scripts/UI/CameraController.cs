@@ -43,4 +43,8 @@ public class CameraController : MonoBehaviour {
 
                 cameraTransform.localRotation = Quaternion.AngleAxis(angleCurve.Evaluate((cameraTransform.localPosition.y - maxZoom) / minZoom) * 90, new Vector3(1,0,0));
         }
+
+        public void LookAt(DVector2 point) {
+                transform.position = new Vector3((float)point.x, 0, (float)point.y);
+        }
 }

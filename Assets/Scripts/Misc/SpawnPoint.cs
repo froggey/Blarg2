@@ -22,5 +22,9 @@ public class SpawnPoint : MonoBehaviour {
                 //if(action == Action.MOVE) {
                 //        ComSat.IssueMove(ent, new DVector2((DReal)point.x, (DReal)point.y));
                 //}
+
+                if (team == ComSat.localTeam) {
+                        FindObjectOfType<CameraController>().LookAt(vec);
+                }
         }
 }
