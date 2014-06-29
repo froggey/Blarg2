@@ -76,6 +76,9 @@ MonoBehaviour:
   initialSpeed: 300
   turnSpeed: 0
   target: {fileID: 0}
+  penetrates: 1
+  penetrationSpeedReduction: 100
+  minPenetrationSpeed: 100
   impactPrefab: {fileID: 100012, guid: d9d02c0a3ffc84ca1b5dfdccebb87c66, type: 2}
   trail: {fileID: 0}
 --- !u!114 &11400002

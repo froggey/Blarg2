@@ -7,11 +7,21 @@ public class Projectile : MonoBehaviour {
         public int initialSpeed;
         public int turnSpeed;
         public Entity target;
+        public bool penetrates;
+        public int penetrationSpeedReduction;
+        public int minPenetrationSpeed;
 
         public GameObject impactPrefab;
         public TrailRenderer trail;
 
+        public enum Kind {
+                KINETIC, EXPLOSIVE, ENERGY
+        }
+
+        public Kind kind;
+
         Entity entity;
+        public DReal speed;
 
         void Awake() {
                 ComSat.Trace(this, "Awake");
@@ -22,6 +32,15 @@ public class Projectile : MonoBehaviour {
 
         void OnInstantiate() {
                 target = null;
+                speed = initialSpeed;
+        }
+
+        DReal ComputeDamage() {
+                if(kind == Kind.KINETIC) {
+                        return damage * (speed / initialSpeed);
+                } else {
+                        return damage;
+                }
         }
 
         void TickUpdate() {
@@ -32,14 +51,14 @@ public class Projectile : MonoBehaviour {
                         var baseAngle = Utility.CalculateNewAngle(entity.rotation, targetAngle, DReal.Radians(turnSpeed));
                         entity.rotation = baseAngle;
                 }
-                entity.velocity = DVector2.FromAngle(entity.rotation) * initialSpeed;
+                entity.velocity = DVector2.FromAngle(entity.rotation) * speed;
                 DVector2 newPosition = entity.position + entity.velocity * ComSat.tickRate;
 
                 // FIXME: this should do something to account for hitting fast-moving projectiles.
                 DVector2 hitPosition;
                 Entity hit = ComSat.LineCast(entity.position, newPosition, out hitPosition, entity.team);
                 if(hit != null && (!hit.hitOnlyIfTargetted || hit == target)) {
-                        hit.Damage(damage);
+                        hit.Damage((int)ComputeDamage());
 
                         var position = new Vector3((float)hitPosition.y, 0, (float)hitPosition.x);
                         var rotation = Quaternion.AngleAxis((float)entity.rotation, Vector3.up);
@@ -53,8 +72,12 @@ public class Projectile : MonoBehaviour {
                         //        trail = null;
                         //}
 
-                        ComSat.DestroyEntity(entity, DestroyReason.HitTarget);
-                        return;
+                        if(!penetrates || speed < minPenetrationSpeed) {
+                                ComSat.DestroyEntity(entity, DestroyReason.HitTarget);
+                                return;
+                        } else {
+                                speed -= penetrationSpeedReduction;
+                        }
                 }
         }
 }
