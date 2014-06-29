@@ -499,6 +499,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maximumPower: 50
+  sabotageRepairTime: 10
+  sabotageMaxPower: 0
 --- !u!114 &11400004
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -512,6 +514,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   layer: 0
   fixedPosition: 1
+  canPush: 1
 --- !u!114 &11400006
 MonoBehaviour:
   m_ObjectHideFlags: 1

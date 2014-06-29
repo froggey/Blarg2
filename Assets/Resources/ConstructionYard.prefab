@@ -1193,7 +1193,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: da56b4f1051bc0e49954d47c196c03a0, type: 2}
   - {fileID: 11400006, guid: 794325221e4b94621a352ef32c738960, type: 2}
   - {fileID: 11400010, guid: c87dd465649c840efb18a0676ea2b78a, type: 2}
-  sabotageRepairTime: 0
+  sabotageRepairTime: 50
   sabotageTimeMultiplier: 3
   buildRadius: 40
   dontManagePower: 0
@@ -1292,6 +1292,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maximumPower: 50
+  sabotageRepairTime: 0
+  sabotageMaxPower: 0
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

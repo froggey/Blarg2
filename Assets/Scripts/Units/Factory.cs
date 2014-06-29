@@ -12,7 +12,7 @@ public struct BuildCommandData {
 }
 
 [RequireComponent(typeof(Entity), typeof(PowerSink))]
-public class Factory : MonoBehaviour {
+public class Factory : MonoBehaviour, ISabotagable {
         public Entity[] prefabs;
 
         // Sabotage time remaining.

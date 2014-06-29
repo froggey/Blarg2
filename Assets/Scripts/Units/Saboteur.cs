@@ -2,6 +2,10 @@ using UnityEngine;
 using System.Collections;
 using System.Linq;
 
+public interface ISabotagable {
+        void Sabotage();
+}
+
 [RequireComponent (typeof(Vehicle))]
 [RequireComponent (typeof(Entity))]
 public class Saboteur : MonoBehaviour {
@@ -28,8 +32,14 @@ public class Saboteur : MonoBehaviour {
                 if(ComSat.EntityExists(target)) {
                         destination = target.position;
 
-                        if((target.position - entity.position).sqrMagnitude < target.collisionRadius * target.collisionRadius) {
-                                target.GetComponent<Factory>().Sabotage();
+                        var radius = target.collisionRadius + entity.collisionRadius;
+                        if((target.position - entity.position).sqrMagnitude < radius * radius) {
+                                var components = target.GetComponents(typeof(ISabotagable));
+
+                                foreach(var c in components) {
+                                        (c as ISabotagable).Sabotage();
+                                }
+
                                 ComSat.DestroyEntity(entity, DestroyReason.HitTarget);
                         }
                 }
@@ -53,7 +63,7 @@ public class Saboteur : MonoBehaviour {
 
         void Attack(Entity[] targets) {
                 ComSat.Trace(this, "Attack");
-                var validTargets = targets.Where(t => ComSat.EntityExists(t) && t.GetComponent<Factory>() != null).OrderBy(t => (t.position - entity.position).sqrMagnitude);
+                var validTargets = targets.Where(t => ComSat.EntityExists(t) && t.GetComponent(typeof(ISabotagable)) != null).OrderBy(t => (t.position - entity.position).sqrMagnitude);
                 if (!validTargets.Any()) return;
                 target = validTargets.First();
                 moving = true;

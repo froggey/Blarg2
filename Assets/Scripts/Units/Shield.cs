@@ -5,7 +5,7 @@ using System.Text;
 using UnityEngine;
 
 [RequireComponent(typeof(Entity), typeof(PowerSink))]
-public class Shield : MonoBehaviour {
+public class Shield : MonoBehaviour, ISabotagable {
         public int radius;
         public Renderer fieldRenderer;
         public float glowLength;
@@ -16,6 +16,11 @@ public class Shield : MonoBehaviour {
         float glowTime;
         Color originalColour;
 
+        // Sabotage time remaining.
+        DReal sabotageTime;
+        // Sabotage lasts this long.
+        public int sabotageRepairTime;
+
         void Awake() {
                 entity = GetComponent<Entity>();
                 entity.AddUpdateAction(TickUpdate);
@@ -25,6 +30,11 @@ public class Shield : MonoBehaviour {
         }
 
         void TickUpdate() {
+                if(sabotageTime > 0) {
+                        sabotageTime -= ComSat.tickRate;
+                        return;
+                }
+
                 if(!powerSink.Powered()) {
                         return;
                 }
@@ -40,8 +50,30 @@ public class Shield : MonoBehaviour {
                 }
         }
 
+        public void Sabotage() {
+                sabotageTime += sabotageRepairTime;
+        }
+
+        private bool isSelected;
+
+        private void OnSelected() {
+                isSelected = true;
+        }
+
+        private void OnUnselected() {
+                isSelected = false;
+        }
+
+        void OnGUI() {
+                if(!isSelected) return;
+
+                if(sabotageTime > 0) {
+                        GUI.Box(new Rect(84, Camera.main.pixelHeight - 100, 100, 25), "Sabotaged! " + Mathf.Ceil((float)sabotageTime));
+                }
+        }
+
         void Update() {
-                fieldRenderer.enabled = powerSink.Powered();
+                fieldRenderer.enabled = (sabotageTime <= 0) && powerSink.Powered();
                 if(glowTime <= 0) {
                         return;
                 }
@@ -54,6 +86,6 @@ public class Shield : MonoBehaviour {
 
         void OnDrawGizmosSelected() {
                 Gizmos.color = Color.magenta;
-                Gizmos.DrawWireSphere(new Vector3(0,0,0), radius);
+                Gizmos.DrawWireSphere(transform.position, radius);
         }
 }
