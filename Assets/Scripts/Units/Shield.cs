@@ -25,25 +25,23 @@ public class Shield : MonoBehaviour {
         }
 
         void TickUpdate() {
-                if(!powerSink.poweredOn) {
+                if(!powerSink.Powered()) {
                         return;
                 }
 
                 foreach(var p in ComSat.FindAllEntitiesWithinRadius<Projectile>(entity.position, radius, entity.team)) {
-                        var e = p.GetComponent<Entity>();
                         if(p.kind != Projectile.Kind.KINETIC) {
                                 continue;
                         }
 
                         glowTime = glowLength;
 
-                        var oldSpeed = p.speed;
                         p.speed /= 30 * ComSat.tickRate;
                 }
         }
 
         void Update() {
-                fieldRenderer.enabled = powerSink.poweredOn;
+                fieldRenderer.enabled = powerSink.Powered();
                 if(glowTime <= 0) {
                         return;
                 }
