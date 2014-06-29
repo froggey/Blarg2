@@ -76,8 +76,12 @@ MonoBehaviour:
   initialSpeed: 50
   turnSpeed: 0
   target: {fileID: 0}
+  penatrates: 0
+  penatrationSpeedReduction: 0
+  minPenatrationSpeed: 0
   impactPrefab: {fileID: 100000, guid: 036c64bc821f341aeb7ef613941c59a3, type: 2}
   trail: {fileID: 0}
+  kind: 2
 --- !u!114 &11400002
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -100,11 +104,13 @@ MonoBehaviour:
   buildTime: 0
   buildIcon: {fileID: 0}
   hpBarTexture: {fileID: 0}
-  hitOnlyIfTargetted: 0
-  teamColourRenderer: {fileID: 0}
   buildCost:
     Metal: 0
     MagicSmoke: 0
+  buildAtPoint: 0
+  sellable: 0
+  hitOnlyIfTargetted: 0
+  teamColourRenderer: {fileID: 0}
 --- !u!114 &11400004
 MonoBehaviour:
   m_ObjectHideFlags: 1

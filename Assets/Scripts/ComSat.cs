@@ -740,6 +740,29 @@ public class ComSat : MonoBehaviour, IClient {
                 return FindEntitiesWithinRadius<Entity>(origin, radius, ignoreTeam, getRadius);
         }
 
+        // Locate an entity within the given circle, not on the given team.
+        // This includes all entities, not just collidable entities.
+        public static List<T> FindAllEntitiesWithinRadius<T>(DVector2 origin, DReal radius, int ignoreTeam = -1, Func<T, DReal> getRadius = null) where T : MonoBehaviour {
+                var result = new List<T>();
+
+                foreach(Entity e in currentInstance.worldEntityCache) {
+                        T thing = (typeof(T) == typeof(Entity)) ? e as T : e.GetComponent<T>();
+                        if(thing == null) continue;
+                        if(e.team == ignoreTeam) continue;
+
+                        var r = getRadius != null ? getRadius(thing) : e.collisionRadius;
+                        if((e.position - origin).sqrMagnitude < radius * radius + r * r) {
+                                result.Add(thing);
+                        }
+                }
+
+                return result;
+        }
+
+        public static List<Entity> FindAllEntitiesWithinRadius(DVector2 origin, DReal radius, int ignoreTeam = -1, Func<Entity, DReal> getRadius = null) {
+                return FindAllEntitiesWithinRadius<Entity>(origin, radius, ignoreTeam, getRadius);
+        }
+
         public static DReal RandomValue() {
                 randomValue = 22695477 * randomValue + 1;
                 return randomValue;
