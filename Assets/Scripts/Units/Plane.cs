@@ -100,6 +100,8 @@ public class Plane : MonoBehaviour {
                         } else {
                                 gunFireSound.Stop();
                         }
+                } else {
+                        gunFireSound.Stop();
                 }
 
                 if(missilesLoaded < maxMissiles) {
