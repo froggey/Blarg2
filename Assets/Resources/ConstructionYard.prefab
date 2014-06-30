@@ -1292,7 +1292,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maximumPower: 50
-  sabotageRepairTime: 0
+  sabotageRepairTime: 50
   sabotageMaxPower: 0
 --- !u!1001 &100100000
 Prefab:
